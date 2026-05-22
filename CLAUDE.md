@@ -15,6 +15,8 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `update-claude-md` | `/update-claude-md` | Promote durable session knowledge into `CLAUDE.md` |
 | `grill-me` | `/grill-me` | Stress-test a plan via relentless structured questioning |
 | `lit-review` | `/lit-review` | Search and synthesize scientific literature across Zotero, arxiv, bioRxiv, Google Scholar, Consensus |
+| `overbaked` | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
+| `slack-message` | `/slack-message` | Draft a first-draft internal Slack message grounded in live git context |
 | `write-new-skill` | `/write-new-skill` | Scaffold and iterate on new Claude Code skills |
 
 ## Skill file format
@@ -53,3 +55,5 @@ bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 `push` regenerates the `## Skills` table in `README.md` from each skill's `name` and `description` frontmatter (first sentence). The awk replacement targets the block between `## Skills` and the next `##` heading — if that heading is ever missing from README.md, the table update silently no-ops.
 
 After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
+
+**Always edit `skills/` (the repo copy), never `~/.claude/skills/` directly.** `push` overwrites the installed copy from the repo — edits to the installed copy are silently lost on the next push.
