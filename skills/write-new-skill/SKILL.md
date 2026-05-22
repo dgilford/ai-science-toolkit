@@ -1,0 +1,94 @@
+---
+name: write-new-skill
+description: Create new Claude Code skills with proper structure and progressive disclosure. Use when user wants to create, write, or build a new skill.
+---
+
+# Writing Skills
+
+## Process
+
+1. **Gather requirements** - ask user about:
+   - What task/domain does the skill cover?
+   - What specific use cases should it handle?
+   - Does it need executable scripts or just instructions?
+   - Any reference materials to include?
+
+2. **Draft the skill** - create:
+   - SKILL.md with concise instructions
+   - Additional reference files if content exceeds 100 lines
+   - Utility scripts if deterministic operations needed
+
+3. **Review with user** - present draft and ask:
+   - Does this cover your use cases?
+   - Anything missing or unclear?
+   - Should any section be more/less detailed?
+
+## Skill Structure
+
+```
+skill-name/
+├── SKILL.md           # Main instructions (required)
+├── REFERENCE.md       # Detailed docs (if needed)
+└── scripts/           # Utility scripts (if needed)
+```
+
+## SKILL.md Template
+
+```
+---
+name: skill-name
+description: Brief description of capability. Use when [specific triggers].
+allowed-tools: Bash Read Write Edit
+---
+
+[Opening directive — one sentence goal]
+
+## Live repo state (if needed)
+
+```!
+git status --short 2>/dev/null || echo "(not a git repo)"
+```
+
+```!
+git log --oneline -12 2>/dev/null || echo "(no git log)"
+```
+
+[Instructions and output template]
+```
+
+## Shell injection
+
+Use ` ```! ` blocks to inject live state before Claude sees the skill content:
+
+```
+```!
+git status --short 2>/dev/null || echo "(not a git repo)"
+```
+```
+
+Commands run at skill load time. Output replaces the block inline. Use for git state, environment checks, or any context that must be current. Fall back gracefully with `|| echo "(message)"` for non-git repos.
+
+## Description requirements
+
+The description is what Claude scans to decide whether to auto-invoke the skill.
+
+**Format**: Max 1024 chars. First sentence: what it does. Second: "Use when [specific triggers]."
+
+**Good**: `Create or update a durable project handoff. Use when ending a session, switching agents, or preparing context for the next Claude session.`
+
+**Bad**: `Helps with project state.`
+
+## When to split files
+
+Split into separate files when SKILL.md exceeds 100 lines or content has clearly distinct domains. Keep the split shallow — one level of references only.
+
+## Review checklist
+
+- [ ] Description includes specific triggers ("Use when...")
+- [ ] SKILL.md under 100 lines
+- [ ] Shell injection added if skill needs live repo or git state
+- [ ] Output template uses `<!-- comment -->` not placeholder prose, to distinguish instructions from content
+- [ ] Skill handles missing files gracefully (no `.ai/`, no `CLAUDE.md`, not a git repo)
+- [ ] Scientific context section included if skill touches data, methods, or analysis
+- [ ] Facts, assumptions, and recommendations are distinguished where relevant
+- [ ] No time-sensitive information hardcoded
