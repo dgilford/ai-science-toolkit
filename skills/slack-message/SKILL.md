@@ -34,10 +34,13 @@ Check the user's request against this list. If **any** anchor is missing, ask al
 3. Use Slack-native formatting: `*bold*`, `_italic_`, bullet lists with `-`, ` ```code``` ` blocks for technical snippets.
 4. Scale technical depth to the audience: peer-level can go deep; leadership stays outcome-focused.
 5. One message, one point. If the user has multiple asks, flag that and suggest splitting.
+6. Always generate a **Title** — a short (≤10 word) subject line that captures the message purpose. Always end the title with 🔽.
 
 ## Output
 
-Present the draft inside a fenced block:
+Present the draft with a title line followed by the message body inside a fenced block:
+
+**Title:** <title ending with 🔽>
 
 ```
 <!-- Slack draft -->
