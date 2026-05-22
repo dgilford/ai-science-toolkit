@@ -39,4 +39,6 @@ The `.ai/` directory is repo-local (gitignored) and holds session state. Add it 
 
 ## License
 
-MIT
+Copyright (c) 2026 Daniel Gilford
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, with attribution.
