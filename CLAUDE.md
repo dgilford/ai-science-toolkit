@@ -14,6 +14,8 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `resume` | `/resume` | Reconstruct session context from `.ai/HANDOFF.md` at session start |
 | `update-claude-md` | `/update-claude-md` | Promote durable session knowledge into `CLAUDE.md` |
 | `grill-me` | `/grill-me` | Stress-test a plan via relentless structured questioning |
+| `lit-review` | `/lit-review` | Search and synthesize scientific literature across Zotero, arxiv, bioRxiv, Google Scholar, Consensus |
+| `write-new-skill` | `/write-new-skill` | Scaffold and iterate on new Claude Code skills |
 
 ## Skill file format
 
@@ -41,16 +43,11 @@ The `.ai/` directory is repo-local and is gitignored.
 
 ## Syncing skills
 
-Skills in `skills/` are the source of truth. To deploy to the global install:
+Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-cp -r skills/<name> ~/.claude/skills/
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/
+bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 ```
 
-To pull the current global state back into the repo:
-
-```bash
-cp -r ~/.claude/skills/<name> skills/
-```
-
-When adding a new skill, do both: write it in `skills/`, then copy to `~/.claude/skills/`.
+After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
