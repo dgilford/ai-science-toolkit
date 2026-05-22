@@ -34,37 +34,13 @@ skill-name/
 
 ## SKILL.md Template
 
-```
----
-name: skill-name
-description: Brief description of capability. Use when [specific triggers].
-allowed-tools: Bash Read Write Edit
----
-
-[Opening directive — one sentence goal]
-
-## Live repo state (if needed)
-
-```!
-git status --short 2>/dev/null || echo "(not a git repo)"
-```
-
-```!
-git log --oneline -12 2>/dev/null || echo "(no git log)"
-```
-
-[Instructions and output template]
-```
+Frontmatter fields: `name`, `description`, `allowed-tools`. Body: opening directive, optional live state injection, instructions, output template.
 
 ## Shell injection
 
-Use ` ```! ` blocks to inject live state before Claude sees the skill content:
+To inject live state before Claude sees the skill, open a fenced code block with three backticks immediately followed by `!` (no space). The command output replaces the block at skill load time. Always add `|| echo "(fallback)"` for non-git repos.
 
-```
-```!
-git status --short 2>/dev/null || echo "(not a git repo)"
-```
-```
+Use for: git status, git log, git diff, environment checks — any context that must be current rather than recalled.
 
 Commands run at skill load time. Output replaces the block inline. Use for git state, environment checks, or any context that must be current. Fall back gracefully with `|| echo "(message)"` for non-git repos.
 

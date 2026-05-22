@@ -26,7 +26,8 @@ case "$1" in
     for skill_dir in "$SKILLS_SRC"/*/; do
       name=$(basename "$skill_dir")
       echo "  → $name"
-      cp -r "$skill_dir" "$SKILLS_DEST/$name"
+      mkdir -p "$SKILLS_DEST/$name"
+      cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
     done
     echo "Done."
     ;;
@@ -35,7 +36,8 @@ case "$1" in
     for skill_dir in "$SKILLS_DEST"/*/; do
       name=$(basename "$skill_dir")
       echo "  ← $name"
-      cp -r "$skill_dir" "$SKILLS_SRC/$name"
+      mkdir -p "$SKILLS_SRC/$name"
+      cp -r "$skill_dir/." "$SKILLS_SRC/$name/"
     done
     echo "Done. Review changes with: git diff skills/"
     ;;
