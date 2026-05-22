@@ -46,8 +46,10 @@ The `.ai/` directory is repo-local and is gitignored.
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; auto-updates README skills table
 bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 ```
+
+`push` regenerates the `## Skills` table in `README.md` from each skill's `name` and `description` frontmatter (first sentence). The awk replacement targets the block between `## Skills` and the next `##` heading — if that heading is ever missing from README.md, the table update silently no-ops.
 
 After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.

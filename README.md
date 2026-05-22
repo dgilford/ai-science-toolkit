@@ -6,26 +6,33 @@ Global Claude Code skills for scientific computing workflows.
 
 | Skill | Command | Purpose |
 |---|---|---|
-| **handoff** | `/handoff` | Write `.ai/HANDOFF.md` at session end; auto-runs `update-claude-md` |
-| **resume** | `/resume` | Reconstruct session context from `.ai/HANDOFF.md` at session start |
-| **update-claude-md** | `/update-claude-md` | Promote durable session knowledge into `CLAUDE.md` |
-| **grill-me** | `/grill-me` | Stress-test a plan via relentless structured questioning |
-| **write-new-skill** | `/write-new-skill` | Scaffold and iterate on new Claude Code skills |
+| **grill-me** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree |
+| **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
+| **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
+| **resume** | `/resume` | Resume work from repo-local handoff state |
+| **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
+| **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
 
 ## Installation
 
-Copy any skill into your global Claude Code skills directory:
-
-```bash
-cp -r skills/<name> ~/.claude/skills/
-```
-
-Or clone the repo and symlink:
+Clone the repo and deploy all skills:
 
 ```bash
 git clone https://github.com/dgilford/ai-tools.git ~/ai-tools
-ln -s ~/ai-tools/skills/<name> ~/.claude/skills/<name>
+cd ~/ai-tools
+bash scripts/sync.sh push
 ```
+
+## Syncing skills
+
+Skills in `skills/` are the source of truth.
+
+```bash
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/
+bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
+```
+
+After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked here.
 
 ## Session workflow
 
