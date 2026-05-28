@@ -43,12 +43,20 @@ These skills form a session lifecycle:
 
 The `.ai/` directory is repo-local and is gitignored.
 
+## Boot hooks
+
+| Hook | Script | Purpose |
+|---|---|---|
+| `SessionStart` | `scripts/session-init.py` | Auto-name and color-code each session on boot |
+
+`session-init.py` is not a skill — it runs automatically via the `SessionStart` hook in `~/.claude/settings.json`. It calls Haiku to generate a logical adjective-noun name from the project context, and picks an unused color from the 23-color set. Requires `ANTHROPIC_API_KEY` in the shell environment (falls back to wordlist hash if absent).
+
 ## Syncing skills
 
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; auto-updates README skills table
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; install session-init hook; auto-updates README skills table
 bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 ```
 
