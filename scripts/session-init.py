@@ -46,7 +46,7 @@ COLORS = {
 # Seconds to wait inside the AppleScript before injecting /color + /rename.
 # Must be long enough for Claude to finish rendering its first prompt after
 # the hook exits — 8s is conservative; tune down if startup feels slow.
-COLOR_INJECT_DELAY = 8
+COLOR_INJECT_DELAY = 4
 
 ADJECTIVES = [
     "amber", "arctic", "blazing", "cobalt", "dappled", "drifting", "ember",
@@ -187,7 +187,7 @@ def auto_color(session_id, claude_pid, tty_dev, project_dir):
     /color + /rename injection via a background AppleScript."""
     tracking_file = os.path.expanduser("~/.claude/tab-colors.json")
     watcher_sh = os.path.expanduser("~/.claude/skills/tab-setup/scripts/watcher.sh")
-    tab_name = os.path.basename(project_dir.rstrip("/"))
+    project_name = os.path.basename(project_dir.rstrip("/"))
 
     if not os.path.exists(tracking_file):
         with open(tracking_file, "w") as f:
@@ -211,6 +211,7 @@ def auto_color(session_id, claude_pid, tty_dev, project_dir):
     chosen = next((c for c in SEQUENCE if c not in used_colors), SEQUENCE[0])
     r, g, b = COLORS[chosen]
 
+    tab_name = f"{project_name} ({chosen})"
     live[session_id] = {"color": chosen, "pid": claude_pid, "cwd": project_dir, "name": tab_name}
     with open(tracking_file, "w") as f:
         json.dump(live, f, indent=2)
