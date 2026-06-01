@@ -42,6 +42,14 @@ async function applyPending() {
     const terminal = vscode.window.activeTerminal;
     if (!terminal) return;
 
+    // Set terminal tab overhead color via VS Code command (same as right-click → Change Color)
+    try {
+        await vscode.commands.executeCommand('workbench.action.terminal.changeColor', {
+            terminal,
+            color: { id: `terminal.ansi${color.charAt(0).toUpperCase()}${color.slice(1)}` }
+        });
+    } catch {}
+
     terminal.sendText(`/color ${color}`);
     if (name) {
         await sleep(400);
