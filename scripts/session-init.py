@@ -113,11 +113,40 @@ def write_session_file(path, data, retries=3, delay=0.05):
 # ---------------------------------------------------------------------------
 
 def get_current_tty():
+    # Standard file descriptors (work when hook inherits a real terminal)
+    for fd in [0, 1, 2]:
+        try:
+            if os.isatty(fd):
+                return os.ttyname(fd)
+        except OSError:
+            pass
+    # /dev/tty is the controlling terminal — available even when stdio is
+    # redirected, because hooks inherit Claude's controlling terminal.
     try:
-        result = subprocess.run(["tty"], capture_output=True, text=True, timeout=2)
-        tty = result.stdout.strip()
-        if result.returncode == 0 and tty and tty != "not a tty":
-            return tty
+        fd = os.open("/dev/tty", os.O_RDONLY | os.O_NOCTTY)
+        try:
+            return os.ttyname(fd)
+        finally:
+            os.close(fd)
+    except OSError:
+        pass
+    # Last resort: walk the process tree for the first ancestor with a TTY
+    try:
+        pid = os.getpid()
+        for _ in range(6):
+            result = subprocess.run(
+                ["ps", "-o", "ppid=,tty=", "-p", str(pid)],
+                capture_output=True, text=True, timeout=2,
+            )
+            if result.returncode != 0:
+                break
+            parts = result.stdout.strip().split(None, 1)
+            if len(parts) < 2:
+                break
+            ppid, tty = int(parts[0]), parts[1].strip()
+            if tty and tty != "??":
+                return f"/dev/{tty}"
+            pid = ppid
     except Exception:
         pass
     return None
