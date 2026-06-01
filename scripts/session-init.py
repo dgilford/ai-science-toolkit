@@ -30,6 +30,24 @@ import time
 # Configuration
 # ---------------------------------------------------------------------------
 
+# Color sequence + RGB values — kept in sync with tab-setup/scripts/setup.sh
+SEQUENCE = ["red", "blue", "green", "pink", "purple", "cyan", "yellow", "orange"]
+COLORS = {
+    "red":    (220, 50,  47),
+    "blue":   (38,  139, 210),
+    "green":  (133, 153, 0),
+    "yellow": (181, 137, 0),
+    "purple": (108, 113, 196),
+    "orange": (203, 75,  22),
+    "pink":   (211, 54,  130),
+    "cyan":   (42,  161, 152),
+}
+
+# Seconds to wait inside the AppleScript before injecting /color + /rename.
+# Must be long enough for Claude to finish rendering its first prompt after
+# the hook exits — 8s is conservative; tune down if startup feels slow.
+COLOR_INJECT_DELAY = 8
+
 ADJECTIVES = [
     "amber", "arctic", "blazing", "cobalt", "dappled", "drifting", "ember",
     "emerald", "feral", "gilded", "glacial", "glowing", "hollow", "indigo",
@@ -89,6 +107,146 @@ def write_session_file(path, data, retries=3, delay=0.05):
         except IOError:
             if attempt < retries - 1:
                 time.sleep(delay)
+
+# ---------------------------------------------------------------------------
+# Auto-color helpers
+# ---------------------------------------------------------------------------
+
+def get_current_tty():
+    try:
+        result = subprocess.run(["tty"], capture_output=True, text=True, timeout=2)
+        tty = result.stdout.strip()
+        if result.returncode == 0 and tty and tty != "not a tty":
+            return tty
+    except Exception:
+        pass
+    return None
+
+
+def find_session_by_tty(tty_dev, retries=10, delay=0.3):
+    """Return (claude_pid, session_id) by matching tty_dev against live session files."""
+    sessions_dir = os.path.expanduser("~/.claude/sessions")
+    tty_short = tty_dev.replace("/dev/", "")
+    if not os.path.isdir(sessions_dir):
+        return None, None
+    for _ in range(retries):
+        for fname in os.listdir(sessions_dir):
+            if not fname.endswith(".json"):
+                continue
+            fpath = os.path.join(sessions_dir, fname)
+            try:
+                with open(fpath) as f:
+                    data = json.load(f)
+                pid = data.get("pid")
+                if not pid:
+                    continue
+                os.kill(pid, 0)
+                result = subprocess.run(
+                    ["ps", "-o", "tty=", "-p", str(pid)],
+                    capture_output=True, text=True, timeout=2,
+                )
+                if result.returncode == 0 and result.stdout.strip() == tty_short:
+                    return pid, data.get("sessionId", "")
+            except (json.JSONDecodeError, IOError, OSError, ProcessLookupError):
+                continue
+        time.sleep(delay)
+    return None, None
+
+
+def auto_color(session_id, claude_pid, tty_dev, project_dir):
+    """Pick the next available color, write iTerm2 escape codes, and schedule
+    /color + /rename injection via a background AppleScript."""
+    tracking_file = os.path.expanduser("~/.claude/tab-colors.json")
+    watcher_sh = os.path.expanduser("~/.claude/skills/tab-setup/scripts/watcher.sh")
+    tab_name = os.path.basename(project_dir.rstrip("/"))
+
+    if not os.path.exists(tracking_file):
+        with open(tracking_file, "w") as f:
+            json.dump({}, f)
+    try:
+        with open(tracking_file) as f:
+            tracking = json.load(f)
+    except Exception:
+        tracking = {}
+
+    tracking.pop(session_id, None)
+    live, used_colors = {}, set()
+    for sid, entry in tracking.items():
+        try:
+            os.kill(entry.get("pid", 0), 0)
+            live[sid] = entry
+            used_colors.add(entry.get("color", ""))
+        except (OSError, ProcessLookupError):
+            pass
+
+    chosen = next((c for c in SEQUENCE if c not in used_colors), SEQUENCE[0])
+    r, g, b = COLORS[chosen]
+
+    live[session_id] = {"color": chosen, "pid": claude_pid, "cwd": project_dir, "name": tab_name}
+    with open(tracking_file, "w") as f:
+        json.dump(live, f, indent=2)
+
+    # Write iTerm2 tab color escape codes immediately to the terminal device
+    try:
+        with open(tty_dev, "w") as tty_f:
+            tty_f.write(f"\033]6;1;bg;red;brightness;{r}\007")
+            tty_f.write(f"\033]6;1;bg;green;brightness;{g}\007")
+            tty_f.write(f"\033]6;1;bg;blue;brightness;{b}\007")
+            tty_f.flush()
+    except IOError:
+        pass
+
+    # Background AppleScript: inject /color + /rename after Claude's first prompt
+    ascript = f"""on run argv
+  set ttyDevice to item 1 of argv
+  set tabName to item 2 of argv
+  set tabColor to item 3 of argv
+  delay {COLOR_INJECT_DELAY}
+  try
+    tell application "iTerm2"
+      repeat with w in windows
+        repeat with t in tabs of w
+          repeat with s in sessions of t
+            if tty of s = ttyDevice then
+              tell s to write text "/color " & tabColor
+              delay 0.3
+              tell s to write text "/rename " & tabName
+              return
+            end if
+          end repeat
+        end repeat
+      end repeat
+    end tell
+  end try
+end run
+"""
+    ascript_path = os.path.expanduser("~/.claude/tab-setup-hook.applescript")
+    try:
+        with open(ascript_path, "w") as f:
+            f.write(ascript)
+        subprocess.Popen(
+            ["nohup", "osascript", ascript_path, tty_dev, tab_name, chosen],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as e:
+        debug_log(f"  auto-color osascript error: {e}")
+
+    # Launch watcher to clean up tracking file when Claude exits
+    if os.path.exists(watcher_sh):
+        try:
+            subprocess.Popen(
+                ["bash", watcher_sh, str(claude_pid), session_id],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+        except Exception:
+            pass
+
+    return chosen, tab_name
+
 
 # ---------------------------------------------------------------------------
 # Naming
@@ -337,6 +495,21 @@ def main():
                 debug_log(f"  name write error: {e}")
         else:
             debug_log("  no session_path — skipping name write")
+
+    # --- AUTO-COLOR ---
+    # Find Claude PID by matching the hook's TTY against live session files.
+    # The naming section above gives the session file time to be created.
+    tty_dev = get_current_tty()
+    if tty_dev:
+        claude_pid, found_sid = find_session_by_tty(tty_dev)
+        if claude_pid:
+            active_sid = found_sid or session_id or "unknown"
+            chosen, tab_name = auto_color(active_sid, claude_pid, tty_dev, project_dir)
+            debug_log(f"  auto-color: {chosen} / {tab_name} (pid={claude_pid})")
+        else:
+            debug_log(f"  auto-color: session not found via tty {tty_dev!r}")
+    else:
+        debug_log("  auto-color: no tty")
 
     # --- REMINDERS (printed to stderr — visible in terminal at startup) ---
     handoff = get_handoff_summary(project_dir)
