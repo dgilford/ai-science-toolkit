@@ -20,7 +20,7 @@ EXTERNAL_SKILLS=(
 
 usage() {
   echo "Usage: $0 [push|pull]"
-  echo "  push  Deploy skills from repo to ~/.claude/skills/; update README skills table"
+  echo "  push  Deploy skills + session-init from repo to ~/.claude/; update README skills table"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
   exit 1
 }
