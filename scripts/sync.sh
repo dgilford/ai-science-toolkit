@@ -37,11 +37,16 @@ sync_external_skills() {
       echo "  ↓ $repo (clone)"
       git clone --quiet "https://github.com/$repo" "$dest_path"
     fi
-    # Copy scripts into the skills deploy dir
+    # Copy scripts (and vscode-extension if present) into the skills deploy dir
     local skill_name
     skill_name=$(basename "$dest")
     mkdir -p "$SKILLS_SRC/$skill_name/scripts"
     cp -r "$dest_path/scripts/." "$SKILLS_SRC/$skill_name/scripts/"
+    if [ -d "$dest_path/vscode-extension" ]; then
+      mkdir -p "$SKILLS_SRC/$skill_name/vscode-extension"
+      cp -r "$dest_path/vscode-extension/." "$SKILLS_SRC/$skill_name/vscode-extension/"
+      echo "  → vscode-extension synced"
+    fi
   done
 }
 
