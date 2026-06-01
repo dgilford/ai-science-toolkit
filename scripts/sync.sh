@@ -12,11 +12,37 @@ SKILLS_SRC="$REPO_DIR/skills"
 SKILLS_DEST="$HOME/.claude/skills"
 README="$REPO_DIR/README.md"
 
+# External skill repos — cloned/updated into REPO_DIR on push.
+# Format: "owner/repo:dest_subdir"
+EXTERNAL_SKILLS=(
+  "dgilford/tab-setup:tab-setup"
+)
+
 usage() {
   echo "Usage: $0 [push|pull]"
   echo "  push  Deploy skills from repo to ~/.claude/skills/; update README skills table"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
   exit 1
+}
+
+sync_external_skills() {
+  for entry in "${EXTERNAL_SKILLS[@]}"; do
+    local repo="${entry%%:*}"
+    local dest="${entry##*:}"
+    local dest_path="$REPO_DIR/$dest"
+    if [ -d "$dest_path/.git" ]; then
+      echo "  ↻ $repo (pull)"
+      git -C "$dest_path" pull --ff-only --quiet
+    else
+      echo "  ↓ $repo (clone)"
+      git clone --quiet "https://github.com/$repo" "$dest_path"
+    fi
+    # Copy scripts into the skills deploy dir
+    local skill_name
+    skill_name=$(basename "$dest")
+    mkdir -p "$SKILLS_SRC/$skill_name/scripts"
+    cp -r "$dest_path/scripts/." "$SKILLS_SRC/$skill_name/scripts/"
+  done
 }
 
 # Regenerate the skills table in README.md from skills/*/SKILL.md frontmatter.
@@ -113,6 +139,8 @@ EOF
 
 case "$1" in
   push)
+    echo "Syncing external skills"
+    sync_external_skills
     echo "Deploying skills/ → $SKILLS_DEST"
     for skill_dir in "$SKILLS_SRC"/*/; do
       name=$(basename "$skill_dir")
