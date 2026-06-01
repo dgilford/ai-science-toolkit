@@ -112,73 +112,43 @@ def write_session_file(path, data, retries=3, delay=0.05):
 # Auto-color helpers
 # ---------------------------------------------------------------------------
 
-def get_current_tty():
-    # Standard file descriptors (work when hook inherits a real terminal)
-    for fd in [0, 1, 2]:
+def find_session_by_ppid():
+    """Walk the PPID chain upward from this process to find the ancestor
+    Claude process, then match it against live session JSON files.
+    Works in all environments — no /dev/tty or TTY matching required."""
+    sessions_dir = os.path.expanduser("~/.claude/sessions")
+    pid = os.getpid()
+    ancestor_pids = set()
+    for _ in range(10):
         try:
-            if os.isatty(fd):
-                return os.ttyname(fd)
-        except OSError:
-            pass
-    # /dev/tty is the controlling terminal — available even when stdio is
-    # redirected, because hooks inherit Claude's controlling terminal.
-    try:
-        fd = os.open("/dev/tty", os.O_RDONLY | os.O_NOCTTY)
-        try:
-            return os.ttyname(fd)
-        finally:
-            os.close(fd)
-    except OSError:
-        pass
-    # Last resort: walk the process tree for the first ancestor with a TTY
-    try:
-        pid = os.getpid()
-        for _ in range(6):
             result = subprocess.run(
-                ["ps", "-o", "ppid=,tty=", "-p", str(pid)],
+                ["ps", "-o", "ppid=", "-p", str(pid)],
                 capture_output=True, text=True, timeout=2,
             )
             if result.returncode != 0:
                 break
-            parts = result.stdout.strip().split(None, 1)
-            if len(parts) < 2:
+            ppid = int(result.stdout.strip())
+            if ppid <= 1:
                 break
-            ppid, tty = int(parts[0]), parts[1].strip()
-            if tty and tty != "??":
-                return f"/dev/{tty}"
+            ancestor_pids.add(ppid)
             pid = ppid
-    except Exception:
-        pass
-    return None
+        except Exception:
+            break
 
-
-def find_session_by_tty(tty_dev, retries=10, delay=0.3):
-    """Return (claude_pid, session_id) by matching tty_dev against live session files."""
-    sessions_dir = os.path.expanduser("~/.claude/sessions")
-    tty_short = tty_dev.replace("/dev/", "")
     if not os.path.isdir(sessions_dir):
         return None, None
-    for _ in range(retries):
-        for fname in os.listdir(sessions_dir):
-            if not fname.endswith(".json"):
-                continue
-            fpath = os.path.join(sessions_dir, fname)
-            try:
-                with open(fpath) as f:
-                    data = json.load(f)
-                pid = data.get("pid")
-                if not pid:
-                    continue
-                os.kill(pid, 0)
-                result = subprocess.run(
-                    ["ps", "-o", "tty=", "-p", str(pid)],
-                    capture_output=True, text=True, timeout=2,
-                )
-                if result.returncode == 0 and result.stdout.strip() == tty_short:
-                    return pid, data.get("sessionId", "")
-            except (json.JSONDecodeError, IOError, OSError, ProcessLookupError):
-                continue
-        time.sleep(delay)
+    for fname in os.listdir(sessions_dir):
+        if not fname.endswith(".json"):
+            continue
+        try:
+            with open(os.path.join(sessions_dir, fname)) as f:
+                data = json.load(f)
+            pid_val = data.get("pid")
+            if pid_val in ancestor_pids:
+                os.kill(pid_val, 0)
+                return pid_val, data.get("sessionId", "")
+        except (json.JSONDecodeError, IOError, OSError, ProcessLookupError):
+            continue
     return None, None
 
 
@@ -201,6 +171,8 @@ def auto_color(session_id, claude_pid, tty_dev, project_dir):
     tracking.pop(session_id, None)
     live, used_colors = {}, set()
     for sid, entry in tracking.items():
+        if sid == "_last" or not isinstance(entry, dict):
+            continue
         try:
             os.kill(entry.get("pid", 0), 0)
             live[sid] = entry
@@ -218,6 +190,8 @@ def auto_color(session_id, claude_pid, tty_dev, project_dir):
         json.dump(live, f, indent=2)
 
     # Write iTerm2 tab color escape codes immediately to the terminal device
+    if not tty_dev:
+        return chosen, tab_name
     try:
         with open(tty_dev, "w") as tty_f:
             tty_f.write(f"\033]6;1;bg;red;brightness;{r}\007")
@@ -528,19 +502,21 @@ def main():
             debug_log("  no session_path — skipping name write")
 
     # --- AUTO-COLOR ---
-    # Find Claude PID by matching the hook's TTY against live session files.
-    # The naming section above gives the session file time to be created.
-    tty_dev = get_current_tty()
-    if tty_dev:
-        claude_pid, found_sid = find_session_by_tty(tty_dev)
-        if claude_pid:
-            active_sid = found_sid or session_id or "unknown"
-            chosen, tab_name = auto_color(active_sid, claude_pid, tty_dev, project_dir)
-            debug_log(f"  auto-color: {chosen} / {tab_name} (pid={claude_pid})")
-        else:
-            debug_log(f"  auto-color: session not found via tty {tty_dev!r}")
+    # Find Claude PID by walking the PPID chain — works in all environments.
+    claude_pid, found_sid = find_session_by_ppid()
+    if claude_pid:
+        active_sid = found_sid or session_id or "unknown"
+        # Derive TTY from the Claude process for iTerm2 escape codes / AppleScript
+        tty_result = subprocess.run(
+            ["ps", "-o", "tty=", "-p", str(claude_pid)],
+            capture_output=True, text=True, timeout=2,
+        )
+        tty_short = tty_result.stdout.strip() if tty_result.returncode == 0 else ""
+        tty_dev = f"/dev/{tty_short}" if tty_short and tty_short != "??" else None
+        chosen, tab_name = auto_color(active_sid, claude_pid, tty_dev, project_dir)
+        debug_log(f"  auto-color: {chosen} / {tab_name} (pid={claude_pid})")
     else:
-        debug_log("  auto-color: no tty")
+        debug_log("  auto-color: session not found via ppid chain")
 
     # --- REMINDERS (printed to stderr — visible in terminal at startup) ---
     handoff = get_handoff_summary(project_dir)
