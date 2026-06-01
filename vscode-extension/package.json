@@ -1,4 +1,5 @@
 {
+  "publisher": "dgilford",
   "name": "claude-tab",
   "displayName": "Claude Tab Setup",
   "description": "Auto-applies /color and /rename to Claude Code sessions via ~/.claude/.pending-color",
