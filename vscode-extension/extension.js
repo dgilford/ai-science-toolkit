@@ -5,21 +5,28 @@ const os = require('os');
 
 const PENDING_FILE = path.join(os.homedir(), '.claude', '.pending-color');
 const SESSIONS_DIR = path.join(os.homedir(), '.claude', 'sessions');
+const POLL_MS = 500;
 
 function activate(context) {
-    const watchDir = vscode.Uri.file(path.join(os.homedir(), '.claude'));
-    const watcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(watchDir, '.pending-color')
-    );
-    watcher.onDidCreate(() => applyPending());
-    watcher.onDidChange(() => applyPending());
-    context.subscriptions.push(watcher);
+    // Poll for pending-color file every 500ms.
+    // File watcher doesn't reliably fire for paths outside the workspace root,
+    // so polling is more robust.
+    const timer = setInterval(() => {
+        if (fs.existsSync(PENDING_FILE)) {
+            applyPending();
+        }
+    }, POLL_MS);
+
+    context.subscriptions.push({ dispose: () => clearInterval(timer) });
 }
 
 async function applyPending() {
     let content;
     try { content = fs.readFileSync(PENDING_FILE, 'utf8').trim(); }
     catch { return; }
+
+    // Delete immediately to prevent double-firing
+    try { fs.unlinkSync(PENDING_FILE); } catch { return; }
 
     const data = {};
     for (const line of content.split('\n')) {
@@ -29,7 +36,7 @@ async function applyPending() {
     const { session_id, color, name } = data;
     if (!color) return;
 
-    // Wait until Claude finishes generating its response
+    // Wait until the Claude session is idle before sending commands
     await waitForIdle(session_id);
 
     const terminal = vscode.window.activeTerminal;
@@ -40,8 +47,6 @@ async function applyPending() {
         await sleep(400);
         terminal.sendText(`/rename ${name}`);
     }
-
-    try { fs.unlinkSync(PENDING_FILE); } catch {}
 }
 
 async function waitForIdle(sessionId, timeoutMs = 30000) {
