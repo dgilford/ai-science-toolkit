@@ -211,7 +211,8 @@ def auto_color(session_id, claude_pid, tty_dev, project_dir):
     chosen = next((c for c in SEQUENCE if c not in used_colors), SEQUENCE[0])
     r, g, b = COLORS[chosen]
 
-    tab_name = f"{project_name} ({chosen})"
+    existing_names = {entry.get("name", "") for entry in live.values()}
+    tab_name = f"{project_name} ({chosen})" if project_name in existing_names else project_name
     live[session_id] = {"color": chosen, "pid": claude_pid, "cwd": project_dir, "name": tab_name}
     with open(tracking_file, "w") as f:
         json.dump(live, f, indent=2)
