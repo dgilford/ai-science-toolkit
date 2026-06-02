@@ -12,7 +12,7 @@ Global Claude Code skills for scientific computing workflows.
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | **resume** | `/resume` | Resume work from repo-local handoff state |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
-| **tab-setup** | `/tab-setup` | Set a unique color and name for this Claude Code tab based on the current working directory |
+| **tab-setup** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
 

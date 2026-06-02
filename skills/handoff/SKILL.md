@@ -34,7 +34,10 @@ Use only the sections that have real content. Skip empty ones.
 <!-- one sentence -->
 
 ## Next actions
-<!-- numbered, concrete, specific — most important section -->
+<!-- numbered, concrete, specific — most important section; each action must be immediately executable without a follow-up question -->
+
+<!-- **Good**: `Run scripts/validate.py --baseline 1991-2020 and check the NaN count in coastal cells` -->
+<!-- **Bad**: `Continue working on the validation` -->
 
 ## State
 <!-- branch, environment, anything non-obvious; files changed and why -->
