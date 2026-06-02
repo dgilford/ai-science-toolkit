@@ -66,7 +66,7 @@ bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; install sess
 bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 ```
 
-`push` regenerates the `## Skills` table in `README.md` from each skill's `name` and `description` frontmatter (first sentence). The awk replacement targets the block between `## Skills` and the next `##` heading — if that heading is ever missing from README.md, the table update silently no-ops.
+`push` regenerates the `## Skills` table in `README.md` from each skill's `name` and `description` frontmatter (first sentence). **Keep first sentences to ~130 chars** — use grill-me as the benchmark. Triggering vocabulary belongs in the "Use when…" second sentence, not the first. The awk replacement targets the block between `## Skills` and the next `##` heading — if that heading is ever missing from README.md, the table update silently no-ops.
 
 After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
 
