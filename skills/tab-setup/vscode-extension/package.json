@@ -1,0 +1,12 @@
+{
+  "publisher": "dgilford",
+  "name": "claude-tab",
+  "displayName": "Claude Tab Setup",
+  "description": "Auto-applies /color and /rename to Claude Code sessions via ~/.claude/.pending-color",
+  "version": "0.0.1",
+  "engines": { "vscode": "^1.60.0" },
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {}
+}
