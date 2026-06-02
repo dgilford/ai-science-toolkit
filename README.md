@@ -6,13 +6,16 @@ Global Claude Code skills for scientific computing workflows.
 
 | Skill | Command | Purpose |
 |---|---|---|
+| **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness against structural criteria: colorblind-safe colormaps and sufficient contrast, whether uncertainty is shown (CI/spread/error bars/ensemble range), complete axis labels with units, a caption that stands alone, and whether the figure actually supports the claim made in the surrounding text |
 | **grill-me** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree |
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | **resume** | `/resume` | Resume work from repo-local handoff state |
+| **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
 | **tab-setup** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session |
+| **unstale** | `/unstale` | Detect and optionally repair staleness residue left behind after AI-assisted development — dead imports, resolved TODOs still in code, comments and docstrings describing logic that has since changed, stale filepaths/README instructions, and outdated HANDOFF.md blockers |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
 
