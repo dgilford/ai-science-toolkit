@@ -1,6 +1,6 @@
 # Climate Central Figure Style Reference
 
-Source: [Style and branding guides](https://climatecentral.atlassian.net/wiki/spaces/CONTENT/pages/2869297519/Style+and+branding+guides) | Visual style owner: Megan Martin (mmartin@climatecentral.org)
+Source: [Style and branding guides](https://climatecentral.atlassian.net/wiki/spaces/CONTENT/pages/2869297519/Style+and+branding+guides)
 
 ## Colors
 
@@ -22,9 +22,6 @@ Source: [Style and branding guides](https://climatecentral.atlassian.net/wiki/sp
 | Light Blue | `#B9D6EE` | Fill, shading, ranges |
 | Gray | `#B0B0AF` | Neutral labels, supporting graphics |
 
-### Colorblind note
-Coral (`#FF6046`) paired with green tones fails red-green colorblindness checks. Avoid coral + green combinations. The blue-dominant primary palette is generally safe.
-
 ## Typography (graphics)
 | Font | Source | Use |
 |---|---|---|
@@ -36,4 +33,4 @@ Coral (`#FF6046`) paired with green tones fails red-green colorblindness checks.
 - Clean and modern; minimal clutter; strong use of white space
 - Design priority order: clarity → credibility → accessibility → visual simplicity
 - Avoid excessive gradients, shadows, and decorative effects
-- Present scientific information confidently without ornamentation
+- Present scientific information clearly and confidently

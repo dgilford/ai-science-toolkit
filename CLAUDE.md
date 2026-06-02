@@ -18,6 +18,9 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `overbaked` | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | `slack-message` | `/slack-message` | Draft a first-draft internal Slack message grounded in live git context |
 | `write-new-skill` | `/write-new-skill` | Scaffold and iterate on new Claude Code skills |
+| `unstale` | `/unstale` | Detect and repair staleness residue from AI-assisted dev (dead imports, resolved TODOs, stale comments/filepaths); `--auto` applies HIGH-confidence fixes |
+| `figure-review` | `/figure-review` | Per-criterion publication-readiness audit for scientific figures (colormap, uncertainty, axes, caption, claim support); `--style` adds CC house style |
+| `reviewer-2` | `/reviewer-2` | Adversarial per-claim stress-test (baseline, counterfactual, alternatives, uncertainty consistency); defers citation checks to `/lit-review` |
 
 ## Skill file format
 
@@ -28,10 +31,13 @@ Each skill lives at `~/.claude/skills/<name>/SKILL.md` with YAML frontmatter:
 name: skill-name
 description: shown to Claude for auto-invocation matching
 allowed-tools: Bash Read Write Edit
+argument-hint: "[--flag | optional arg]"   # shown in user-facing help; optional
 ---
 ```
 
 Shell commands in ` ```! ` blocks run before Claude sees the skill content — use for injecting live repo state (git status, log, diff).
+
+Skills may include companion reference files (e.g., `REFERENCE.md`, `CC-STYLE.md`, `COLORBLIND.md`) in the same skill directory. Load them at runtime using the same `!` block syntax above, pointing at the deployed path: `cat ~/.claude/skills/<name>/COMPANION.md 2>/dev/null || echo "(not found)"`. This keeps SKILL.md lean while injecting richer context at load time. Only the deployed path (`~/.claude/skills/`) is referenced — the repo copy in `skills/` is synced there by `sync.sh push`.
 
 ## Session workflow
 
@@ -65,3 +71,7 @@ bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
 
 **Always edit `skills/` (the repo copy), never `~/.claude/skills/` directly.** `push` overwrites the installed copy from the repo — edits to the installed copy are silently lost on the next push.
+
+## Commits
+
+Global GPG signing is enabled (`commit.gpgsign = true`). In this environment the pinentry GUI times out before the passphrase can be entered. Commits must be made in an external terminal with the GPG key already unlocked, or run directly by the user.
