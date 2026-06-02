@@ -2,3 +2,7 @@
 settings/settings.local.json
 /tab-setup/
 skills/tab-setup/scripts/
+skills/tab-setup/vscode-extension/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
