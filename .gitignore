@@ -6,3 +6,4 @@ skills/tab-setup/vscode-extension/
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+.ipynb_checkpoints/
