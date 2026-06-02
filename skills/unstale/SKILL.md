@@ -1,6 +1,6 @@
 ---
 name: unstale
-description: Detect and optionally repair staleness residue left behind after AI-assisted development — dead imports, resolved TODOs still in code, comments and docstrings describing logic that has since changed, stale filepaths/README instructions, and outdated HANDOFF.md blockers. Use this whenever the user mentions stale code, cleanup after a refactor, "this comment is wrong now," leftover TODOs, doc drift, or wants to tidy a file before a handoff or release — even if they don't say "unstale." Always emits a structured report before making any edit.
+description: Detect and repair staleness residue from AI-assisted development — dead imports, resolved TODOs, stale comments/filepaths, and HANDOFF blockers. Use this whenever the user mentions stale code, cleanup after a refactor, "this comment is wrong now," leftover TODOs, doc drift, or wants to tidy a file before a handoff or release — even if they don't say "unstale." Always emits a structured report before making any edit.
 allowed-tools: Bash Read Edit
 argument-hint: "[--auto]"
 ---

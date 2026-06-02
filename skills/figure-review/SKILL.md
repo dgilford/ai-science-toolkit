@@ -1,6 +1,6 @@
 ---
 name: figure-review
-description: Audit a scientific figure for publication-readiness against structural criteria: colorblind-safe colormaps and sufficient contrast, whether uncertainty is shown (CI/spread/error bars/ensemble range), complete axis labels with units, a caption that stands alone, and whether the figure actually supports the claim made in the surrounding text. Use this whenever the user shares or references a figure, plot, panel, or colorbar for a paper, report, or brief and wants it checked, reviewed, or made publication-ready — even if they just say "does this figure work?" or "review my plot." Emits a per-criterion report; never silently rewrites plotting code.
+description: Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support. Use this whenever the user shares or references a figure, plot, panel, or colorbar for a paper, report, or brief and wants it checked, reviewed, or made publication-ready — even if they just say "does this figure work?" or "review my plot." Emits a per-criterion report; never silently rewrites plotting code.
 allowed-tools: Read
 argument-hint: "[--style]"
 ---
