@@ -53,16 +53,16 @@ The `.ai/` directory is repo-local and is gitignored.
 
 | Hook | Script | Purpose |
 |---|---|---|
-| `SessionStart` | `scripts/session-init.py` | Auto-name and color-code each session on boot |
+| `SessionStart` | `~/.claude/skills/tab-setup/scripts/hook-startup.sh` | Auto-name and color-code each session on boot |
 
-`session-init.py` is not a skill — it runs automatically via the `SessionStart` hook in `~/.claude/settings.json`. It calls Haiku to generate a logical adjective-noun name from the project context, and picks an unused color from the 23-color set. Requires `ANTHROPIC_API_KEY` in the shell environment (falls back to wordlist hash if absent).
+`hook-startup.sh` is part of the `tab-setup` skill (deployed from `dgilford/tab-setup`). It is fully self-contained — no dependency on this repo. It generates a session name via Haiku API (requires `ANTHROPIC_API_KEY` in the `env` block of `~/.claude/settings.json`) with a wordlist fallback, assigns a tab color, and prints `[resume]` / `[env]` reminders to stderr. `sync.sh push` registers it in `~/.claude/settings.json` automatically.
 
 ## Syncing skills
 
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; install session-init hook; auto-updates README skills table
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; register hook-startup.sh; auto-updates README skills table
 bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 ```
 

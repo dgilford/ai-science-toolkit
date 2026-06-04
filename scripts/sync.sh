@@ -94,14 +94,11 @@ PYEOF
   echo "  README.md skills table updated."
 }
 
-install_session_init() {
-  local script_src="$REPO_DIR/scripts/session-init.py"
-  local script_dest="$HOME/.claude/session-init.py"
+install_startup_hook() {
   local config_dest="$HOME/.claude/session-init-config.json"
+  local hook_cmd="bash ~/.claude/skills/tab-setup/scripts/hook-startup.sh"
 
-  cp "$script_src" "$script_dest"
-  echo "  → session-init.py installed to ~/.claude/"
-
+  # session-init-config.json is still read by hook-startup.sh for the default_env reminder
   if [ ! -f "$config_dest" ]; then
     echo '{ "default_env": "" }' > "$config_dest"
     echo "  → session-init-config.json created at ~/.claude/"
@@ -109,9 +106,10 @@ install_session_init() {
     echo "  → session-init-config.json already present, skipping"
   fi
 
-  python3 - <<'EOF'
+  python3 - "$hook_cmd" <<'EOF'
 import json, os, sys
 
+hook_cmd = sys.argv[1]
 settings_path = os.path.expanduser("~/.claude/settings.json")
 if not os.path.exists(settings_path):
     print("  ! ~/.claude/settings.json not found, skipping hook merge", file=sys.stderr)
@@ -120,15 +118,16 @@ if not os.path.exists(settings_path):
 with open(settings_path) as f:
     settings = json.load(f)
 
-# Correct Claude Code hook format: outer object has "matcher" + "hooks" list.
 hook_entry = {
     "matcher": "",
-    "hooks": [{"type": "command", "command": "python3 ~/.claude/session-init.py"}],
+    "hooks": [{"type": "command", "command": hook_cmd}],
 }
 hooks = settings.setdefault("hooks", {})
 existing = hooks.get("SessionStart", [])
 
-if not any("session-init" in str(h) for h in existing):
+if not any("hook-startup" in str(h) for h in existing):
+    # Remove any stale session-init.py entries while we're here
+    existing = [h for h in existing if "session-init" not in str(h)]
     existing.append(hook_entry)
     hooks["SessionStart"] = existing
     with open(settings_path, "w") as f:
@@ -154,6 +153,7 @@ case "$1" in
       cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
     done
     update_readme
+    install_startup_hook
     echo "Done."
     ;;
   pull)

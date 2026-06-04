@@ -29,15 +29,14 @@ cd ~/ai-tools
 bash scripts/sync.sh push
 ```
 
-`push` installs skills to `~/.claude/skills/` and registers the `session-init` boot hook (see below).
+`push` installs skills to `~/.claude/skills/` and registers the `tab-setup` boot hook (see below).
 
 ## Session auto-naming and color
 
-Every new Claude Code session is automatically named and color-coded at boot via a `SessionStart` hook.
+Every new Claude Code session is automatically named and color-coded at boot via the `tab-setup` skill's `SessionStart` hook (`hook-startup.sh`). The skill is self-contained and sourced from [dgilford/tab-setup](https://github.com/dgilford/tab-setup).
 
 - **Name**: Haiku generates a logical 2-word adjective-noun name from the project directory name (e.g., `fiscal-ledger` for a finance project). Falls back to a deterministic wordlist hash if the API is unavailable.
-- **Color**: Picks the first color not already in use by another running Claude session. Falls back to `silver` if all 23 colors are taken.
-- **Respects `-n`**: If you launch with `claude -n "my-name"`, the existing name is kept and only color is assigned.
+- **Color**: Picks the next color not already in use by another running Claude session. Persists through `/clear` and `claude -c`.
 
 **Context reminders at startup:**
 - `[resume]` — if `.ai/HANDOFF.md` exists in the project, surfaces the objective and first next action so you know where you left off without running `/resume`
@@ -61,7 +60,7 @@ Leave `default_env` empty (`""`) to disable the machine-level reminder.
 **Requirements:**
 - Claude Code v2.1.152+
 - Python 3 (pre-installed on macOS/Linux)
-- `ANTHROPIC_API_KEY` in your shell environment (optional — falls back to wordlist hash if absent)
+- `ANTHROPIC_API_KEY` in `~/.claude/settings.json` `env` block (optional — falls back to wordlist hash if absent)
 
 **Uninstall:**
 ```bash
@@ -72,7 +71,7 @@ s = json.load(open(p))
 s.get('hooks', {}).pop('SessionStart', None)
 json.dump(s, open(p, 'w'), indent=2)
 "
-rm ~/.claude/session-init.py ~/.claude/session-init-config.json
+rm ~/.claude/session-init-config.json
 ```
 
 ## Syncing skills
