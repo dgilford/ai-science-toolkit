@@ -40,19 +40,23 @@ Stop adding sources once coverage is sufficient for the mode.
 
 ## Adding papers to Zotero
 
-**User ID:** `12937876`  
-**Inbox collection:** `11 Inbox / To Sort`  
-**API key env var:** `$ZOTERO_API_KEY`
+**Required env vars** (set in `~/.claude/settings.json` → `env` block):
+- `ZOTERO_USER_ID` — your numeric Zotero user ID (find it at zotero.org/settings/keys)
+- `ZOTERO_API_KEY` — a Zotero API key with write access (same page)
+- `ZOTERO_INBOX_COLLECTION` — name of the collection to file new papers into (e.g. `Inbox`)
+
+If any required var is unset, skip the Zotero write step and tell the user what to configure.
 
 **Step 1 — resolve the collection key:**
 ```bash
-curl -s "https://api.zotero.org/users/12937876/collections?limit=100" \
+curl -s "https://api.zotero.org/users/$ZOTERO_USER_ID/collections?limit=100" \
   -H "Zotero-API-Key: $ZOTERO_API_KEY" \
   | python3 -c "
-import sys, json
+import sys, json, os
 cols = json.load(sys.stdin)
+target = os.environ.get('ZOTERO_INBOX_COLLECTION', 'Inbox')
 for c in cols:
-    if c['data']['name'] == '11 Inbox / To Sort':
+    if c['data']['name'] == target:
         print(c['key'])
 "
 ```
@@ -67,7 +71,7 @@ Minimum required fields per item:
 - `tags`: `[{"tag": "lit-review"}]`
 
 ```bash
-curl -s -X POST "https://api.zotero.org/users/12937876/items" \
+curl -s -X POST "https://api.zotero.org/users/$ZOTERO_USER_ID/items" \
   -H "Zotero-API-Key: $ZOTERO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '<JSON array>'
