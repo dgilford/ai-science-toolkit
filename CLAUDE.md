@@ -14,7 +14,7 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `resume` | `/resume` | Reconstruct session context from `.ai/HANDOFF.md` at session start |
 | `update-claude-md` | `/update-claude-md` | Promote durable session knowledge into `CLAUDE.md` |
 | `grill-me` | `/grill-me` | Stress-test a plan via relentless structured questioning |
-| `lit-review` | `/lit-review` | Search and synthesize scientific literature across Zotero, arxiv, bioRxiv, Google Scholar, Consensus |
+| `lit-review` | `/lit-review` | Search and synthesize scientific literature across Zotero, arxiv, bioRxiv, Google Scholar, Consensus. Requires `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_INBOX_COLLECTION` in `~/.claude/settings.json` env block for Zotero write support. |
 | `overbaked` | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | `slack-message` | `/slack-message` | Draft a first-draft internal Slack message grounded in live git context |
 | `write-new-skill` | `/write-new-skill` | Scaffold and iterate on new Claude Code skills |
@@ -57,6 +57,8 @@ The `.ai/` directory is repo-local and is gitignored.
 
 `hook-startup.sh` is part of the `tab-setup` skill (deployed from `dgilford/tab-setup`). It is fully self-contained — no dependency on this repo. It generates a session name via Haiku API (requires `ANTHROPIC_API_KEY` in the `env` block of `~/.claude/settings.json`) with a wordlist fallback, assigns a tab color, and prints `[resume]` / `[env]` reminders to stderr. `sync.sh push` registers it in `~/.claude/settings.json` automatically.
 
+Tab color assignments are persisted in `~/.claude/project-colors.json` (cwd → {color, name, pid}), which is written by `hook-startup.sh` and never touched by the watcher. This drives color persistence through `/clear` (same PID) and `claude -c` (same cwd, dead PID not in use).
+
 ## Syncing skills
 
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
@@ -71,6 +73,8 @@ bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
 After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
 
 **Always edit `skills/` (the repo copy), never `~/.claude/skills/` directly.** `push` overwrites the installed copy from the repo — edits to the installed copy are silently lost on the next push.
+
+**External skills** (`tab-setup`) are a special case: `push` pulls from `github.com/dgilford/tab-setup` into `tab-setup/` (a nested git repo at the repo root) *before* copying into `skills/tab-setup/`. Edits to `skills/tab-setup/` are overwritten by this pull. To change tab-setup scripts: edit `tab-setup/scripts/`, commit and push to `dgilford/tab-setup`, then run `sync.sh push`.
 
 ## Commits
 
