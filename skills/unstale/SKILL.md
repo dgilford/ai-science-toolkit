@@ -1,58 +1,159 @@
 ---
 name: unstale
-description: Detect and repair staleness residue from AI-assisted development — dead imports, resolved TODOs, stale comments/filepaths, and HANDOFF blockers. Use this whenever the user mentions stale code, cleanup after a refactor, "this comment is wrong now," leftover TODOs, doc drift, or wants to tidy a file before a handoff or release — even if they don't say "unstale." Always emits a structured report before making any edit.
-allowed-tools: Bash Read Edit
-argument-hint: "[--auto]"
+description: Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers. Use this whenever you want to clean up after a refactor, fix a comment that no longer matches the code, remove unused imports, check for leftover TODOs, detect doc drift, or tidy a notebook before sharing or submission — even without the word "unstale." Default mode auto-detects library .py scope and runs ruff + vulture (deterministic), then LLM semantic checks; never touches notebooks. `--artifact <nb.ipynb>` cleans a notebook as a deliverable (full treatment including dead-code detection). `--exploratory <nb.ipynb>` tidies a working notebook non-destructively (structural + semantic only, no removals ever). Always emits a structured report before any edit.
+allowed-tools: Bash Read Edit Write
+argument-hint: "[--auto] [--artifact <paths>] [--exploratory <paths>]"
 ---
 
-## Scope
+**Governing principle: deterministic where you can, LLM where you must — adapt to the repo, never dictate its structure.**
 
-If files are named, scan those. Otherwise, start with recently changed files:
+## Live state
 
 ```!
 git status --short 2>/dev/null || echo "(not a git repo)"
 ```
 
-## Modes
+## Mode overview
 
-- `/unstale` — emit report, no edits.
-- `/unstale --auto` — emit report, then apply all HIGH-confidence fixes; append apply log.
-
-## What to scan
-
-- Dead imports (not referenced)
-- Resolved TODOs still in code (`# TODO`, `# FIXME`)
-- Comments or docstrings that describe logic no longer present in the code
-- Stale filepaths or README instructions (verify against the repo tree)
-- Resolved blockers still listed in `.ai/HANDOFF.md`
-
-## Confidence tiers
-
-| Tier | Items | `--auto` eligible |
+| Invocation | Target | Edits? |
 |---|---|---|
-| HIGH | Dead imports; resolved TODOs; filepaths verifiable against repo; resolved HANDOFF blockers | yes |
-| MED/LOW | Intent comments; planned-feature lists; divergence requiring judgment | never |
+| `/unstale` | Auto-detected .py library scope | Report only |
+| `/unstale --auto` | Same | Apply HIGH fixes |
+| `/unstale --artifact <nb.ipynb>` | Notebook as deliverable | Report only |
+| `/unstale --artifact <nb.ipynb> --auto` | Same | Apply HIGH fixes |
+| `/unstale --exploratory <nb.ipynb>` | Working notebook | Report only (always) |
 
-## Report (emit before any edit)
+`--artifact` and `--exploratory` are **notebook-only**. If a path ends in `.py`, warn and skip it.
 
-One row per finding:
+---
 
-| Item | Location | Category | Confidence | Action |
-|---|---|---|---|---|
-| `import foo` unused | `utils.py:3` | dead import | HIGH | remove |
-| `# using requests not httpx — httpx had auth bug` | `api.py:14` | intent comment | MED | flag only |
+## Default mode — scope auto-detection
+
+| Signal | Scope |
+|---|---|
+| `pyproject.toml` / `setup.py` / `src/` / importable package dir | Library → run both lanes |
+| Top-level `.py` with no package structure | Ambiguous → skip Lane A (dead-code) |
+| Only `.ipynb` files | No .py scope → nudge to `--artifact` / `--exploratory` |
+
+Check for a CLAUDE.md override line: `unstale library scope: <path>; treat <glob> as exploratory`. Use it if present.
+
+Always state the detected scope in the report. If notebooks exist but weren't scanned, emit:
+> "N notebooks present — run `/unstale --artifact <path>` (clean as deliverable) or `--exploratory <path>` (tidy) to check them."
+
+---
+
+## Default mode — two lanes
+
+### Lane A — Deterministic
+
+Run on detected library scope. Tag findings `DETERMINISTIC-LINT` or `DETERMINISTIC-DEADCODE`.
+
+```bash
+ruff check --select F401 <library-scope>       # unused imports
+vulture <library-scope> --min-confidence 80    # dead code
+```
+
+### Lane B — LLM judgment
+
+Do **not** re-detect dead code or unused imports — Lane A owns them. Scan for:
+
+- Comments describing logic that has since changed
+- Contradictory or outdated docstrings
+- Resolved TODOs (is the work actually done?)
+- Stale filepaths / README instructions (verify against repo tree)
+- Outdated `.ai/HANDOFF.md` blockers
+
+Tag findings `LLM-JUDGED`.
+
+---
+
+## Tool availability
+
+Before running Lane A, check `which ruff && which vulture` (add `nbqa` for `--artifact`).
+
+- If absent: install into the project venv (`uv pip install` if uv present, else `pip install`); add to `pyproject.toml` dev deps if one exists.
+- If a tool can't be installed: skip its lane, run the remaining lanes, and state what was skipped and why.
+
+---
+
+## Whitelist
+
+Maintain `.vulture_whitelist.py` at the repo root (committed — not in `.ai/`). Apply to all vulture invocations (default mode and `--artifact`). Report whitelist hits as "suppressed" — never silently dropped.
+
+---
+
+## Confidence tiers and `--auto` gating
+
+| Source | Confidence | Tier | `--auto` eligible |
+|---|---|---|---|
+| ruff F401 | — | HIGH | yes |
+| vulture 100% | unreachable / unused | HIGH | yes |
+| vulture 80–99% | probable dead code | MED | flag only |
+| LLM-judged | all | flag only | never |
+
+**Hard rule:** `--auto` never touches anything below 100% vulture confidence, under any flag. The 80% floor widens what the **report** shows; never what `--auto` applies.
+
+---
+
+## --artifact mode (notebook as deliverable)
+
+`--artifact` asserts the notebook is a deliverable, not exploratory scratch. That assertion licenses dead-code detection (the opposite of default mode).
+
+**Deterministic structural** (parse `.ipynb` JSON):
+- Execution-order integrity: flag non-monotonic / missing `execution_count`
+- Hardcoded path literals: regex code cells for `/home/`, `/mnt/`, `s3://`, etc.
+
+Tag: `DETERMINISTIC-STRUCTURAL`.
+
+**Deterministic dead-code + lint:**
+- `ruff check --select F401 <nb.ipynb>` → HIGH
+- `nbqa vulture <nb.ipynb> --min-confidence 80` (or jupytext → `.py` → vulture if nbqa unavailable)
+
+**LLM semantic:**
+- Markdown↔code drift: a markdown cell describes behavior the code lacks
+- Stale outputs: stored output inconsistent with current code (judge from code + stored output; do NOT re-execute)
+
+Under `--auto`: apply HIGH findings (ruff F401 + vulture 100%). Structural and semantic findings remain flag-only.
+
+---
+
+## --exploratory mode (working notebook)
+
+Same as `--artifact` **minus** the destructive parts:
+
+- **Run:** structural checks + LLM semantic
+- **Skip entirely:** dead-code lane (vulture / nbqa) — exploratory "unused" code is expected, not stale
+- **Unused imports (ruff F401):** flag only — never removed (may be staged for a not-yet-written cell)
+- **`--auto` performs NO removals** — all findings flag-only, always
+
+---
+
+## Report format (always emitted before any edit)
+
+State mode and detected scope at the top. Then one row per finding:
+
+| Item | Location | Category | Tier | Source | Action |
+|---|---|---|---|---|---|
+| `import foo` unused | `utils.py:3` | dead import | HIGH | ruff F401 | remove |
+| `MyClass._cache` | `store.py:88` | dead attr (92%) | MED | vulture 92% | flag only |
+| `# uses requests not httpx` | `api.py:14` | stale comment | — | LLM-JUDGED | flag only |
 
 ## Apply log (`--auto` only)
 
-Append:
+Append to `.ai/unstale-<timestamp>.md`:
 
 ```
 Applied fixes:
 - utils.py:3 — removed unused import `foo`
 ```
 
+---
+
 ## Does not
 
-- Flag style, quality, or verbosity issues — that is `/overbaked`'s domain.
-- Touch MED/LOW items under any flag.
-- Infer additional files to scan beyond those named or git-tracked as changed.
+- Flag style, quality, or verbosity — that is `/overbaked`'s domain.
+- Re-detect dead code or unused imports in the LLM pass (Lane A owns them).
+- Touch `.ipynb` files in default mode.
+- Auto-remove below 100% vulture confidence under any flag.
+- Remove anything in `--exploratory` mode, even with `--auto`.
+- Mandate any repo directory layout.
