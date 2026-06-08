@@ -82,7 +82,7 @@ rm ~/.claude/session-init-config.json
 source ~/ai-tools/scripts/ai-sessions.sh
 ```
 
-Run `ai-sessions` to list sessions, or `ai-sessions --recap` for a Haiku-generated one-line summary per session.
+Run `ai-sessions` to list sessions, or `ai-sessions --recap` to show Claude's own recap (`Goal:…/Next:…`) for each session.
 
 ## Syncing skills
 
