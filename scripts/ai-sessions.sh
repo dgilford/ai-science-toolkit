@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
 # ai-sessions — show running Claude / Codex CLI sessions with session IDs and resume commands
-# Usage: ai-sessions [--recap]
+# Usage: ai-sessions
 #
 # Install (add to ~/.zshrc or ~/.bashrc):
 #   source /path/to/ai-tools/scripts/ai-sessions.sh
-#
-# --recap: copies Claude's own "* recap:" block verbatim if present (the system/away_summary
-#          it writes when you step away); otherwise generates one in the same style via a
-#          headless `claude -p` call with hooks disabled (so it never triggers tab-setup).
-#          Codex sessions always use stored thread_name or first user message (instant).
 
 ai-sessions() {
-  local do_recap=0
-  [[ "$1" == "--recap" ]] && do_recap=1
 
   # interactive CLI sessions: current user, real tty (exclude no-tty: ? on Linux, ?? on BSD/macOS),
   # comm ends with claude/codex, skip app-server subprocs. Filtering out no-tty drops headless
@@ -56,12 +49,11 @@ ai-sessions() {
         || resume_cmd="claude -c  # (session ID not found)"
 
       if [[ -n "$transcript" ]]; then
-        if (( do_recap )); then
-          # 1) Copy Claude's own "* recap:" block verbatim if it exists: the latest
-          #    system/away_summary record, minus the "(disable recaps in /config)" UI hint.
-          description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
+        # away_summary first (Claude's own "* recap:" block), fall back to last user message
+        description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
 import sys, json, re
 recap = ""
+last_user = ""
 for line in open(sys.argv[1]):
     try:
         d = json.loads(line)
@@ -71,66 +63,24 @@ for line in open(sys.argv[1]):
         c = (d.get("content") or "").strip()
         if c:
             recap = c
+    elif d.get("type") == "user":
+        c = d.get("message", {}).get("content", "")
+        if isinstance(c, list):
+            if all(x.get("type") == "tool_result" for x in c):
+                continue
+            text = " ".join(x.get("text", "") for x in c if x.get("type") == "text")
+        else:
+            text = c if isinstance(c, str) else ""
+        text = re.sub(r'<[a-zA-Z][a-zA-Z0-9_-]*(?:\s[^>]*)?>.*?</[a-zA-Z][a-zA-Z0-9_-]*>', '', text, flags=re.DOTALL).strip()
+        if text:
+            last_user = text
 if recap:
     recap = re.sub(r'\s*\(disable recaps in /config\)\s*$', '', recap)
     print(recap.replace("\n", " ").strip())
+elif last_user:
+    print(last_user[:120].replace("\n", " "))
 PYEOF
 )
-          # 2) No recap yet — generate one in the same style from the recent transcript.
-          #    disableAllHooks keeps this throwaway call from triggering SessionStart/tab-setup;
-          #    --settings preserves OAuth auth (unlike --bare, which skips settings entirely).
-          if [[ -z "$description" ]]; then
-            description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF' | claude -p --settings '{"disableAllHooks": true}' "Write a recap of this Claude Code session in EXACTLY this style: 'Goal: <one sentence>. <one sentence of current state>. Next: <the pending decision or step>.' 2-3 sentences, no preamble, no markdown." 2>/dev/null
-import sys, json
-msgs = []
-for line in open(sys.argv[1]):
-    try:
-        d = json.loads(line)
-    except:
-        continue
-    role = d.get("type")
-    if role not in ("user", "assistant"):
-        continue
-    c = d.get("message", {}).get("content", "")
-    if isinstance(c, list):
-        text = " ".join(x.get("text", "") for x in c if x.get("type") == "text")
-    else:
-        text = c if isinstance(c, str) else ""
-    text = text.strip()
-    if text:
-        msgs.append(f"{role.upper()}: {text[:300]}")
-print("\n".join(msgs[-12:]))
-PYEOF
-)
-          fi
-        else
-          # last human-typed user message (strip injected system tags, skip pure tool results)
-          description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
-import sys, json, re
-last = ""
-with open(sys.argv[1]) as f:
-    for line in f:
-        try:
-            d = json.loads(line)
-            if d.get("type") != "user":
-                continue
-            c = d.get("message", {}).get("content", "")
-            if isinstance(c, list):
-                if all(x.get("type") == "tool_result" for x in c):
-                    continue
-                text = " ".join(x.get("text","") for x in c if x.get("type")=="text")
-            else:
-                text = c if isinstance(c, str) else ""
-            text = re.sub(r'<[a-zA-Z][a-zA-Z0-9_-]*(?:\s[^>]*)?>.*?</[a-zA-Z][a-zA-Z0-9_-]*>', '', text, flags=re.DOTALL)
-            text = text.strip()
-            if text:
-                last = text
-        except: pass
-if last:
-    print(last[:120].replace("\n", " "))
-PYEOF
-)
-        fi
       fi
 
     elif [[ "$cmd" == "codex" ]]; then
