@@ -7,7 +7,7 @@ Global Claude Code skills for scientific computing workflows.
 | Skill | Command | Purpose |
 |---|---|---|
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support |
-| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Developed by [Matt Pocock](https://github.com/mattpocock). |
+| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock). |
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
@@ -15,7 +15,7 @@ Global Claude Code skills for scientific computing workflows.
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
 | **tab-setup** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session |
-| **unstale** | `/unstale` | Detect and repair staleness residue from AI-assisted development — dead imports, resolved TODOs, stale comments/filepaths, and HANDOFF blockers |
+| **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
 
@@ -33,7 +33,7 @@ bash scripts/sync.sh push
 
 ## Session auto-naming and color
 
-Every new Claude Code session is automatically named and color-coded at boot via the `tab-setup` skill's `SessionStart` hook (`hook-startup.sh`). The skill is self-contained and sourced from [dgilford/tab-setup](https://github.com/dgilford/tab-setup).
+Every new Claude Code session is automatically named and color-coded at boot via the `tab-setup` skill's `SessionStart` hook (`hook-startup.sh`). The skill is self-contained, originally developed by [JeraldHuff/tab-setup](https://github.com/JeraldHuff/tab-setup) and forked to [dgilford/tab-setup](https://github.com/dgilford/tab-setup).
 
 - **Name**: Haiku generates a logical 2-word adjective-noun name from the project directory name (e.g., `fiscal-ledger` for a finance project). Falls back to a deterministic wordlist hash if the API is unavailable.
 - **Color**: Picks the next color not already in use by another running Claude session. Persists through `/clear` and `claude -c`.
