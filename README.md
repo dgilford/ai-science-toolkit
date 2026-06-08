@@ -74,6 +74,16 @@ json.dump(s, open(p, 'w'), indent=2)
 rm ~/.claude/session-init-config.json
 ```
 
+## Listing running sessions (`ai-sessions`)
+
+`scripts/ai-sessions.sh` defines an `ai-sessions` shell function that lists your running Claude/Codex CLI sessions with their resume commands. Source it directly from the repo (no copy — `git pull` keeps it current) by adding to `~/.bashrc` (or `~/.zshrc`):
+
+```bash
+source ~/ai-tools/scripts/ai-sessions.sh
+```
+
+Run `ai-sessions` to list sessions, or `ai-sessions --recap` for a Haiku-generated one-line summary per session.
+
 ## Syncing skills
 
 Skills in `skills/` are the source of truth.

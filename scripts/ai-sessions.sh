@@ -12,11 +12,14 @@ ai-sessions() {
   local do_recap=0
   [[ "$1" == "--recap" ]] && do_recap=1
 
-  # interactive CLI sessions: real tty, comm ends with claude/codex, skip app-server subprocs
+  # interactive CLI sessions: current user, real tty (exclude no-tty: ? on Linux, ?? on BSD/macOS),
+  # comm ends with claude/codex, skip app-server subprocs. Filtering out no-tty drops headless
+  # (e.g. VS Code) and orphaned processes; restricting to the current user drops other users' procs
+  # on shared hosts (whose transcripts we can't read or resume anyway).
   local pid_list pids=""
-  pid_list=$(ps -eo pid,tty,comm | awk '
-    $2 != "??" && $3 ~ /claude$/ { print $1, "claude" }
-    $2 != "??" && $3 ~ /codex$/  { print $1, "codex" }
+  pid_list=$(ps -u "$(id -un)" -o pid,tty,comm | awk '
+    $2 != "?" && $2 != "??" && $3 ~ /claude$/ { print $1, "claude" }
+    $2 != "?" && $2 != "??" && $3 ~ /codex$/  { print $1, "codex" }
   ' | grep -v "^$$ ")
   while IFS=' ' read -r pid cmd; do
     [[ -z "$pid" ]] && continue
@@ -42,6 +45,8 @@ ai-sessions() {
     if [[ "$cmd" == "claude" ]]; then
       encoded="-$(echo "$cwd" | sed 's|^/||; s|/|-|g')"
       dir="$HOME/.claude/projects/$encoded"
+      # newest transcript in this cwd. The projects dir is keyed by cwd, not pid, so two live
+      # sessions in the same cwd can't be told apart — both resolve to the most-recently-written one.
       transcript=$(ls -t "$dir"/*.jsonl 2>/dev/null | head -1)
       session_id=$(basename "$transcript" .jsonl 2>/dev/null)
       [[ -n "$session_id" ]] \
