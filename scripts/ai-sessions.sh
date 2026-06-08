@@ -5,7 +5,8 @@
 # Install (add to ~/.zshrc or ~/.bashrc):
 #   source /path/to/ai-tools/scripts/ai-sessions.sh
 #
-# --recap: calls `claude -p` to generate a one-line summary per claude session (~1-2s each).
+# --recap: calls `claude -p` (hooks disabled, so it won't trigger SessionStart/tab-setup) to
+#          generate a one-line summary per claude session (~1-2s each).
 #          Codex sessions always use stored thread_name or first user message (instant).
 
 ai-sessions() {
@@ -82,7 +83,10 @@ excerpt = "\n".join(f"{r.upper()}: {t[:300]}" for r,t in msgs[-12:])
 print(excerpt)
 PYEOF
 )
-          description=$(echo "$description" | claude -p \
+          # disableAllHooks: this throwaway headless call must not trigger SessionStart hooks
+          # (e.g. tab-setup naming/recolor). --bare would also skip hooks but skips settings/auth
+          # loading too, breaking OAuth login; --settings keeps auth and only turns hooks off.
+          description=$(echo "$description" | claude -p --settings '{"disableAllHooks": true}' \
             "Summarize in one sentence (max 15 words) what was being worked on. Just the sentence, no preamble." \
             2>/dev/null)
         else
