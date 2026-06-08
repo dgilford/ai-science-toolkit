@@ -24,12 +24,32 @@ Global Claude Code skills for scientific computing workflows.
 Clone the repo and deploy all skills and hooks:
 
 ```bash
-git clone https://github.com/dgilford/ai-tools.git ~/ai-tools
-cd ~/ai-tools
+git clone https://github.com/dgilford/ai-tools.git ~/Projects/ai-tools
+cd ~/Projects/ai-tools
 bash scripts/sync.sh push
 ```
 
 `push` installs skills to `~/.claude/skills/` and registers the `tab-setup` boot hook (see below).
+
+## Repository layout
+
+- `AGENTS.md` - Codex entry point. It points Codex at `CLAUDE.md` for shared
+  durable repo guidance.
+- `CLAUDE.md` - shared source of truth for repository workflow notes,
+  skill-development conventions, sync behavior, and session lifecycle.
+- `skills/` - source copies of Claude Code skills. Edit here first, then deploy
+  with `scripts/sync.sh push`.
+- `scripts/sync.sh` - pushes `skills/` to `~/.claude/skills/`, syncs the
+  external `tab-setup` skill, regenerates the skills table in this README, and
+  registers the startup hook.
+- `scripts/ai-sessions.sh` - shell function for listing live Claude and Codex
+  CLI sessions with resume commands.
+- `settings/` - commit-safe global Claude Code settings plus restore notes.
+  Machine-local `settings.local.json` backups stay gitignored.
+- `tab-setup/` - external skill checkout from `dgilford/tab-setup`; `sync.sh
+  push` refreshes this before copying its scripts into `skills/tab-setup/`.
+- `vscode-extension/` - small helper extension for applying pending Claude tab
+  colors/names in VS Code-compatible remote servers.
 
 ## Session auto-naming and color
 
@@ -79,7 +99,7 @@ rm ~/.claude/session-init-config.json
 `scripts/ai-sessions.sh` defines an `ai-sessions` shell function that lists your running Claude/Codex CLI sessions with their resume commands. Source it directly from the repo (no copy — `git pull` keeps it current) by adding to `~/.bashrc` (or `~/.zshrc`):
 
 ```bash
-source ~/ai-tools/scripts/ai-sessions.sh
+source ~/Projects/ai-tools/scripts/ai-sessions.sh
 ```
 
 Run `ai-sessions` to list sessions, or `ai-sessions --recap` to show Claude's own recap (`Goal:…/Next:…`) for each session.
