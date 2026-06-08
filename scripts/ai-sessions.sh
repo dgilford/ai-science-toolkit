@@ -5,8 +5,9 @@
 # Install (add to ~/.zshrc or ~/.bashrc):
 #   source /path/to/ai-tools/scripts/ai-sessions.sh
 #
-# --recap: calls `claude -p` (hooks disabled, so it won't trigger SessionStart/tab-setup) to
-#          generate a one-line summary per claude session (~1-2s each).
+# --recap: copies Claude's own "* recap:" block verbatim if present (the system/away_summary
+#          it writes when you step away); otherwise generates one in the same style via a
+#          headless `claude -p` call with hooks disabled (so it never triggers tab-setup).
 #          Codex sessions always use stored thread_name or first user message (instant).
 
 ai-sessions() {
@@ -56,39 +57,52 @@ ai-sessions() {
 
       if [[ -n "$transcript" ]]; then
         if (( do_recap )); then
+          # 1) Copy Claude's own "* recap:" block verbatim if it exists: the latest
+          #    system/away_summary record, minus the "(disable recaps in /config)" UI hint.
           description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
-import sys, json
-msgs = []
-with open(sys.argv[1]) as f:
-    for line in f:
-        try:
-            d = json.loads(line)
-            role = d.get("type")
-            if role == "user":
-                c = d.get("message", {}).get("content", "")
-                if isinstance(c, str) and c.strip():
-                    msgs.append(("user", c.strip()))
-                elif isinstance(c, list):
-                    text = " ".join(x.get("text","") for x in c if x.get("type")=="text")
-                    if text.strip(): msgs.append(("user", text.strip()))
-            elif role == "assistant":
-                c = d.get("message", {}).get("content", "")
-                if isinstance(c, str) and c.strip():
-                    msgs.append(("assistant", c.strip()))
-                elif isinstance(c, list):
-                    text = " ".join(x.get("text","") for x in c if x.get("type")=="text")
-                    if text.strip(): msgs.append(("assistant", text.strip()))
-        except: pass
-excerpt = "\n".join(f"{r.upper()}: {t[:300]}" for r,t in msgs[-12:])
-print(excerpt)
+import sys, json, re
+recap = ""
+for line in open(sys.argv[1]):
+    try:
+        d = json.loads(line)
+    except:
+        continue
+    if d.get("type") == "system" and d.get("subtype") == "away_summary":
+        c = (d.get("content") or "").strip()
+        if c:
+            recap = c
+if recap:
+    recap = re.sub(r'\s*\(disable recaps in /config\)\s*$', '', recap)
+    print(recap.replace("\n", " ").strip())
 PYEOF
 )
-          # disableAllHooks: this throwaway headless call must not trigger SessionStart hooks
-          # (e.g. tab-setup naming/recolor). --bare would also skip hooks but skips settings/auth
-          # loading too, breaking OAuth login; --settings keeps auth and only turns hooks off.
-          description=$(echo "$description" | claude -p --settings '{"disableAllHooks": true}' \
-            "Summarize in one sentence (max 15 words) what was being worked on. Just the sentence, no preamble." \
-            2>/dev/null)
+          # 2) No recap yet — generate one in the same style from the recent transcript.
+          #    disableAllHooks keeps this throwaway call from triggering SessionStart/tab-setup;
+          #    --settings preserves OAuth auth (unlike --bare, which skips settings entirely).
+          if [[ -z "$description" ]]; then
+            description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF' | claude -p --settings '{"disableAllHooks": true}' "Write a recap of this Claude Code session in EXACTLY this style: 'Goal: <one sentence>. <one sentence of current state>. Next: <the pending decision or step>.' 2-3 sentences, no preamble, no markdown." 2>/dev/null
+import sys, json
+msgs = []
+for line in open(sys.argv[1]):
+    try:
+        d = json.loads(line)
+    except:
+        continue
+    role = d.get("type")
+    if role not in ("user", "assistant"):
+        continue
+    c = d.get("message", {}).get("content", "")
+    if isinstance(c, list):
+        text = " ".join(x.get("text", "") for x in c if x.get("type") == "text")
+    else:
+        text = c if isinstance(c, str) else ""
+    text = text.strip()
+    if text:
+        msgs.append(f"{role.upper()}: {text[:300]}")
+print("\n".join(msgs[-12:]))
+PYEOF
+)
+          fi
         else
           # last human-typed user message (strip injected system tags, skip pure tool results)
           description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
