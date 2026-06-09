@@ -64,13 +64,11 @@ Tab color assignments are persisted in `~/.claude/project-colors.json` (cwd → 
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; register hook-startup.sh; auto-updates README skills table
-bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/; register hook-startup.sh
+bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 ```
 
-`push` regenerates the `## Skills` table in `README.md` from each skill's `name` and `description` frontmatter (first sentence). **Keep first sentences to ~130 chars** — use grill-me as the benchmark. Triggering vocabulary belongs in the "Use when…" second sentence, not the first. The awk replacement targets the block between `## Skills` and the next `##` heading — if that heading is ever missing from README.md, the table update silently no-ops.
-
-After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked in this repo.
+After `pull`, review `git diff skills/ agents/` — pull brings in all globally installed skills and agents, including any not yet tracked in this repo.
 
 **Always edit `skills/` (the repo copy), never `~/.claude/skills/` directly.** `push` overwrites the installed copy from the repo — edits to the installed copy are silently lost on the next push.
 

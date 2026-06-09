@@ -2,7 +2,7 @@
 # Sync skills and agents between this repo and ~/.claude/
 #
 # Usage:
-#   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/; update README
+#   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 
 set -euo pipefail
@@ -12,8 +12,6 @@ SKILLS_SRC="$REPO_DIR/skills"
 SKILLS_DEST="$HOME/.claude/skills"
 AGENTS_SRC="$REPO_DIR/agents"
 AGENTS_DEST="$HOME/.claude/agents"
-README="$REPO_DIR/README.md"
-
 # External skill repos — cloned/updated into REPO_DIR on push.
 # Format: "owner/repo:dest_subdir"
 EXTERNAL_SKILLS=(
@@ -22,7 +20,7 @@ EXTERNAL_SKILLS=(
 
 usage() {
   echo "Usage: $0 [push|pull]"
-  echo "  push  Deploy skills from repo to ~/.claude/skills/; update README skills table"
+  echo "  push  Deploy skills from repo to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
   exit 1
 }
@@ -50,50 +48,6 @@ sync_external_skills() {
       echo "  → vscode-extension synced"
     fi
   done
-}
-
-# Regenerate the skills table in README.md from skills/*/SKILL.md frontmatter.
-update_readme() {
-  local table_file
-  table_file=$(mktemp)
-  printf '%s\n%s\n' "| Skill | Command | Purpose |" "|---|---|---|" > "$table_file"
-  for skill_dir in $(ls -d "$SKILLS_SRC"/*/ | sort); do
-    local skill_md="$skill_dir/SKILL.md"
-    [ -f "$skill_md" ] || continue
-    local name desc first_sentence
-    name=$(grep '^name:' "$skill_md" | head -1 | sed 's/^name:[[:space:]]*//')
-    desc=$(grep '^description:' "$skill_md" | head -1 | sed 's/^description:[[:space:]]*//')
-    first_sentence=$(echo "$desc" | sed 's/\. .*//')
-    printf '| **%s** | `/%s` | %s |\n' "$name" "$name" "$first_sentence" >> "$table_file"
-  done
-
-  # Replace everything between "## Skills" and the next "##" heading.
-  # Uses Python instead of awk -v because macOS awk doesn't support multiline -v values.
-  python3 - "$README" "$table_file" <<'PYEOF'
-import sys
-readme_path, table_path = sys.argv[1], sys.argv[2]
-with open(readme_path) as f:
-    lines = f.readlines()
-with open(table_path) as f:
-    table = f.read()
-out, in_section = [], False
-for line in lines:
-    if line.rstrip() == "## Skills":
-        out.append(line)
-        out.append("\n")
-        out.append(table)
-        out.append("\n")
-        in_section = True
-    elif in_section and line.startswith("## "):
-        in_section = False
-        out.append(line)
-    elif not in_section:
-        out.append(line)
-with open(readme_path, "w") as f:
-    f.writelines(out)
-PYEOF
-  rm -f "$table_file"
-  echo "  README.md skills table updated."
 }
 
 install_startup_hook() {
@@ -162,7 +116,6 @@ case "$1" in
       echo "  → $name"
       cp "$agent_file" "$AGENTS_DEST/$name"
     done
-    update_readme
     install_startup_hook
     echo "Done."
     ;;

@@ -18,14 +18,14 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | Skill | Command | Purpose |
 |---|---|---|
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support |
-| **grill-me** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree |
+| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock) |
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | **resume** | `/resume` | Resume work from repo-local handoff state |
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
-| **tab-setup** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session |
+| **[tab-setup](https://github.com/JeraldHuff/tab-setup)** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup) |
 | **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
