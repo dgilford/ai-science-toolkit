@@ -40,7 +40,7 @@ cd ~/Projects/ai-tools
 bash scripts/sync.sh push
 ```
 
-`push` installs skills to `~/.claude/skills/` and registers the `tab-setup` boot hook (see below).
+`push` installs skills to `~/.claude/skills/`, agents to `~/.claude/agents/`, and registers the `tab-setup` boot hook (see below).
 
 ## Repository layout
 
@@ -52,9 +52,9 @@ bash scripts/sync.sh push
   then deploy with `scripts/sync.sh push` (syncs to `~/.claude/agents/`).
 - `skills/` - source copies of Claude Code skills. Edit here first, then deploy
   with `scripts/sync.sh push`.
-- `scripts/sync.sh` - pushes `skills/` to `~/.claude/skills/`, syncs the
-  external `tab-setup` skill, regenerates the skills table in this README, and
-  registers the startup hook.
+- `scripts/sync.sh` - pushes `skills/` to `~/.claude/skills/` and `agents/`
+  to `~/.claude/agents/`, syncs the external `tab-setup` skill, and registers
+  the startup hook.
 - `scripts/ai-sessions.sh` - shell function for listing live Claude and Codex
   CLI sessions with resume commands.
 - `settings/` - commit-safe global Claude Code settings plus restore notes.
