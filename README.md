@@ -1,6 +1,16 @@
 # ai-tools
 
-Global Claude Code skills for scientific computing workflows.
+Global Claude Code skills and agent personas for scientific computing workflows.
+
+## Agents
+
+Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Each adopts a domain-expert reviewer stance — adversarial, ranked concerns, no rewriting.
+
+| Agent | Purpose |
+|---|---|
+| **attribution-reviewer** | Reviews climate-attribution claims for counterfactual, baseline, framing, uncertainty, model adequacy, and overclaiming |
+| **meteo-reviewer** | Reviews weather event analyses and atmospheric mechanism claims for dynamical, physical, observational, and hydrological rigor |
+| **stats-reviewer** | Reviews statistical analyses for estimator validity, causal identification, inference under dependence, model specification, multiple testing, and ML validity |
 
 ## Skills
 
@@ -106,16 +116,16 @@ source ~/Projects/ai-tools/scripts/ai-sessions.sh
 
 Run `ai-sessions` to list sessions. Claude's own recap (`away_summary`) is shown by default for each session.
 
-## Syncing skills
+## Syncing skills and agents
 
-Skills in `skills/` are the source of truth.
+Skills in `skills/` and agents in `agents/` are the source of truth.
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/
-bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/
+bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
+bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 ```
 
-After `pull`, review `git diff skills/` — pull brings in all globally installed skills, including any not yet tracked here.
+After `pull`, review `git diff skills/ agents/` — pull brings in all globally installed skills and agents, including any not yet tracked here.
 
 ## Session workflow
 
