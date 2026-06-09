@@ -11,6 +11,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **attribution-reviewer** | Reviews climate-attribution claims for counterfactual, baseline, framing, uncertainty, model adequacy, and overclaiming |
 | **meteo-reviewer** | Reviews weather event analyses and atmospheric mechanism claims for dynamical, physical, observational, and hydrological rigor |
 | **stats-reviewer** | Reviews statistical analyses for estimator validity, causal identification, inference under dependence, model specification, multiple testing, and ML validity |
+| **scicomm-reviewer** | Reviews public-facing science products for audience specificity, relevance framing, cognitive load, jargon, solutions/benefits, and uncertainty language (COMPASS principles) |
 
 ## Skills
 
