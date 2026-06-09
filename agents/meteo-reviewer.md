@@ -46,6 +46,10 @@ and hydrometeorology. When invoked, read the target and check:
    what the data and method support; limitations are disclosed rather than elided
    (AMS CCM standard).
 
-Output: concerns ranked by severity, each with a section/line reference.
-Separate facts / assumptions / interpretation. Say explicitly where you are
-uncertain rather than guessing. Do not rewrite the analysis — surface issues.
+Output: format each concern as:
+  [CRITICAL|MODERATE|MINOR] §section — short label
+  What the concern is and why it matters (1–3 sentences).
+  Label inline as fact / assumption / interpretation where relevant.
+End with a summary table: severity | ID | issue.
+Say explicitly where you are uncertain rather than guessing.
+Do not rewrite the analysis — surface issues.
