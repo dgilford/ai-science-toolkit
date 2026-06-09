@@ -7,14 +7,14 @@ Global Claude Code skills for scientific computing workflows.
 | Skill | Command | Purpose |
 |---|---|---|
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support |
-| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock) |
+| **grill-me** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree |
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
 | **resume** | `/resume` | Resume work from repo-local handoff state |
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
-| **[tab-setup](https://github.com/JeraldHuff/tab-setup)** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup) |
+| **tab-setup** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session |
 | **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
@@ -37,6 +37,8 @@ bash scripts/sync.sh push
   durable repo guidance.
 - `CLAUDE.md` - shared source of truth for repository workflow notes,
   skill-development conventions, sync behavior, and session lifecycle.
+- `agents/` - source copies of Claude Code subagent personas. Edit here first,
+  then deploy with `scripts/sync.sh push` (syncs to `~/.claude/agents/`).
 - `skills/` - source copies of Claude Code skills. Edit here first, then deploy
   with `scripts/sync.sh push`.
 - `scripts/sync.sh` - pushes `skills/` to `~/.claude/skills/`, syncs the

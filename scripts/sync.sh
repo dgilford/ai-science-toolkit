@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# Sync skills between this repo and ~/.claude/skills/
+# Sync skills and agents between this repo and ~/.claude/
 #
 # Usage:
-#   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; update README
-#   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/
+#   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/; update README
+#   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_SRC="$REPO_DIR/skills"
 SKILLS_DEST="$HOME/.claude/skills"
+AGENTS_SRC="$REPO_DIR/agents"
+AGENTS_DEST="$HOME/.claude/agents"
 README="$REPO_DIR/README.md"
 
 # External skill repos — cloned/updated into REPO_DIR on push.
@@ -152,6 +154,14 @@ case "$1" in
       mkdir -p "$SKILLS_DEST/$name"
       cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
     done
+    echo "Deploying agents/ → $AGENTS_DEST"
+    mkdir -p "$AGENTS_DEST"
+    for agent_file in "$AGENTS_SRC"/*.md; do
+      [ -f "$agent_file" ] || continue
+      name=$(basename "$agent_file")
+      echo "  → $name"
+      cp "$agent_file" "$AGENTS_DEST/$name"
+    done
     update_readme
     install_startup_hook
     echo "Done."
@@ -164,7 +174,15 @@ case "$1" in
       mkdir -p "$SKILLS_SRC/$name"
       cp -r "$skill_dir/." "$SKILLS_SRC/$name/"
     done
-    echo "Done. Review changes with: git diff skills/"
+    echo "Pulling $AGENTS_DEST → agents/"
+    mkdir -p "$AGENTS_SRC"
+    for agent_file in "$AGENTS_DEST"/*.md; do
+      [ -f "$agent_file" ] || continue
+      name=$(basename "$agent_file")
+      echo "  ← $name"
+      cp "$agent_file" "$AGENTS_SRC/$name"
+    done
+    echo "Done. Review changes with: git diff skills/ agents/"
     ;;
   *)
     usage
