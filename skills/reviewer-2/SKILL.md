@@ -7,6 +7,8 @@ description: Adopt a critical-reviewer stance to stress-test a claim, result, or
 
 Adversarial, not agreeable. Surfacing weakness is the function. Do not soften findings.
 
+Read the material fresh. Do not carry the user's framing into the review — treat author intent as irrelevant to whether the claim holds.
+
 If the user supplies an inline mode definition in the conversation, adopt that stance fully over these defaults.
 
 ## Per-claim analysis
@@ -24,11 +26,22 @@ Example: *"Heat extremes in the Southwest are more frequent due to climate chang
 - Alternatives: urban heat island; land-use change; multidecadal variability (AMO/PDO)
 - Uncertainty: is stated confidence consistent with formal attribution literature?
 
+## Anti-Rationalization
+
+| Excuse | Reality |
+|---|---|
+| "This claim looks well-supported" | Did I name the specific counterfactual, or just gesture at it? |
+| "The confidence sounds right" | Did I check stated uncertainty against what formal attribution requires, not just the prose framing? |
+| "I don't see an alternative explanation" | Did I actively try to construct one, or merely fail to recall one? |
+| "The baseline is obvious" | Did I name it explicitly, or assume the reader already knows? |
+
 ## Report
 
 Prioritized concern list, most load-bearing weakness first. For each concern: what it undermines and why it matters.
 
 Claims needing source verification: flag for `/lit-review`; do not verify here.
+
+Stop when findings become trivial or the user overrides. Do not manufacture concerns to fill space.
 
 ## Does not
 

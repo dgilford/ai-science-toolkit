@@ -36,13 +36,13 @@ skill-name/
 
 Frontmatter fields: `name`, `description`, `allowed-tools`. Body: opening directive, optional live state injection, instructions, output template.
 
+Optional sections: `## Anti-Rationalization` (3–5 skill-specific rows: an excuse an agent uses to skip a key step, paired with a factual rebuttal — never generic filler) and `## Verification` (exit-criteria checklist requiring observable evidence before claiming done).
+
 ## Shell injection
 
 To inject live state before Claude sees the skill, open a fenced code block with three backticks immediately followed by `!` (no space). The command output replaces the block at skill load time. Always add `|| echo "(fallback)"` for non-git repos.
 
 Use for: git status, git log, git diff, environment checks — any context that must be current rather than recalled.
-
-Commands run at skill load time. Output replaces the block inline. Use for git state, environment checks, or any context that must be current. Fall back gracefully with `|| echo "(message)"` for non-git repos.
 
 ## Description requirements
 
@@ -68,3 +68,5 @@ Split into separate files when SKILL.md exceeds 100 lines or content has clearly
 - [ ] Scientific context section included if skill touches data, methods, or analysis
 - [ ] Facts, assumptions, and recommendations are distinguished where relevant
 - [ ] No time-sensitive information hardcoded
+- [ ] Anti-Rationalization table present if skill has skip-worthy judgment steps (3–5 rows, skill-specific, not generic)
+- [ ] Verification checklist present if skill has a completion state requiring observable evidence

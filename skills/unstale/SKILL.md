@@ -91,7 +91,7 @@ Maintain `.vulture_whitelist.py` at the repo root (committed — not in `.ai/`).
 | vulture 80–99% | probable dead code | MED | flag only |
 | LLM-judged | all | flag only | never |
 
-**Hard rule:** `--auto` never touches anything below 100% vulture confidence, under any flag. The 80% floor widens what the **report** shows; never what `--auto` applies.
+**Chesterton's Fence:** `--auto` never touches anything below 100% vulture confidence under any flag. Code that might be dead is code you don't fully understand yet. The 80% floor widens what the **report** shows; never what `--auto` applies.
 
 ---
 
@@ -149,11 +149,18 @@ Applied fixes:
 
 ---
 
+## Anti-Rationalization
+
+| Excuse | Reality |
+|---|---|
+| "This comment looks fine" | Does it still match the code path it describes, or just the code that used to be there? |
+| "This TODO looks resolved" | Is the work actually merged into this file, or just started somewhere? |
+| "vulture flagged this but it's probably used" | That's what `.vulture_whitelist.py` is for — whitelist it, don't suppress the finding |
+
 ## Does not
 
 - Flag style, quality, or verbosity — that is `/overbaked`'s domain.
 - Re-detect dead code or unused imports in the LLM pass (Lane A owns them).
 - Touch `.ipynb` files in default mode.
-- Auto-remove below 100% vulture confidence under any flag.
 - Remove anything in `--exploratory` mode, even with `--auto`.
 - Mandate any repo directory layout.
