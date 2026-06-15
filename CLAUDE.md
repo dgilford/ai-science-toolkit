@@ -93,4 +93,4 @@ After `pull`, review `git diff skills/ agents/` — pull brings in all globally 
 
 ## Commits
 
-Global GPG signing is enabled (`commit.gpgsign = true`). In this environment the pinentry GUI times out before the passphrase can be entered. Commits must be made in an external terminal with the GPG key already unlocked, or run directly by the user.
+Global GPG signing is disabled (`commit.gpgsign` is unset in `~/.gitconfig`), so commits are unsigned by default and can be made in-session without a passphrase prompt. The signing key (`user.signingkey`) is still configured — opt into a signed commit per-commit with `git commit -S`. To restore signing-by-default: `git config --global commit.gpgsign true` (note: pinentry's GUI times out in this environment, so signed commits would then need an external terminal with the key already unlocked).
