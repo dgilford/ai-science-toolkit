@@ -50,6 +50,49 @@ sync_external_skills() {
   done
 }
 
+# Validate that every agent file's YAML frontmatter parses and has a name.
+# Catches the silent-drop failure mode where a malformed agent .md deploys
+# fine but never registers as an invokable subagent type (e.g. an unquoted
+# multi-line description containing a ": " colon-space, which YAML reads as a
+# stray mapping key). Aborts the push so the breakage surfaces here, not later.
+lint_agents() {
+  python3 - "$AGENTS_SRC" <<'EOF'
+import os, re, sys
+agents_dir = sys.argv[1]
+try:
+    import yaml
+except ImportError:
+    print("  ! PyYAML not installed — skipping agent frontmatter lint", file=sys.stderr)
+    sys.exit(0)
+
+failures = []
+for fn in sorted(os.listdir(agents_dir)):
+    if not fn.endswith(".md"):
+        continue
+    text = open(os.path.join(agents_dir, fn)).read()
+    m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    if not m:
+        failures.append(f"{fn}: no YAML frontmatter block")
+        continue
+    try:
+        data = yaml.safe_load(m.group(1))
+    except yaml.YAMLError as e:
+        msg = str(e).splitlines()[0]
+        failures.append(f"{fn}: frontmatter does not parse ({msg})")
+        continue
+    if not isinstance(data, dict) or not data.get("name"):
+        failures.append(f"{fn}: frontmatter missing required 'name' field")
+
+if failures:
+    print("  ✗ agent frontmatter lint failed:", file=sys.stderr)
+    for f in failures:
+        print(f"      {f}", file=sys.stderr)
+    print("    Fix: quote multi-line descriptions, e.g. description: '...'", file=sys.stderr)
+    sys.exit(1)
+print("  ✓ agent frontmatter lint passed")
+EOF
+}
+
 install_startup_hook() {
   local config_dest="$HOME/.claude/session-init-config.json"
   local hook_cmd="bash ~/.claude/skills/tab-setup/scripts/hook-startup.sh"
@@ -108,6 +151,8 @@ case "$1" in
       mkdir -p "$SKILLS_DEST/$name"
       cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
     done
+    echo "Linting agent frontmatter"
+    lint_agents
     echo "Deploying agents/ → $AGENTS_DEST"
     mkdir -p "$AGENTS_DEST"
     for agent_file in "$AGENTS_SRC"/*.md; do
