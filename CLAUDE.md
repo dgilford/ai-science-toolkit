@@ -22,6 +22,23 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `figure-review` | `/figure-review` | Per-criterion publication-readiness audit for scientific figures (colormap, uncertainty, axes, caption, claim support); `--style` adds CC house style |
 | `reviewer-2` | `/reviewer-2` | Adversarial per-claim stress-test (baseline, counterfactual, alternatives, uncertainty consistency); defers citation checks to `/lit-review` |
 
+## Review agents (subagent panel)
+
+Domain-expert reviewer personas live in `agents/<name>.md` and deploy to `~/.claude/agents/` via `sync.sh push`. They are **invokable subagent types** (spawned with the `Agent` tool / `subagent_type`), not slash-command skills. Each is **review-only** — it reports findings (severity-tagged, with a summary table) and never rewrites the target. They are designed to run **individually or as a parallel panel** (spawn several in one message for a multi-reviewer read).
+
+| Agent | Domain | Reviews for |
+|---|---|---|
+| `attribution-reviewer` | Climate attribution | Counterfactual, baseline, framing, uncertainty, model adequacy, overclaiming (PR/OR/ChIP, storyline, D&A) |
+| `stats-reviewer` | Statistics / ML | Estimator properties, causal ID, inference under dependence, specification, multiple testing, calibration |
+| `meteo-reviewer` | Meteorology (AMS CCM) | Dynamical/thermodynamic consistency, physical basis, observational adequacy, competing drivers, hydrology |
+| `scicomm-reviewer` | Science communication | Message Box, narrative, stakes/framing, audience, quantification (full COMPASS portfolio) |
+
+All four share `tools: Read, Grep, Glob` and `model: opus`.
+
+### Agent file format & gotcha
+
+Same YAML frontmatter as skills (`name`, `description`, `tools`, `model`). **Critical:** the loader silently drops any agent whose frontmatter fails to parse — the `.md` deploys fine but the type never registers, and it only surfaces in a *fresh* session (the type list is snapshotted at session start). The classic failure is an **unquoted multi-line `description` containing `": "` (colon-space)** on a wrapped line, which YAML reads as a stray mapping key. **Always single-quote multi-line descriptions** (`description: '...'`). `sync.sh push` runs `lint_agents()` to parse every agent's frontmatter and aborts the push on any failure.
+
 ## Skill file format
 
 Each skill lives at `~/.claude/skills/<name>/SKILL.md` with YAML frontmatter:
