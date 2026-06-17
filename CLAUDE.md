@@ -91,6 +91,15 @@ After `pull`, review `git diff skills/ agents/` — pull brings in all globally 
 
 **External skills** (`tab-setup`) are a special case: `push` pulls from `github.com/dgilford/tab-setup` into `tab-setup/` (a nested git repo at the repo root) *before* copying into `skills/tab-setup/`. Edits to `skills/tab-setup/` are overwritten by this pull. To change tab-setup scripts: edit `tab-setup/scripts/`, commit and push to `dgilford/tab-setup`, then run `sync.sh push`. `dgilford/tab-setup` is a **fork of `JeraldHuff/tab-setup`** (the upstream) — contribute changes back to Jerald with `gh pr create --repo JeraldHuff/tab-setup --base main --head dgilford:<branch>`.
 
+To pull *new* upstream (Jerald) work into the fork: add `upstream` (`git -C tab-setup remote add upstream https://github.com/JeraldHuff/tab-setup.git`), `git -C tab-setup fetch upstream`, fast-forward `main` to `upstream/main`, and `git -C tab-setup push origin main`. Then `sync.sh push`. **Caveat:** `sync_external_skills()` copies only `scripts/` and `vscode-extension/` into `skills/tab-setup/` — **not** `SKILL.md` or `README.md`, and `cp -r` never prunes files deleted upstream (stale scripts can linger in the deployed dir; remove them by hand). If Jerald updates `SKILL.md`, copy it over `skills/tab-setup/SKILL.md` manually.
+
+### `/tab-setup update` (alternate refresh path)
+
+tab-setup ships its own self-update command: `/tab-setup update` → `scripts/update.sh`, which `git pull --ff-only`s the fork at the path recorded in `~/.claude/skills/tab-setup/.repo-path` and re-runs `install.sh` (re-copies skill files + rebuilds the VS Code/code-server extension). It's a quick, **tab-setup-only** refresh — it does **not** deploy other skills/agents, lint, or register the hook (that's `sync.sh push`'s job). Notes:
+- `.repo-path` is written by `install.sh`, **not** `sync.sh`. It was bootstrapped once (`bash tab-setup/scripts/install.sh`) to point at `tab-setup/`; `sync.sh push` never overwrites or deletes it, so `/tab-setup update` keeps working.
+- It pulls from `origin` (your fork), not Jerald's `upstream` — so it only sees new Jerald work *after* the fork's `main` has been synced to upstream (see above).
+- `update.sh` refuses to run if `tab-setup/` has uncommitted changes, and only fast-forwards — safe, won't clobber.
+
 ## Scheduled cloud routines
 
 Three weekday cron routines live in the claude.ai account (not in this repo) to open Claude's 5-hour usage windows on a predictable schedule. They fire a 1-token Haiku call (`"Say 'Alláh-u-Abhá'."`) — just enough to start the clock. All run Mon–Fri.
