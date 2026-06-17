@@ -98,8 +98,8 @@ Three weekday cron routines live in the claude.ai account (not in this repo) to 
 | Routine | Fires (ET) | Cron (UTC) | Window |
 |---------|-----------|------------|--------|
 | `window-reset-5am` | 5:00am | `0 9 * * 1-5` | 5:00am–10:00am |
-| `window-reset-10am` | 10:01am | `1 14 * * 1-5` | 10:01am–3:01pm |
-| `window-reset-3pm` | 3:02pm | `2 19 * * 1-5` | 3:02pm–8:02pm |
+| `window-reset-10am` | 10:02am | `2 14 * * 1-5` | 10:02am–3:02pm |
+| `window-reset-3pm` | 3:04pm | `4 19 * * 1-5` | 3:04pm–8:04pm |
 
 Manage at: https://claude.ai/code/routines — see `.ai/routines.md` for IDs and creation notes.
 
