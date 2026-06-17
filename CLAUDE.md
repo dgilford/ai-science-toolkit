@@ -91,6 +91,18 @@ After `pull`, review `git diff skills/ agents/` — pull brings in all globally 
 
 **External skills** (`tab-setup`) are a special case: `push` pulls from `github.com/dgilford/tab-setup` into `tab-setup/` (a nested git repo at the repo root) *before* copying into `skills/tab-setup/`. Edits to `skills/tab-setup/` are overwritten by this pull. To change tab-setup scripts: edit `tab-setup/scripts/`, commit and push to `dgilford/tab-setup`, then run `sync.sh push`. `dgilford/tab-setup` is a **fork of `JeraldHuff/tab-setup`** (the upstream) — contribute changes back to Jerald with `gh pr create --repo JeraldHuff/tab-setup --base main --head dgilford:<branch>`.
 
+## Scheduled cloud routines
+
+Three weekday cron routines live in the claude.ai account (not in this repo) to open Claude's 5-hour usage windows on a predictable schedule. They fire a 1-token Haiku call (`"Say 'Alláh-u-Abhá'."`) — just enough to start the clock. All run Mon–Fri.
+
+| Routine | Fires (ET) | Cron (UTC) | Window |
+|---------|-----------|------------|--------|
+| `window-reset-5am` | 5:00am | `0 9 * * 1-5` | 5:00am–10:00am |
+| `window-reset-10am` | 10:01am | `1 14 * * 1-5` | 10:01am–3:01pm |
+| `window-reset-3pm` | 3:02pm | `2 19 * * 1-5` | 3:02pm–8:02pm |
+
+Manage at: https://claude.ai/code/routines — see `.ai/routines.md` for IDs and creation notes.
+
 ## Commits
 
 Global GPG signing is disabled (`commit.gpgsign` is unset in `~/.gitconfig`), so commits are unsigned by default and can be made in-session without a passphrase prompt. The signing key (`user.signingkey`) is still configured — opt into a signed commit per-commit with `git commit -S`. To restore signing-by-default: `git config --global commit.gpgsign true` (note: pinentry's GUI times out in this environment, so signed commits would then need an external terminal with the key already unlocked).
