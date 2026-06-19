@@ -6,9 +6,9 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 
 ## Open
 
-- [ ] **Commit + push the staged `disable-model-invocation` reorg.** The 6 skill
-  one-liners + CLAUDE.md edits + new `skills/pathfinder/SKILL.md` are written and
-  deployed but uncommitted in the working tree. Review `git diff` and commit.
+- [x] **Commit + push the `disable-model-invocation` reorg.** Done — `8accf59`
+  (the 6 skill one-liners + CLAUDE.md) and `dd4aed6` (pathfinder, bundled with the
+  BACKLOG.md commit). All pushed to `main`.
 - [ ] **Bug-watch routine notification channel — finish the webhook.** Routine
   `trig_01YR15V8NzaehoWj1hMMukRW` currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
@@ -18,9 +18,10 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   strip the now-unused Gmail/bioRxiv/Slack/Notion connectors from the routine.
 - [ ] **Watch upstream PR #6** —
   https://github.com/JeraldHuff/tab-setup/pull/6
-  (`dgilford:feat/disable-model-invocation` → `JeraldHuff:main`). After merge,
-  fast-forward the fork's `main` and run `sync.sh push`. (The field is already live in
-  the deployed `skills/tab-setup/SKILL.md` regardless of merge.)
+  (`dgilford:feat/disable-model-invocation` → `JeraldHuff:main`). Status (2026-06-19):
+  still OPEN, mergeable, awaiting Jerald. After merge, fast-forward the fork's `main` and
+  run `sync.sh push`. (The field is already live in the deployed `skills/tab-setup/SKILL.md`
+  regardless of merge.)
 - [ ] **Retire the bug-watch routine once the upstream bug lands.** When
   anthropics/claude-code#31935 or #41417 closes (i.e. `disable-model-invocation` reclaims
   token budget), revisit the ai-tools token-budget goal and delete the routine at
