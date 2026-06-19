@@ -3,6 +3,7 @@ name: tab-setup
 description: Set a unique color and name for this Claude Code tab based on the current working directory. Use "all" to recolor and relabel every active session at once.
 argument-hint: "[all | optional tab name override]"
 allowed-tools: Bash(bash ~/.claude/skills/tab-setup/scripts/*)
+disable-model-invocation: true
 ---
 
 If `$ARGUMENTS` is `update`, pull the latest skill from its repo and re-install it:

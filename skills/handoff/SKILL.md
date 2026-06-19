@@ -2,6 +2,7 @@
 name: handoff
 description: Create or update a durable project handoff for the next AI agent/session. Use when ending a coding/research session, switching agents, compressing context, or preparing another Claude/ChatGPT/Codex session to continue the work.
 allowed-tools: Bash Read Write Edit
+disable-model-invocation: true
 ---
 
 Create or update `.ai/HANDOFF.md` so the next agent can resume without rereading this conversation.

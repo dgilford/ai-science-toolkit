@@ -2,6 +2,7 @@
 name: slack-message
 description: Draft an internal Slack message grounded in current project context and recent workflow. Use when sharing a status update, result, finding, or request with a teammate or internal stakeholder at your org.
 allowed-tools: Bash Read
+disable-model-invocation: true
 ---
 
 You are drafting a first-draft Slack message for the user to review and edit before sending. Synthesize live project context with their direction.

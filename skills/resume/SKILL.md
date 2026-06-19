@@ -2,6 +2,7 @@
 name: resume
 description: Resume work from repo-local handoff state. Use when starting a new Claude Code session, switching agents, returning to a project, or asking an AI agent to reconstruct context from prior work.
 allowed-tools: Bash Read
+disable-model-invocation: true
 ---
 
 Resume this project from the repo-local handoff state.

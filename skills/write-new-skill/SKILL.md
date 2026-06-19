@@ -1,6 +1,7 @@
 ---
 name: write-new-skill
 description: Create new Claude Code skills with proper structure and progressive disclosure. Use when user wants to create, write, or build a new skill.
+disable-model-invocation: true
 ---
 
 # Writing Skills

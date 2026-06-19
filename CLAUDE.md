@@ -21,6 +21,7 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `unstale` | `/unstale` | Detect and repair staleness residue from AI-assisted dev (dead imports, resolved TODOs, stale comments/filepaths); `--auto` applies HIGH-confidence fixes |
 | `figure-review` | `/figure-review` | Per-criterion publication-readiness audit for scientific figures (colormap, uncertainty, axes, caption, claim support); `--style` adds CC house style |
 | `reviewer-2` | `/reviewer-2` | Adversarial per-claim stress-test (baseline, counterfactual, alternatives, uncertainty consistency); defers citation checks to `/lit-review` |
+| `pathfinder` | `/pathfinder` | Router: indexes every skill + reviewer subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision tree |
 
 ## Review agents (subagent panel)
 
@@ -49,10 +50,23 @@ name: skill-name
 description: shown to Claude for auto-invocation matching
 allowed-tools: Bash Read Write Edit
 argument-hint: "[--flag | optional arg]"   # shown in user-facing help; optional
+disable-model-invocation: true             # user-invoked only; see below
 ---
 ```
 
 Shell commands in ` ```! ` blocks run before Claude sees the skill content — use for injecting live repo state (git status, log, diff).
+
+### Invocation control: user-invoked vs model-invokable
+
+`disable-model-invocation: true` is a **supported** SKILL.md frontmatter key (verified at code.claude.com/docs/en/skills). It blocks Claude from auto-invoking the skill and prevents preloading into subagents; the `/slash` command still works. The companion key `user-invocable: false` does the inverse (hide from the `/` menu; Claude-only background-knowledge skills).
+
+**Non-obvious gotcha:** on Claude Code 2.1.181 the field does **not** reclaim description token budget — the description stays in the model's selection context (the model still *sees* it and may try to invoke it; only the tool-call is blocked). This is a known open bug (anthropics/claude-code#31935, #41417). The only real token lever is keeping `description` + `when_to_use` under the 1,536-char cap. Don't add this field expecting token savings — add it for invocation control.
+
+Skills carry the field on the **user-invoked vs model-invokable** axis:
+- **User-invoked** (`disable-model-invocation: true`) — orchestrators you type explicitly: `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`.
+- **Model-invokable** (no field) — Claude or another skill may reach them mid-task: `figure-review`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`.
+
+**Composition rule:** a user-invoked skill may invoke model-invokable skills, never another user-invoked one. (`handoff` → `update-claude-md` is why `update-claude-md` is model-invokable.) The 4 reviewer subagents are out of scope for this field — subagents use their own description-based invocation.
 
 Skills may include companion reference files (e.g., `REFERENCE.md`, `CC-STYLE.md`, `COLORBLIND.md`) in the same skill directory. Load them at runtime using the same `!` block syntax above, pointing at the deployed path: `cat ~/.claude/skills/<name>/COMPANION.md 2>/dev/null || echo "(not found)"`. This keeps SKILL.md lean while injecting richer context at load time. Only the deployed path (`~/.claude/skills/`) is referenced — the repo copy in `skills/` is synced there by `sync.sh push`.
 
@@ -109,6 +123,8 @@ Three weekday cron routines live in the claude.ai account (not in this repo) to 
 | `window-reset-5am` | 5:00am | `0 9 * * 1-5` | 5:00am–10:00am |
 | `window-reset-10am` | 10:02am | `2 14 * * 1-5` | 10:02am–3:02pm |
 | `window-reset-3pm` | 3:04pm | `4 19 * * 1-5` | 3:04pm–8:04pm |
+
+A separate weekly routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls anthropics/claude-code#31935 + #41417 and the CHANGELOG and alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed. Retire it once that lands.
 
 Manage at: https://claude.ai/code/routines — see `.ai/routines.md` for IDs and creation notes.
 
