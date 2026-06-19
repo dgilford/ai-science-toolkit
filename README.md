@@ -22,6 +22,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep |
+| **pathfinder** | `/pathfinder` | Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision |
 | **resume** | `/resume` | Resume work from repo-local handoff state |
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow |
@@ -29,6 +30,8 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers |
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
+
+Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
 
 ## Installation
 
@@ -48,6 +51,8 @@ bash scripts/sync.sh push
   durable repo guidance.
 - `CLAUDE.md` - shared source of truth for repository workflow notes,
   skill-development conventions, sync behavior, and session lifecycle.
+- `BACKLOG.md` - durable in-repo task tracker (open tasks, someday/explore,
+  connector notes). Transient per-session state lives in the gitignored `.ai/`.
 - `agents/` - source copies of Claude Code subagent personas. Edit here first,
   then deploy with `scripts/sync.sh push` (syncs to `~/.claude/agents/`).
 - `skills/` - source copies of Claude Code skills. Edit here first, then deploy
