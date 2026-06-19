@@ -1,0 +1,46 @@
+# Backlog
+
+Standing list of outstanding tasks and potential improvements for this repo.
+Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
+`/handoff`); durable tasks belong here.
+
+## Open
+
+- [ ] **Commit + push the staged `disable-model-invocation` reorg.** The 6 skill
+  one-liners + CLAUDE.md edits + new `skills/pathfinder/SKILL.md` are written and
+  deployed but uncommitted in the working tree. Review `git diff` and commit.
+- [ ] **Bug-watch routine notification channel — finish the webhook.** Routine
+  `trig_01YR15V8NzaehoWj1hMMukRW` currently DMs the FIXED report to the user's Slack
+  self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
+  Real fix pending: a Slack **incoming webhook** (app posts → real notification).
+  Webhook app is awaiting Slack admin approval. Once approved: create the webhook URL,
+  swap the routine's `slack_send_message` step for a `Bash` `curl` to the webhook, and
+  strip the now-unused Gmail/bioRxiv/Slack/Notion connectors from the routine.
+- [ ] **Watch upstream PR #6** —
+  https://github.com/JeraldHuff/tab-setup/pull/6
+  (`dgilford:feat/disable-model-invocation` → `JeraldHuff:main`). After merge,
+  fast-forward the fork's `main` and run `sync.sh push`. (The field is already live in
+  the deployed `skills/tab-setup/SKILL.md` regardless of merge.)
+- [ ] **Retire the bug-watch routine once the upstream bug lands.** When
+  anthropics/claude-code#31935 or #41417 closes (i.e. `disable-model-invocation` reclaims
+  token budget), revisit the ai-tools token-budget goal and delete the routine at
+  https://claude.ai/code/routines.
+
+## Someday / explore
+
+- [ ] **Evaluate [Backlog.md](https://github.com/MrLesk/Backlog.md) as a task-manager upgrade.**
+  Markdown-native, git-tracked Kanban with an MCP server that lets Claude
+  create/list/update/search tasks via tool calls (instead of hand-editing this file) —
+  a strong fit for the human+AI workflow here. Deferred: overkill at the current ~handful
+  of tasks, adds a global CLI dependency, and auto-writes itself into the Claude Code MCP
+  config (same `settings.json` as the tab-setup hook/connectors). Revisit once task volume
+  grows or Claude-managed tasks become worth the ceremony. Trial is low-risk and reversible
+  (`brew install backlog-md` + `backlog init` → a removable `backlog/` dir).
+
+## Notes
+
+- Gmail connector is **draft-only** — no send capability exists; it cannot be used for
+  unattended email notifications.
+- Slack self-DMs (and self-@mentions) never generate notifications because the connector
+  acts as the user. Only an independent sender (webhook/app) notifies.
+- Routines can't be deleted via API — only at https://claude.ai/code/routines.
