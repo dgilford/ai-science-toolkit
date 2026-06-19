@@ -62,6 +62,8 @@ bash scripts/sync.sh push
   the startup hook.
 - `scripts/ai-sessions.sh` - shell function for listing live Claude and Codex
   CLI sessions with resume commands.
+- `templates/` - reusable scaffolds (e.g. `CLAUDE_scientific_python.md`, a
+  fill-in-the-blanks starter CLAUDE.md for new scientific-Python projects).
 - `settings/` - commit-safe global Claude Code settings plus restore notes.
   Machine-local `settings.local.json` backups stay gitignored.
 - `tab-setup/` - external skill checkout from `dgilford/tab-setup`; `sync.sh
