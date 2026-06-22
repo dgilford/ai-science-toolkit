@@ -1,4 +1,4 @@
-![ai-tools](assets/ai-tools-banner.png)
+![ai-tools](assets/ai-tools-banner_rounded.png)
 
 # ai-tools
 
