@@ -124,7 +124,7 @@ Three weekday cron routines live in the claude.ai account (not in this repo) to 
 | `window-reset-10am` | 10:02am | `2 14 * * 1-5` | 10:02am–3:02pm |
 | `window-reset-3pm` | 3:04pm | `4 19 * * 1-5` | 3:04pm–8:04pm |
 
-A separate weekly routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls anthropics/claude-code#31935 + #41417 and the CHANGELOG and alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed. Retire it once that lands.
+A separate weekly routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls the CHANGELOG and the active tracking issue **anthropics/claude-code#22345** — both #31935 and #41417 were closed as **duplicates** of #22345 (closed ≠ fixed), so they're now informational-only and the FIXED signal comes solely from #22345 (`state_reason == "completed"`) or a CHANGELOG entry. It alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed, and also alerts if #22345 itself is closed as not-completed (signal the parent moved again). Retire it once the fix lands.
 
 Manage at: https://claude.ai/code/routines — see `.ai/routines.md` for IDs and creation notes.
 
