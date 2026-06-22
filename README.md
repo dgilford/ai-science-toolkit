@@ -1,3 +1,5 @@
+![ai-tools](assets/ai-tools-banner.png)
+
 # ai-tools
 
 Global Claude Code skills and agent personas for scientific computing workflows.
