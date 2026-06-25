@@ -116,7 +116,7 @@ tab-setup ships its own self-update command: `/tab-setup update` → `scripts/up
 
 ## Scheduled window warmup (GitHub Actions)
 
-The 5-hour usage window is **rolling and anchored to the first session message** — and only a real **`claude -p`** session anchors it. A claude.ai **cloud routine** spends a token but does *not* start a window-anchoring session, so it can't pre-open a window (empirically confirmed 2026-06-24: the cloud routines fired but the authoritative reset still tracked the user's own first message, not the routine). The fix is the documented "warmup" technique (cf. `vdsmon/claude-warmup`): run `claude -p` on a cron via GitHub Actions, so the 5am fire works while the Mac is asleep.
+The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it. A scheduled claude.ai **cloud routine** spends a token but does *not* start a window-anchoring session, so it can't pre-open a window — which is why this runs `claude -p` on a cron via **GitHub Actions** (the documented "warmup" technique, cf. `vdsmon/claude-warmup`), letting the 5am fire work while the Mac is asleep. **Do not** move it back to a cloud routine.
 
 `.github/workflows/window-warmup.yml` fires a 1-token Haiku warmup (`claude -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence`) on weekdays. Each target hour fires **4 staggered attempts** (`:02, :15, :30, :45` ET) to absorb GH cron jitter:
 

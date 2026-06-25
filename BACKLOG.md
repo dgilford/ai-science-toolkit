@@ -46,5 +46,4 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   acts as the user. Only an independent sender (webhook/app) notifies.
 - Routines can't be *deleted* via API (no delete action) — only at https://claude.ai/code/routines.
   But they CAN be *disabled* via `RemoteTrigger update` with body `{"enabled": false}`, which
-  stops them firing (functionally retired, just still listed). Used 2026-06-25 to retire the
-  three `window-reset-*` routines after the GitHub Actions warmup replaced them.
+  stops them firing (functionally retired, just still listed).
