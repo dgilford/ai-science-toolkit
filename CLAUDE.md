@@ -114,17 +114,25 @@ tab-setup ships its own self-update command: `/tab-setup update` → `scripts/up
 - It pulls from `origin` (your fork), not Jerald's `upstream` — so it only sees new Jerald work *after* the fork's `main` has been synced to upstream (see above).
 - `update.sh` refuses to run if `tab-setup/` has uncommitted changes, and only fast-forwards — safe, won't clobber.
 
-## Scheduled cloud routines
+## Scheduled window warmup (GitHub Actions)
 
-Three weekday cron routines live in the claude.ai account (not in this repo) to open Claude's 5-hour usage windows on a predictable schedule. They fire a 1-token Haiku call (`"Say 'Alláh-u-Abhá'."`) — just enough to start the clock. All run Mon–Fri.
+The 5-hour usage window is **rolling and anchored to the first session message** — and only a real **`claude -p`** session anchors it. A claude.ai **cloud routine** spends a token but does *not* start a window-anchoring session, so it can't pre-open a window (empirically confirmed 2026-06-24: the cloud routines fired but the authoritative reset still tracked the user's own first message, not the routine). The fix is the documented "warmup" technique (cf. `vdsmon/claude-warmup`): run `claude -p` on a cron via GitHub Actions, so the 5am fire works while the Mac is asleep.
 
-| Routine | Fires (ET) | Cron (UTC) | Window |
-|---------|-----------|------------|--------|
-| `window-reset-5am` | 5:00am | `0 9 * * 1-5` | 5:00am–10:00am |
-| `window-reset-10am` | 10:02am | `2 14 * * 1-5` | 10:02am–3:02pm |
-| `window-reset-3pm` | 3:04pm | `4 19 * * 1-5` | 3:04pm–8:04pm |
+`.github/workflows/window-warmup.yml` fires a 1-token Haiku warmup (`claude -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence`) on weekdays. Each target hour fires **4 staggered attempts** (`:02, :15, :30, :45` ET) to absorb GH cron jitter:
 
-A separate weekly routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls the CHANGELOG and the active tracking issue **anthropics/claude-code#22345** — both #31935 and #41417 were closed as **duplicates** of #22345 (closed ≠ fixed), so they're now informational-only and the FIXED signal comes solely from #22345 (`state_reason == "completed"`) or a CHANGELOG entry. It alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed, and also alerts if #22345 itself is closed as not-completed (signal the parent moved again). Retire it once the fix lands.
+| Target (ET) | Cron (`America/New_York`) | Window |
+|-----------|---------------------------|--------|
+| ~5:00am | `2,15,30,45 5 * * 1-5` | ~5:00am–10:00am |
+| ~10:00am | `2,15,30,45 10 * * 1-5` | ~10:00am–3:00pm |
+| ~3:00pm | `2,15,30,45 15 * * 1-5` | ~3:00pm–8:00pm |
+
+Notes:
+- **Why staggered:** GH crons fire **late, never early**, and can be skipped under load. The earliest attempt that lands while no window is open **anchors** it; later attempts fall inside the now-open window and are **harmless no-ops** (a ping inside an open window cannot re-anchor or move the reset). So no "did the previous fire?" check is needed — and it isn't cleanly implementable from a fresh CI runner anyway (no local session history to query the current window). Cost is trivial: a 1-token Haiku ping, and public-repo Actions minutes are free.
+- **Auth:** `claude setup-token` mints a 1-year OAuth token (inference-only scope) → repo secret `CLAUDE_CODE_OAUTH_TOKEN`. Do **not** set `ANTHROPIC_API_KEY` (takes precedence → bills API not subscription) or pass `--bare` (ignores the OAuth token).
+- **DST:** crons use the per-entry `timezone:` field (GH Actions, since Mar 2026) pinned to `America/New_York`, so the ET wall-clock times hold year-round — no UTC drift.
+- **Other caveats:** scheduled workflows **auto-disable after 60 days of repo inactivity** (low risk — this repo is actively committed). Warmup helps only the 5-hour window, never the weekly cap.
+
+A separate weekly **cloud routine**, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls the CHANGELOG and the active tracking issue **anthropics/claude-code#22345** — both #31935 and #41417 were closed as **duplicates** of #22345 (closed ≠ fixed), so they're now informational-only and the FIXED signal comes solely from #22345 (`state_reason == "completed"`) or a CHANGELOG entry. It alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed, and also alerts if #22345 itself is closed as not-completed (signal the parent moved again). Retire it once the fix lands.
 
 Manage at: https://claude.ai/code/routines — see `.ai/routines.md` for IDs and creation notes.
 

@@ -68,6 +68,9 @@ bash scripts/sync.sh push
   fill-in-the-blanks starter CLAUDE.md for new scientific-Python projects).
 - `settings/` - commit-safe global Claude Code settings plus restore notes.
   Machine-local `settings.local.json` backups stay gitignored.
+- `.github/workflows/` - GitHub Actions. `window-warmup.yml` runs a weekday
+  `claude -p` "warmup" on a cron to anchor the 5-hour usage window at
+  5:00am/10:02am/3:04pm ET (cloud routines can't — see CLAUDE.md).
 - `tab-setup/` - external skill checkout from `dgilford/tab-setup`; `sync.sh
   push` refreshes this before copying its scripts into `skills/tab-setup/`.
 - `vscode-extension/` - small helper extension for applying pending Claude tab
