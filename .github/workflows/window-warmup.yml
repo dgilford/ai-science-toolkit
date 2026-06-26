@@ -1,25 +1,23 @@
 name: Window warmup
-# Anchors the 5-hour Claude usage window at ~5:00am / 10:02am / 3:04pm ET on weekdays by
-# running a real `claude -p` session. Cloud routines (claude.ai/code/routines) spend a token
-# but do NOT anchor the window — only an authenticated `claude -p` session does. See
-# .ai/routines.md and the "Scheduled warmup" section of CLAUDE.md for the why.
+# FALLBACK tier for anchoring the 5-hour Claude usage window (covers the Mac-off/traveling
+# case). The PRIMARY tier is a local macOS launchd job — see window-warmup/README.md.
+#
+# Precise timing comes from workflow_dispatch fired by an external scheduler (cron-job.org),
+# NOT from `schedule:`. GitHub runs all `on: schedule:` events through one global queue with no
+# reserved capacity, so they fire 2–3h late and are silently dropped under load — useless for a
+# time-critical anchor. workflow_dispatch is an immediate webhook and is not subject to that
+# delay. The `schedule:` block below is kept only as a coarse last-resort backup.
 #
 # Setup: `claude setup-token` (1-year OAuth token) → store as repo secret
 #   CLAUDE_CODE_OAUTH_TOKEN. Do NOT set ANTHROPIC_API_KEY (it takes precedence and bills the
 #   API instead of the subscription) and do NOT pass --bare (it ignores the OAuth token).
+#   For the cron-job.org → dispatch setup (PAT scope, endpoint, body), see window-warmup/README.md.
 on:
-  workflow_dispatch:        # manual test runs
+  workflow_dispatch:        # primary precise trigger (external cron) + manual test runs
   schedule:
-    # Each target hour fires 4 staggered attempts (:02, :15, :30, :45 ET) to absorb GitHub
-    # cron jitter/skips (GH fires late, never early). The earliest attempt that lands while
-    # no window is open anchors it; later attempts fall inside the now-open window and are
-    # harmless no-ops — a ping inside an open window cannot re-anchor or move the reset, so
-    # no "did the previous one fire?" check is needed.
-    - cron: '2,15,30,45 5 * * 1-5'   # ~5:00am ET block
-      timezone: America/New_York
-    - cron: '2,15,30,45 10 * * 1-5'  # ~10:00am ET block
-      timezone: America/New_York
-    - cron: '2,15,30,45 15 * * 1-5'  # ~3:00pm ET block
+    # Coarse last-resort backup only; expect multi-hour lateness. Off-round minute to dodge the
+    # worst top-of-hour contention. Real timing is the launchd job + workflow_dispatch.
+    - cron: '7 5,10,15 * * 1-5'
       timezone: America/New_York
 
 jobs:
