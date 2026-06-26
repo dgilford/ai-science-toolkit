@@ -114,23 +114,18 @@ tab-setup ships its own self-update command: `/tab-setup update` → `scripts/up
 - It pulls from `origin` (your fork), not Jerald's `upstream` — so it only sees new Jerald work *after* the fork's `main` has been synced to upstream (see above).
 - `update.sh` refuses to run if `tab-setup/` has uncommitted changes, and only fast-forwards — safe, won't clobber.
 
-## Scheduled window warmup (GitHub Actions)
+## Scheduled window warmup (two-tier)
 
-The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it. A scheduled claude.ai **cloud routine** spends a token but does *not* start a window-anchoring session, so it can't pre-open a window — which is why this runs `claude -p` on a cron via **GitHub Actions** (the documented "warmup" technique, cf. `vdsmon/claude-warmup`), letting the 5am fire work while the Mac is asleep. **Do not** move it back to a cloud routine.
+The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it (a claude.ai **cloud routine** spends a token but does *not* anchor — **do not** move it back to a cloud routine). Anchoring at ~5/10/15:00 ET runs in **two independent tiers** covering independent failure modes; a 1-token Haiku ping inside an already-open window is a harmless no-op, so running both is safe. All assets live in `window-warmup/`.
 
-`.github/workflows/window-warmup.yml` fires a 1-token Haiku warmup (`claude -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence`) on weekdays. Each target hour fires **4 staggered attempts** (`:02, :15, :30, :45` ET) to absorb GH cron jitter:
+**Why not GitHub `schedule:` alone:** GH runs all `on: schedule:` events through one global queue with **no reserved capacity**, so they fire **2–3h late and are silently dropped** under load (empirically: the ~5am block landed ~7:46–7:48am, and only 1 of 4 staggered attempts survived each block). The delay happens *before* the runner queue, so minute-level staggering inside one workflow does nothing, and self-hosted runners can't help (queuing is GH-side). A 5am anchor that lands at 7:48am anchors the **wrong** window.
 
-| Target (ET) | Cron (`America/New_York`) | Window |
-|-----------|---------------------------|--------|
-| ~5:00am | `2,15,30,45 5 * * 1-5` | ~5:00am–10:00am |
-| ~10:00am | `2,15,30,45 10 * * 1-5` | ~10:00am–3:00pm |
-| ~3:00pm | `2,15,30,45 15 * * 1-5` | ~3:00pm–8:00pm |
+**Tier 1 — macOS launchd (primary, precise).** A LaunchAgent (`com.dgilford.window-warmup`) with **`WakeSystem=true`** wakes the sleeping Mac and runs `warmup.sh` locally at exact wall-clock times (weekdays × 5/10/15:00). Second-precise, free, no third party, no cloud token, no sudo. `warmup.sh` does `unset ANTHROPIC_API_KEY` (guarantees subscription billing). Install: `bash window-warmup/install.sh`; deployed to `~/.claude/window-warmup/` + `~/Library/LaunchAgents/`, log at `~/.claude/window-warmup.log`. Fails only if the Mac is fully powered off / away from power — which Tier 2 covers. Verify: `launchctl kickstart -k gui/$(id -u)/com.dgilford.window-warmup` then check the log for `exit=0`; `pmset -g sched` lists the registered wake events.
 
-Notes:
-- **Why staggered:** GH crons fire **late, never early**, and can be skipped under load. The earliest attempt that lands while no window is open **anchors** it; later attempts fall inside the now-open window and are **harmless no-ops** (a ping inside an open window cannot re-anchor or move the reset). So no "did the previous fire?" check is needed — and it isn't cleanly implementable from a fresh CI runner anyway (no local session history to query the current window). Cost is trivial: a 1-token Haiku ping, and public-repo Actions minutes are free.
-- **Auth:** `claude setup-token` mints a 1-year OAuth token (inference-only scope) → repo secret `CLAUDE_CODE_OAUTH_TOKEN`. Do **not** set `ANTHROPIC_API_KEY` (takes precedence → bills API not subscription) or pass `--bare` (ignores the OAuth token).
-- **DST:** crons use the per-entry `timezone:` field (GH Actions, since Mar 2026) pinned to `America/New_York`, so the ET wall-clock times hold year-round — no UTC drift.
-- **Other caveats:** scheduled workflows **auto-disable after 60 days of repo inactivity** (low risk — this repo is actively committed). Warmup helps only the 5-hour window, never the weekly cap.
+**Tier 2 — GitHub workflow via external cron (fallback).** `.github/workflows/window-warmup.yml` fires the same 1-token Haiku warmup. Precise timing comes from **`workflow_dispatch`** (an immediate webhook, NOT subject to the schedule-queue delay) triggered by an external scheduler (**cron-job.org**, free) POSTing to the workflow dispatch API at 5/10/15:00 ET with a fine-grained PAT (Actions: read/write, this repo). The `schedule:` block is kept only as a **coarse last-resort backup** (single off-round minute `7 5,10,15 * * 1-5`; expect multi-hour lateness). Setup details (PAT scope, endpoint, body) in `window-warmup/README.md`.
+- **Auth:** `claude setup-token` mints a 1-year OAuth token → repo secret `CLAUDE_CODE_OAUTH_TOKEN`. Do **not** set `ANTHROPIC_API_KEY` (precedence → bills API) or pass `--bare`.
+- **DST:** the `schedule:` cron uses the per-entry `timezone:` field pinned to `America/New_York`.
+- **Other caveats:** scheduled workflows **auto-disable after 60 days of repo inactivity** (low risk). Warmup helps only the 5-hour window, never the weekly cap.
 
 A separate weekly **cloud routine**, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`, `0 13 * * 1` UTC), polls the CHANGELOG and the active tracking issue **anthropics/claude-code#22345** — both #31935 and #41417 were closed as **duplicates** of #22345 (closed ≠ fixed), so they're now informational-only and the FIXED signal comes solely from #22345 (`state_reason == "completed"`) or a CHANGELOG entry. It alerts when the `disable-model-invocation` token-reclaim bug (see Skill file format) is fixed, and also alerts if #22345 itself is closed as not-completed (signal the parent moved again). Retire it once the fix lands.
 
