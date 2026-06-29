@@ -9,11 +9,15 @@ share one global queue with no reserved capacity, so they fire 2–3h late and a
 dropped under load. A 5am anchor that lands at 7:48am anchors the wrong window. So this uses two
 independent tiers covering independent failure modes.
 
-## Tier 1 — macOS launchd (primary, precise)
+## Tier 1 — macOS launchd (local redundancy, best-effort timing)
 
-A LaunchAgent with `WakeSystem=true` wakes the sleeping Mac and runs `warmup.sh` locally at the
-exact times. Second-precise, free, no third party, no cloud token, no sudo. Fails only if the
-Mac is fully powered off / away from power.
+A LaunchAgent with `WakeSystem=true` is *meant* to wake the sleeping Mac and run `warmup.sh`
+locally at the scheduled times. Free, no third party, no cloud token, no sudo. **Caveat (observed
+2026-06-29):** macOS coalesces `WakeSystem` events and arms only **one** RTC wake at a time
+(`pmset -g sched` shows a single repeating wake, not three/day), so anchors that fall while the
+Mac is asleep are deferred to the next natural wake and fire late (e.g. 5:00→6:25, 10:00→10:29).
+It also fails outright if the Mac is powered off / away from power. Tier 2 is the precise tier;
+treat Tier 1 as best-effort redundancy.
 
 ```sh
 bash window-warmup/install.sh
