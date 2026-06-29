@@ -1,4 +1,9 @@
 .ai/
+.claude/
+.claude-flow/
+.metaharness/
+.swarm/
+ruvector.db
 settings/settings.local.json
 /tab-setup/
 skills/tab-setup/scripts/
