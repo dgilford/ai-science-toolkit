@@ -49,3 +49,22 @@ coarse `schedule:` backup. The precise trigger is an external scheduler:
    - **Body** `{"ref":"main"}`
 
 A ping inside an already-open window is a harmless no-op, so running both tiers is safe.
+
+## Health record & monthly check
+
+GitHub retains Actions run history only ~90 days, and Tier 2 is the tier that actually anchors
+the window — so the workflow keeps its own durable record. The `Record Tier-2 heartbeat` step
+(runs `if: always()`) appends one line per fire to `heartbeat.log` on the orphan
+**`warmup-heartbeat`** branch (kept off `main` to avoid polluting history):
+
+```
+2026-06-29T10:01:02-0400 trig=workflow_dispatch run=28377672699 late=1m ping=success
+```
+
+`late` is minutes from the nearest ET anchor (05/10/15:00): negative=early, positive=late;
+`trig` distinguishes the precise `workflow_dispatch` from the coarse `schedule` backup. Read it
+raw at `https://raw.githubusercontent.com/dgilford/ai-tools/warmup-heartbeat/heartbeat.log`.
+
+A monthly **cloud routine** (`warmup health check`) fires on the last day of each month, scans
+this log + the month's run history, and alerts only on degradation (any anchor missed, or a
+`workflow_dispatch` fire >5 min late). See `.ai/routines.md` for the routine ID.
