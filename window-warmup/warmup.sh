@@ -16,6 +16,16 @@ ts() { date '+%Y-%m-%dT%H:%M:%S%z'; }
 
 {
   echo "[$(ts)] warmup start (pid $$)"
-  "${HOME}/.local/bin/claude" -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence
-  echo "[$(ts)] warmup exit=$?"
+  out=$(claude -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence 2>&1)
+  rc=$?
+  printf '%s\n' "$out"
+  # Mirror the Tier-2 workflow's outcome taxonomy so the local log can
+  # distinguish an already-capped window (expected no-op) from a real fault.
+  if [ "$rc" -eq 0 ]; then
+    echo "[$(ts)] warmup exit=0 ping=success"
+  elif printf '%s' "$out" | grep -qi 'session limit'; then
+    echo "[$(ts)] warmup exit=$rc ping=capped (window already session-limited — no-op)"
+  else
+    echo "[$(ts)] warmup exit=$rc ping=failure"
+  fi
 } >> "${LOG}" 2>&1

@@ -38,7 +38,8 @@ ai-sessions() {
     cwd=$(lsof -p "$pid" 2>/dev/null | awk '$4=="cwd"{print $NF}')
 
     if [[ "$cmd" == "claude" ]]; then
-      encoded="-$(echo "$cwd" | sed 's|^/||; s|/|-|g')"
+      # Claude Code encodes '/', '.', and '_' all as '-' in projects-dir names
+      encoded="-$(echo "$cwd" | sed 's|^/||; s|[/._]|-|g')"
       dir="$HOME/.claude/projects/$encoded"
       # newest transcript in this cwd. The projects dir is keyed by cwd, not pid, so two live
       # sessions in the same cwd can't be told apart — both resolve to the most-recently-written one.
