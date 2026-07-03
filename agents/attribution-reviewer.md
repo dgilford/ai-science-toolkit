@@ -1,11 +1,11 @@
 ---
 name: attribution-reviewer
-description: Reviews a climate-attribution claim, result, or draft section for
+description: 'Reviews a climate-attribution claim, result, or draft section for
   attribution-specific rigor — counterfactual, baseline, framing, uncertainty,
   model adequacy, and overclaiming. Works across probabilistic (PR/OR/ChIP),
   storyline, and D&A frameworks. Use when an attribution result or section
   needs an expert read, or as one voice in a multi-reviewer panel. Reviews
-  only; does not rewrite.
+  only; does not rewrite.'
 tools: Read, Grep, Glob
 model: opus
 ---

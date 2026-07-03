@@ -1,0 +1,72 @@
+name: Lint
+# Enforces in CI what scripts/sync.sh enforces at push time, so a broken
+# frontmatter block (the silent-drop failure mode documented in CLAUDE.md)
+# or a shell regression can never land on main unnoticed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontmatter:
+    name: Skill + agent frontmatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Lint frontmatter (strict YAML parse, name present, description cap)
+        run: |
+          python3 - <<'EOF'
+          import glob, re, sys
+          try:
+              import yaml
+          except ImportError:
+              sys.exit("PyYAML missing")
+
+          targets = sorted(glob.glob("agents/*.md")) + sorted(glob.glob("skills/*/SKILL.md"))
+          DESC_CAP = 1536
+          failures = []
+          for path in targets:
+              text = open(path).read()
+              m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+              if not m:
+                  failures.append(f"{path}: no YAML frontmatter block")
+                  continue
+              try:
+                  data = yaml.safe_load(m.group(1))
+              except yaml.YAMLError as e:
+                  failures.append(f"{path}: frontmatter does not parse ({str(e).splitlines()[0]})")
+                  continue
+              if not isinstance(data, dict) or not data.get("name"):
+                  failures.append(f"{path}: missing required 'name' field")
+                  continue
+              if len(data.get("description") or "") > DESC_CAP:
+                  failures.append(f"{path}: description over {DESC_CAP}-char cap")
+          if failures:
+              print("Frontmatter lint failed:")
+              for f in failures:
+                  print(f"  {f}")
+              sys.exit(1)
+          print(f"Frontmatter lint passed ({len(targets)} files)")
+          EOF
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck all tracked shell scripts
+        run: |
+          # -S warning: fail on real defects, not style notes
+          shellcheck -S warning \
+            scripts/sync.sh \
+            scripts/ai-sessions.sh \
+            vscode-extension/install.sh
+          # zsh shebangs (launchd scripts); bash-compatible syntax, so check as bash
+          shellcheck -S warning --shell=bash \
+            window-warmup/warmup.sh \
+            window-warmup/install.sh
