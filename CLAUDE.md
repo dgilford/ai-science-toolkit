@@ -114,9 +114,9 @@ tab-setup ships its own self-update command: `/tab-setup update` → `scripts/up
 - It pulls from `origin` (your fork), not Jerald's `upstream` — so it only sees new Jerald work *after* the fork's `main` has been synced to upstream (see above).
 - `update.sh` refuses to run if `tab-setup/` has uncommitted changes, and only fast-forwards — safe, won't clobber.
 
-## Scheduled window warmup (two-tier)
+## Scheduled window warmup (three-tier)
 
-The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it (a claude.ai **cloud routine** spends a token but does *not* anchor — **do not** move it back to a cloud routine). Anchoring at ~5/10/15:00 ET runs in **two independent tiers** covering independent failure modes; a 1-token Haiku ping inside an already-open window is a harmless no-op, so running both is safe. All assets live in `window-warmup/`.
+The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it (a claude.ai **cloud routine** spends a token but does *not* anchor — **do not** move it back to a cloud routine). Anchoring at ~5/10/15:00 ET runs in **three independent tiers** covering independent failure modes; a 1-token Haiku ping inside an already-open window is a harmless no-op, so running all three is safe. The window only needs **one successful ping every 5 hours** to stay anchored. All assets live in `window-warmup/`.
 
 **Why not GitHub `schedule:` alone:** GH runs all `on: schedule:` events through one global queue with **no reserved capacity**, so they fire **2–3h late and are silently dropped** under load (empirically: the ~5am block landed ~7:46–7:48am, and only 1 of 4 staggered attempts survived each block). The delay happens *before* the runner queue, so minute-level staggering inside one workflow does nothing, and self-hosted runners can't help (queuing is GH-side). A 5am anchor that lands at 7:48am anchors the **wrong** window.
 
@@ -126,6 +126,8 @@ The 5-hour usage window is **rolling and anchored to the first real session mess
 - **Auth:** `claude setup-token` mints a 1-year OAuth token → repo secret `CLAUDE_CODE_OAUTH_TOKEN`. Do **not** set `ANTHROPIC_API_KEY` (precedence → bills API) or pass `--bare`.
 - **DST:** the `schedule:` cron uses the per-entry `timezone:` field pinned to `America/New_York`.
 - **Other caveats:** scheduled workflows **auto-disable after 60 days of repo inactivity** (low risk). Warmup helps only the 5-hour window, never the weekly cap.
+
+**Tier 3 — Remote server cron (independent redundancy).** An always-on remote server runs the same 1-token Haiku warmup via cron at 05:05 / 10:05 / 15:05 ET (offset by 5 mins from Tiers 1 & 2, to distinguish which tier anchored), logging to `~/.claude/window-warmup-tier3.log` on that box. This tier is **planned to supersede Tier 1** (macOS launchd) once validated, because the remote server is always-on and avoids the `WakeSystem` coalescing issue. Tier 2 (GitHub) remains the primary precise anchor; Tier 3 becomes the always-on backup. **The Tier 3 script, deploy steps, and server address/auth live in the private `talim-server` repo** (`github.com/dgilford/talim-server`) — they're kept out of this public repo. Do not re-add them here.
 
 **Durable health record (Tier 2).** GitHub keeps Actions run history only ~90 days, so the workflow's `Record Tier-2 heartbeat` step (`if: always()`) appends one line per fire to `heartbeat.log` on the orphan **`warmup-heartbeat`** branch (kept off `main`): `<ET-timestamp> trig=<workflow_dispatch|schedule> run=<id> late=<±min from nearest 05/10/15 ET anchor> ping=<success|failure>`. Read raw at `https://raw.githubusercontent.com/dgilford/ai-tools/warmup-heartbeat/heartbeat.log`. A monthly **cloud routine** `warmup health check` fires the **last day of each month** (cron `0 13 28-31 * *` UTC + a "stop unless today is the last day" self-guard, since cron has no `L`), scans the log + the month's runs, and alerts **only on degradation** (anchor missed, or a `workflow_dispatch` fire >5 min late). IDs in `.ai/routines.md`.
 

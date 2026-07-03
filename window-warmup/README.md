@@ -54,6 +54,16 @@ coarse `schedule:` backup. The precise trigger is an external scheduler:
 
 A ping inside an already-open window is a harmless no-op, so running both tiers is safe.
 
+## Tier 3 — Remote server cron (independent redundancy)
+
+An always-on remote server runs the same warmup ping via cron at 05:05 / 10:05 / 15:05 ET
+(offset by 5 mins to help identify which tier anchored). It covers the case where both the local
+Mac and GitHub are down, and is intended to **supersede Tier 1** once validated.
+
+The Tier 3 script (`tier3-remote-heartbeat.sh`), deployment steps, and server details live in the
+**private `talim-server` repo** (they carry the server's address/auth, so they stay out of this
+public repo). A ping inside an already-open window is a harmless no-op, so running all tiers is safe.
+
 ## Health record & monthly check
 
 GitHub retains Actions run history only ~90 days, and Tier 2 is the tier that actually anchors
