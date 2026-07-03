@@ -19,6 +19,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 
 | Skill | Command | Purpose |
 |---|---|---|
+| **ai-review** | `/ai-review` | Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs |
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support |
 | **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock) |
 | **handoff** | `/handoff` | Create or update a durable project handoff for the next AI agent/session |

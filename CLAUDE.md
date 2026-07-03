@@ -22,6 +22,7 @@ This directory is a workspace for developing and iterating on global Claude Code
 | `figure-review` | `/figure-review` | Per-criterion publication-readiness audit for scientific figures (colormap, uncertainty, axes, caption, claim support); `--style` adds CC house style |
 | `reviewer-2` | `/reviewer-2` | Adversarial per-claim stress-test (baseline, counterfactual, alternatives, uncertainty consistency); defers citation checks to `/lit-review` |
 | `pathfinder` | `/pathfinder` | Router: indexes every skill + reviewer subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision tree |
+| `ai-review` | `/ai-review` | Orchestrates a parallel senior-engineer repo review: fans out to `code-review`/`security-review`/`unstale`/`overbaked`/`reviewer-2` plus three unique lanes (gap hunting, ideation, synthesis). Report-only; `--fix` runs HIGH-confidence `unstale --auto` only. Built for fable at high+ effort. |
 
 ## Review agents (subagent panel)
 

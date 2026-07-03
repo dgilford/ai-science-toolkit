@@ -33,6 +33,7 @@ Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.m
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
 | tab-setup | `/tab-setup [all]` | Naming / coloring this Claude Code tab; `all` recolors every active session |
 | write-new-skill | `/write-new-skill` | Scaffolding a new skill from scratch |
+| ai-review | `/ai-review` | Full comprehensive repo/project review; orchestrates code-review/security-review/unstale/overbaked/reviewer-2 in parallel and adds gap-hunting + grounded ideation + prioritized synthesis. Run on fable at high+ effort |
 | pathfinder | `/pathfinder` | This router |
 
 ## Skills — model-invokable (reachable by the model or another skill mid-task)
