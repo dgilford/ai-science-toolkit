@@ -1,23 +1,28 @@
 # Window warmup
 
 Anchors the 5-hour Claude usage window at ~5:00 / 10:00 / 15:00 ET on weekdays. Only a real
-`claude -p` session anchors the rolling window — a claude.ai cloud routine spends a token but
-does not (confirmed 2026-06-24).
+`claude -p` session anchors the rolling window — a claude.ai cloud routine spends tokens but
+does not (single test, confirmed 2026-06-24; re-verify after major Claude Code or plan changes —
+Anthropic can change session accounting without notice).
 
-GitHub Actions **scheduled** cron proved structurally unreliable for this: `on: schedule:` runs
-share one global queue with no reserved capacity, so they fire 2–3h late and are silently
-dropped under load. A 5am anchor that lands at 7:48am anchors the wrong window. So this uses two
-independent tiers covering independent failure modes.
+GitHub Actions **scheduled** cron proved too imprecise for this: observed `on: schedule:` fires
+land 1.5–3h late (apparently a shared scheduling queue with no reserved capacity), and in an
+earlier config with 4 staggered crons per anchor block, only 1 of 4 fired — consistent with
+GitHub coalescing or dropping same-workflow crons. A 5am anchor that lands at 7:48am anchors the
+wrong window. So this uses three independent tiers covering independent failure modes.
 
 ## Tier 1 — macOS launchd (local redundancy, best-effort timing)
 
 A LaunchAgent with `WakeSystem=true` is *meant* to wake the sleeping Mac and run `warmup.sh`
 locally at the scheduled times. Free, no third party, no cloud token, no sudo. **Caveat (observed
-2026-06-29):** macOS coalesces `WakeSystem` events and arms only **one** RTC wake at a time
-(`pmset -g sched` shows a single repeating wake, not three/day), so anchors that fall while the
-Mac is asleep are deferred to the next natural wake and fire late (e.g. 5:00→6:25, 10:00→10:29).
-It also fails outright if the Mac is powered off / away from power. Tier 2 is the precise tier;
-treat Tier 1 as best-effort redundancy.
+2026-06-29, n=2):** anchors that fall while the Mac is asleep fired late on this machine
+(5:00→6:25, 10:00→10:29), apparently deferred to the next natural wake. The mechanism is
+unconfirmed: `pmset -g sched` showed a single repeating wake entry, but that observation is
+confounded by the manually installed `pmset repeat` rule below (`pmset repeat` supports only one
+repeating rule by design), so it isn't evidence that launchd coalesces `WakeSystem` events —
+WakeSystem flakiness or lid-closed/battery wake policy are equally plausible. Tier 1 also fails
+outright if the Mac is powered off / away from power. Tier 2 is the precise tier; treat Tier 1
+as best-effort redundancy.
 
 ```sh
 bash window-warmup/install.sh
@@ -57,8 +62,9 @@ A ping inside an already-open window is a harmless no-op, so running both tiers 
 ## Tier 3 — Remote server cron (independent redundancy)
 
 An always-on remote server runs the same warmup ping via cron at 05:05 / 10:05 / 15:05 ET
-(offset by 5 mins to help identify which tier anchored). It covers the case where both the local
-Mac and GitHub are down, and is intended to **supersede Tier 1** once validated.
+(offset by 5 mins to distinguish Tier 3 from Tiers 1/2, which both fire at :00). It covers the
+case where both the local Mac and GitHub are down, and is intended to **supersede Tier 1** once
+validated.
 
 The Tier 3 script (`tier3-remote-heartbeat.sh`), deployment steps, and server details live in the
 **private `talim-server` repo** (they carry the server's address/auth, so they stay out of this
@@ -76,8 +82,11 @@ the window — so the workflow keeps its own durable record. The `Record Tier-2 
 ```
 
 `late` is minutes from the nearest ET anchor (05/10/15:00): negative=early, positive=late;
-`trig` distinguishes the precise `workflow_dispatch` from the coarse `schedule` backup. Read it
-raw at `https://raw.githubusercontent.com/dgilford/ai-tools/warmup-heartbeat/heartbeat.log`.
+`trig` distinguishes the precise `workflow_dispatch` from the coarse `schedule` backup. Note the
+nearest-anchor folding caps what `late` can express at ±150 min — a dispatch delayed 3h reads as
+"early" against the *next* anchor — so the monthly check's any-anchor-missed test, not the
+lateness field, is the real guard against gross delays. Read the log raw at
+`https://raw.githubusercontent.com/dgilford/ai-tools/warmup-heartbeat/heartbeat.log`.
 
 A monthly **cloud routine** (`warmup health check`) fires on the last day of each month, scans
 this log + the month's run history, and alerts only on degradation (any anchor missed, or a

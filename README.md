@@ -34,7 +34,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure |
 
-Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
+Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`ai-review`, `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
 
 ## Installation
 
@@ -69,9 +69,15 @@ bash scripts/sync.sh push
   fill-in-the-blanks starter CLAUDE.md for new scientific-Python projects).
 - `settings/` - commit-safe global Claude Code settings plus restore notes.
   Machine-local `settings.local.json` backups stay gitignored.
+- `evaluations/` - written evaluations of external AI tooling considered for
+  this workflow (e.g. `ruflo.md`).
+- `docs/` - occasional-use runbooks (e.g. tab-setup fork maintenance).
 - `.github/workflows/` - GitHub Actions. `window-warmup.yml` runs a weekday
-  `claude -p` "warmup" on a cron to anchor the 5-hour usage window at
-  ~5am/10am/3pm ET (see CLAUDE.md).
+  `claude -p` "warmup" to anchor the 5-hour usage window at ~5am/10am/3pm ET.
+  Its precise trigger is `workflow_dispatch` fired by an external scheduler
+  (cron-job.org) — the `schedule:` cron proved hours-late and is kept only as
+  a coarse backup (see `window-warmup/README.md`). `lint.yml` checks skill and
+  agent frontmatter plus ShellCheck on every push/PR.
 - `tab-setup/` - external skill checkout from `dgilford/tab-setup`; `sync.sh
   push` refreshes this before copying its scripts into `skills/tab-setup/`.
 - `vscode-extension/` - small helper extension for applying pending Claude tab
@@ -82,7 +88,7 @@ bash scripts/sync.sh push
 Every new Claude Code session is automatically named and color-coded at boot via the `tab-setup` skill's `SessionStart` hook (`hook-startup.sh`). The skill is self-contained, originally developed by [JeraldHuff/tab-setup](https://github.com/JeraldHuff/tab-setup) and forked to [dgilford/tab-setup](https://github.com/dgilford/tab-setup).
 
 - **Name**: Haiku generates a logical 2-word adjective-noun name from the project directory name (e.g., `fiscal-ledger` for a finance project). Falls back to a deterministic wordlist hash if the API is unavailable.
-- **Color**: Picks the next color not already in use by another running Claude session. Persists through `/clear` and `claude -c`.
+- **Color**: Picks the next color not already in use by another running Claude session. Persists through `/clear` and `claude -c` on the same machine and cwd (see CLAUDE.md for the exact conditions; two live sessions in one cwd can collide).
 
 **Context reminders at startup:**
 - `[resume]` — if `.ai/HANDOFF.md` exists in the project, surfaces the objective and first next action so you know where you left off without running `/resume`
@@ -104,7 +110,7 @@ After `sync.sh push`, a template config is created at `~/.claude/session-init-co
 Leave `default_env` empty (`""`) to disable the machine-level reminder.
 
 **Requirements:**
-- Claude Code v2.1.152+
+- Claude Code v2.1.152+ (floor inherited from upstream tab-setup; not independently verified)
 - Python 3 (pre-installed on macOS/Linux)
 - `ANTHROPIC_API_KEY` in `~/.claude/settings.json` `env` block (optional — falls back to wordlist hash if absent)
 

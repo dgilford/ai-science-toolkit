@@ -6,9 +6,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 
 ## Open
 
-- [x] **Commit + push the `disable-model-invocation` reorg.** Done — `8accf59`
-  (the 6 skill one-liners + CLAUDE.md) and `dd4aed6` (pathfinder, bundled with the
-  BACKLOG.md commit). All pushed to `main`.
 - [ ] **Bug-watch routine notification channel — finish the webhook.** Routine
   `trig_01YR15V8NzaehoWj1hMMukRW` currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
@@ -22,10 +19,31 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   still OPEN, mergeable, awaiting Jerald. After merge, fast-forward the fork's `main` and
   run `sync.sh push`. (The field is already live in the deployed `skills/tab-setup/SKILL.md`
   regardless of merge.)
-- [ ] **Retire the bug-watch routine once the upstream bug lands.** When
-  anthropics/claude-code#31935 or #41417 closes (i.e. `disable-model-invocation` reclaims
-  token budget), revisit the ai-tools token-budget goal and delete the routine at
-  https://claude.ai/code/routines.
+- [ ] **Retire the bug-watch routine once the upstream bug lands.** The trigger is
+  anthropics/claude-code#22345 closing with `state_reason == "completed"` **or** a CHANGELOG
+  entry (#31935 and #41417 are already closed as duplicates of #22345 — their closure means
+  nothing). Caveat: #22345 is titled as a *plugin*-skills issue, a weak proxy for the
+  token-reclaim fix — on any FIXED signal, verify empirically that `disable-model-invocation`
+  reclaims description token budget before revisiting the ai-tools token-budget goal and
+  deleting the routine at https://claude.ai/code/routines.
+- [ ] **Simplify Tier-2 health monitoring** (from `/ai-review` 2026-07-03): the monthly
+  `warmup health check` routine only ever scans the current month's runs — always inside
+  GitHub's ~90-day retention — so the orphan-branch heartbeat log is not load-bearing.
+  Point the routine at the Actions API (trigger type, timestamp, conclusion are all in the
+  run records), then delete the `Record Tier-2 heartbeat` step and the `warmup-heartbeat`
+  branch. Requires editing the cloud routine, so not doable from a repo session.
+- [ ] **Decide Tier 1's retirement date.** Docs promise launchd will be superseded by
+  Tier 3 "once validated" — set the validation criterion (e.g. one clean month of Tier-3
+  log entries) and remove the LaunchAgent + docs when it's met.
+- [ ] **Generate the skill/agent catalog tables from frontmatter** (from `/ai-review`):
+  the same catalog lives in CLAUDE.md, README.md, and pathfinder and has drifted twice; a
+  `scripts/gen-docs.sh` regenerating the tables from `skills/*/SKILL.md` + `agents/*.md`
+  frontmatter would make drift structurally impossible.
+- [ ] **Add fixtures + smoke tests for the transcript parsers** (from `/ai-review`):
+  `ai-sessions.sh` and `extension.js` parse undocumented, version-dependent formats
+  (Claude/Codex JSONL, sessions-dir schema) that break silently when formats change.
+  Capture one fixture line per format under `tests/fixtures/` and wire a smoke test into
+  `.github/workflows/lint.yml`.
 
 ## Someday / explore
 

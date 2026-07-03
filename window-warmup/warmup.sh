@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Window warmup — anchors the 5-hour Claude usage window with a 1-token Haiku ping.
+# Window warmup — anchors the 5-hour Claude usage window with a minimal one-message Haiku ping.
 # Run by launchd (com.dgilford.window-warmup) at ~5/10/15:00 ET on weekdays; WakeSystem
 # wakes the sleeping Mac to fire it. See window-warmup/README.md for the why.
 

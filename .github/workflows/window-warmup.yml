@@ -1,22 +1,17 @@
 name: Window warmup
-# FALLBACK tier for anchoring the 5-hour Claude usage window (covers the Mac-off/traveling
-# case). The PRIMARY tier is a local macOS launchd job — see window-warmup/README.md.
-#
+# Tier 2 of the window-warmup system — the tier that actually anchors precisely.
 # Precise timing comes from workflow_dispatch fired by an external scheduler (cron-job.org),
-# NOT from `schedule:`. GitHub runs all `on: schedule:` events through one global queue with no
-# reserved capacity, so they fire 2–3h late and are silently dropped under load — useless for a
-# time-critical anchor. workflow_dispatch is an immediate webhook and is not subject to that
-# delay. The `schedule:` block below is kept only as a coarse last-resort backup.
+# NOT from `schedule:` (observed to fire 2–3h late; see window-warmup/README.md for the why,
+# the other tiers, and the cron-job.org → dispatch setup).
 #
 # Setup: `claude setup-token` (1-year OAuth token) → store as repo secret
 #   CLAUDE_CODE_OAUTH_TOKEN. Do NOT set ANTHROPIC_API_KEY (it takes precedence and bills the
 #   API instead of the subscription) and do NOT pass --bare (it ignores the OAuth token).
-#   For the cron-job.org → dispatch setup (PAT scope, endpoint, body), see window-warmup/README.md.
 on:
   workflow_dispatch:        # primary precise trigger (external cron) + manual test runs
   schedule:
     # Coarse last-resort backup only; expect multi-hour lateness. Off-round minute to dodge the
-    # worst top-of-hour contention. Real timing is the launchd job + workflow_dispatch.
+    # worst top-of-hour contention. Real timing is workflow_dispatch (external cron).
     - cron: '7 5,10,15 * * 1-5'
       timezone: America/New_York
 
