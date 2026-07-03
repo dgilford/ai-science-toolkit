@@ -3,6 +3,12 @@
 Branch: `eval/ruflo-harness`
 Started: 2026-06-29
 
+> **Reproducibility caveat:** every command below ran `npx -y ruflo@latest` and the resolved
+> version was not recorded, so the scores and behavioral conclusions are pinned to an unknown
+> version around 2026-06-29. Future evaluations should record `npx ruflo --version` alongside
+> results; the sandboxing conclusion in §4 in particular generalizes from a single run of one
+> subcommand.
+
 Goal: test Ruflo features in order of likely fit for this repo without letting
 generated state become part of the source-of-truth tool repo.
 

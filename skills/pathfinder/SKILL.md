@@ -102,6 +102,4 @@ Any reviewer can flag missing citations. To retrieve them, route to `/lit-review
 ## Composition rule (for skills that call other skills)
 
 A user-invoked skill may call model-invokable skills; never another user-invoked one.
-
-Current cross-skill call: `handoff` → `update-claude-md`
-Status: ✓ valid (`update-claude-md` is model-invokable)
+(Example: `handoff` → `update-claude-md`.)
