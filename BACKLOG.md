@@ -23,6 +23,7 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 - [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
   workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
   repo session).
+
 ## Someday / explore
 
 - [ ] **Evaluate [Backlog.md](https://github.com/MrLesk/Backlog.md) as a task-manager upgrade.**
