@@ -4,6 +4,7 @@
 # Usage:
 #   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
+#   ./scripts/sync.sh lint   — lint skill + agent frontmatter only (used by CI)
 
 set -euo pipefail
 
@@ -19,9 +20,10 @@ EXTERNAL_SKILLS=(
 )
 
 usage() {
-  echo "Usage: $0 [push|pull]"
+  echo "Usage: $0 [push|pull|lint]"
   echo "  push  Deploy skills from repo to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
+  echo "  lint  Lint skill + agent frontmatter only"
   exit 1
 }
 
@@ -210,6 +212,9 @@ case "$1" in
       cp "$agent_file" "$AGENTS_SRC/$name"
     done
     echo "Done. Review changes with: git diff skills/ agents/"
+    ;;
+  lint)
+    lint_frontmatter
     ;;
   *)
     usage
