@@ -1,5 +1,5 @@
 name: Window warmup
-# Tier 2 of the window-warmup system — the tier that actually anchors precisely.
+# Tier 1 of the window-warmup system — the tier that actually anchors precisely.
 # Precise timing comes from workflow_dispatch fired by an external scheduler (cron-job.org),
 # NOT from `schedule:` (observed to fire 2–3h late; see window-warmup/README.md for the why,
 # the other tiers, and the cron-job.org → dispatch setup).

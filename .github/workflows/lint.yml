@@ -33,7 +33,3 @@ jobs:
             scripts/sync.sh \
             scripts/ai-sessions.sh \
             vscode-extension/install.sh
-          # zsh shebangs (launchd scripts); bash-compatible syntax, so check as bash
-          shellcheck -S warning --shell=bash \
-            window-warmup/warmup.sh \
-            window-warmup/install.sh
