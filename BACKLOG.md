@@ -23,12 +23,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 - [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
   workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
   repo session).
-- [ ] **Add fixtures + smoke tests for the transcript parsers** (from `/ai-review`):
-  `ai-sessions.sh` and `extension.js` parse undocumented, version-dependent formats
-  (Claude/Codex JSONL, sessions-dir schema) that break silently when formats change.
-  Capture one fixture line per format under `tests/fixtures/` and wire a smoke test into
-  `.github/workflows/lint.yml`.
-
 ## Someday / explore
 
 - [ ] **Evaluate [Backlog.md](https://github.com/MrLesk/Backlog.md) as a task-manager upgrade.**
