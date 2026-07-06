@@ -23,12 +23,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 - [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
   workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
   repo session).
-- [ ] **Retire Tier 1 (macOS launchd) and renumber tiers.** Tier 2 (GitHub workflow_dispatch)
-  becomes Tier 1; Tier 3 (remote server cron) becomes Tier 2. Uninstall the LaunchAgent
-  (`launchctl bootout gui/$(id -u)/com.dgilford.window-warmup`), remove
-  `window-warmup/install.sh`'s launchd-specific bits, and update all docs/refs (CLAUDE.md,
-  window-warmup/README.md, .ai/routines.md). The private `talim-server` repo also has its own
-  Tier-3 references that need the same renumbering — out of scope for a repo session here.
 - [ ] **Generate the skill/agent catalog tables from frontmatter** (from `/ai-review`):
   the same catalog lives in CLAUDE.md, README.md, and pathfinder and has drifted twice; a
   `scripts/gen-docs.sh` regenerating the tables from `skills/*/SKILL.md` + `agents/*.md`
