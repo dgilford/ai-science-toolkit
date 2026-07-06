@@ -23,10 +23,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 - [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
   workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
   repo session).
-- [ ] **Generate the skill/agent catalog tables from frontmatter** (from `/ai-review`):
-  the same catalog lives in CLAUDE.md, README.md, and pathfinder and has drifted twice; a
-  `scripts/gen-docs.sh` regenerating the tables from `skills/*/SKILL.md` + `agents/*.md`
-  frontmatter would make drift structurally impossible.
 - [ ] **Add fixtures + smoke tests for the transcript parsers** (from `/ai-review`):
   `ai-sessions.sh` and `extension.js` parse undocumented, version-dependent formats
   (Claude/Codex JSONL, sessions-dir schema) that break silently when formats change.
