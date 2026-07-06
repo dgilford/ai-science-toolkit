@@ -13,12 +13,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   Webhook app is awaiting Slack admin approval. Once approved: create the webhook URL,
   swap the routine's `slack_send_message` step for a `Bash` `curl` to the webhook, and
   strip the now-unused Gmail/bioRxiv/Slack/Notion connectors from the routine.
-- [ ] **Watch upstream PR #6** —
-  https://github.com/JeraldHuff/tab-setup/pull/6
-  (`dgilford:feat/disable-model-invocation` → `JeraldHuff:main`). Status (2026-06-19):
-  still OPEN, mergeable, awaiting Jerald. After merge, fast-forward the fork's `main` and
-  run `sync.sh push`. (The field is already live in the deployed `skills/tab-setup/SKILL.md`
-  regardless of merge.)
 - [ ] **Retire the bug-watch routine once the upstream bug lands.** The trigger is
   anthropics/claude-code#22345 closing with `state_reason == "completed"` **or** a CHANGELOG
   entry (#31935 and #41417 are already closed as duplicates of #22345 — their closure means
@@ -26,15 +20,15 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   token-reclaim fix — on any FIXED signal, verify empirically that `disable-model-invocation`
   reclaims description token budget before revisiting the ai-tools token-budget goal and
   deleting the routine at https://claude.ai/code/routines.
-- [ ] **Simplify Tier-2 health monitoring** (from `/ai-review` 2026-07-03): the monthly
-  `warmup health check` routine only ever scans the current month's runs — always inside
-  GitHub's ~90-day retention — so the orphan-branch heartbeat log is not load-bearing.
-  Point the routine at the Actions API (trigger type, timestamp, conclusion are all in the
-  run records), then delete the `Record Tier-2 heartbeat` step and the `warmup-heartbeat`
-  branch. Requires editing the cloud routine, so not doable from a repo session.
-- [ ] **Decide Tier 1's retirement date.** Docs promise launchd will be superseded by
-  Tier 3 "once validated" — set the validation criterion (e.g. one clean month of Tier-3
-  log entries) and remove the LaunchAgent + docs when it's met.
+- [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
+  workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
+  repo session).
+- [ ] **Retire Tier 1 (macOS launchd) and renumber tiers.** Tier 2 (GitHub workflow_dispatch)
+  becomes Tier 1; Tier 3 (remote server cron) becomes Tier 2. Uninstall the LaunchAgent
+  (`launchctl bootout gui/$(id -u)/com.dgilford.window-warmup`), remove
+  `window-warmup/install.sh`'s launchd-specific bits, and update all docs/refs (CLAUDE.md,
+  window-warmup/README.md, .ai/routines.md). The private `talim-server` repo also has its own
+  Tier-3 references that need the same renumbering — out of scope for a repo session here.
 - [ ] **Generate the skill/agent catalog tables from frontmatter** (from `/ai-review`):
   the same catalog lives in CLAUDE.md, README.md, and pathfinder and has drifted twice; a
   `scripts/gen-docs.sh` regenerating the tables from `skills/*/SKILL.md` + `agents/*.md`

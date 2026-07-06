@@ -72,22 +72,13 @@ public repo). A ping inside an already-open window is a harmless no-op, so runni
 
 ## Health record & monthly check
 
-GitHub retains Actions run history only ~90 days, and Tier 2 is the tier that actually anchors
-the window — so the workflow keeps its own durable record. The `Record Tier-2 heartbeat` step
-(runs `if: always()`) appends one line per fire to `heartbeat.log` on the orphan
-**`warmup-heartbeat`** branch (kept off `main` to avoid polluting history):
-
-```
-2026-06-29T10:01:02-0400 trig=workflow_dispatch run=28377672699 late=1m ping=success
-```
-
-`late` is minutes from the nearest ET anchor (05/10/15:00): negative=early, positive=late;
-`trig` distinguishes the precise `workflow_dispatch` from the coarse `schedule` backup. Note the
-nearest-anchor folding caps what `late` can express at ±150 min — a dispatch delayed 3h reads as
-"early" against the *next* anchor — so the monthly check's any-anchor-missed test, not the
-lateness field, is the real guard against gross delays. Read the log raw at
-`https://raw.githubusercontent.com/dgilford/ai-tools/warmup-heartbeat/heartbeat.log`.
-
-A monthly **cloud routine** (`warmup health check`) fires on the last day of each month, scans
-this log + the month's run history, and alerts only on degradation (any anchor missed, or a
-`workflow_dispatch` fire >5 min late). See `.ai/routines.md` for the routine ID.
+GitHub retains Actions run history for ~90 days, and the monthly health check only ever needs
+the current month — always well inside that window — so there's no separate durable log to
+maintain. A monthly **cloud routine** (`warmup health check`) fires on the last day of each
+month, reads the current month's `window-warmup.yml` runs straight from the GitHub Actions API
+(`GET /repos/dgilford/ai-tools/actions/workflows/window-warmup.yml/runs`, unauthenticated —
+the repo is public), and for each one checks `event` (`workflow_dispatch` vs the coarse
+`schedule` backup), `created_at` (trigger time, compared to the nearest 05/10/15 ET anchor), and
+`conclusion` (`success` covers both a real ping and an already-capped window; anything else is a
+real failure). It alerts only on degradation: any weekday anchor missed, a `workflow_dispatch`
+run >5 min from its anchor, or a non-success conclusion. See `.ai/routines.md` for the routine ID.

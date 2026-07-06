@@ -116,7 +116,7 @@ The 5-hour usage window is **rolling and anchored to the first real session mess
 - **Tier 2 — GitHub workflow via external cron (the precise anchor, ~0–2 min):** cron-job.org POSTs `workflow_dispatch` at 5/10/15:00 ET; `on: schedule:` is a coarse backup only (observed 1.5–3h late). Auth via `CLAUDE_CODE_OAUTH_TOKEN` repo secret; do **not** set `ANTHROPIC_API_KEY` (precedence → bills API) or pass `--bare`. Warmup helps only the 5-hour window, never the weekly cap.
 - **Tier 3 — remote server cron** at :05 offsets; planned to supersede Tier 1 once validated. Script/deploy/server details live in the private `talim-server` repo — do not re-add them here.
 
-**Health record:** each Tier-2 fire appends `<ET-timestamp> trig=<workflow_dispatch|schedule> run=<id> late=<±min> ping=<success|capped|failure>` to `heartbeat.log` on the orphan `warmup-heartbeat` branch; a monthly cloud routine (`warmup health check`, last day of month) alerts only on degradation. Details in `window-warmup/README.md`.
+**Health record:** a monthly cloud routine (`warmup health check`, last day of month) reads the current month's runs of `window-warmup.yml` directly from the GitHub Actions API (trigger type, timestamp, conclusion) and alerts only on degradation. Details in `window-warmup/README.md`.
 
 A weekly cloud routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`), polls anthropics/claude-code#22345 + the CHANGELOG and alerts when the token-reclaim bug (see Skill file format) is fixed; retire it then. **Caveat:** #22345 is titled as a *plugin*-skills issue — a weak proxy in both directions — so on any FIXED alert, verify token reclaim empirically before acting.
 

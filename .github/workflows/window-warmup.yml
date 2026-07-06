@@ -16,7 +16,7 @@ on:
       timezone: America/New_York
 
 permissions:
-  contents: write           # heartbeat step pushes one line to the warmup-heartbeat branch
+  contents: read
 
 jobs:
   warmup:
@@ -27,68 +27,24 @@ jobs:
           node-version: 24
       - run: npm install -g @anthropic-ai/claude-code
       - name: Warmup ping
-        id: warmup
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         # A session-limited window is an expected, non-actionable outcome (nothing to warm — the
         # window is already anchored/capped), so log it and exit 0 rather than failing the job and
         # emailing a failure alert. Any OTHER non-zero exit is a real fault and still fails the job.
-        # `ping` is recorded on the step so the heartbeat distinguishes success/capped/failure.
+        # The monthly health-check routine reads run conclusions from the Actions API, so a capped
+        # ping and a real success both need to land as job success — only a genuine failure exits
+        # non-zero here.
         run: |
           set +e
           out=$(claude -p "Say 'Alláh-u-Abhá'." --model haiku --no-session-persistence 2>&1)
           rc=$?
           printf '%s\n' "$out"
           if [ "$rc" -eq 0 ]; then
-            echo "ping=success" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if printf '%s' "$out" | grep -qi 'session limit'; then
             echo "::notice::Window already session-limited — warmup no-op, not a failure."
-            echo "ping=capped" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "ping=failure" >> "$GITHUB_OUTPUT"
           exit "$rc"
-
-      # Durable Tier-2 health record. Appends one line per fire to heartbeat.log on the orphan
-      # `warmup-heartbeat` branch (keeps main's history clean). Each line: ET timestamp, trigger,
-      # run id, and minutes from the nearest ET anchor (05/10/15) — negative=early, positive=late.
-      # The monthly health-check cloud routine reads this log. Runs even if the ping failed
-      # (if: always()) so a broken ping still leaves a trace.
-      - name: Record Tier-2 heartbeat
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          EVENT: ${{ github.event_name }}
-          RUN_ID: ${{ github.run_id }}
-          PING_RESULT: ${{ steps.warmup.outputs.ping || steps.warmup.outcome }}
-        run: |
-          set -euo pipefail
-          export TZ=America/New_York
-          now=$(date +%s)
-          stamp=$(date +%Y-%m-%dT%H:%M:%S%z)
-          best=99999999; signed=0
-          for h in 5 10 15; do
-            a=$(date -d "today $h:00" +%s)
-            d=$(( now - a )); ad=${d#-}
-            if [ "$ad" -lt "$best" ]; then best=$ad; signed=$d; fi
-          done
-          late_min=$(( signed / 60 ))
-          line="$stamp trig=$EVENT run=$RUN_ID late=${late_min}m ping=$PING_RESULT"
-          auth="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
-          if git clone -q --depth 1 --single-branch --branch warmup-heartbeat "$auth" hb; then
-            cd hb
-          else
-            mkdir hb && cd hb
-            git init -q && git checkout -q --orphan warmup-heartbeat
-            git remote add origin "$auth"
-            printf '%s\n' "# Tier-2 window-warmup heartbeat — one line per GitHub fire (ET). Auto-appended; do not hand-edit." > heartbeat.log
-          fi
-          printf '%s\n' "$line" >> heartbeat.log
-          git config user.name "window-warmup-bot"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add heartbeat.log
-          git commit -q -m "heartbeat: $line"
-          git push -q origin HEAD:warmup-heartbeat
