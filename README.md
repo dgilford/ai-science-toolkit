@@ -68,7 +68,15 @@ bash scripts/sync.sh push
   to `~/.claude/agents/`, syncs the external `tab-setup` skill, and registers
   the startup hook.
 - `scripts/ai-sessions.sh` - shell function for listing live Claude and Codex
-  CLI sessions with resume commands.
+  CLI sessions with resume commands; parses transcripts via the standalone
+  scripts in `scripts/lib/ai-sessions/`.
+- `scripts/gen-docs.sh` - regenerates the skill/agent catalog tables in
+  CLAUDE.md and README.md from `catalog:` frontmatter (see CLAUDE.md).
+- `tests/` - fixtures and smoke tests for the transcript/session-status
+  parsers (`ai-sessions.sh`'s Python helpers, the VS Code extension's
+  session-status reader) — undocumented, version-dependent formats that can
+  break silently on a Claude Code version bump. Run with
+  `bash tests/smoke_test_parsers.sh`; wired into `lint.yml`.
 - `templates/` - reusable scaffolds (e.g. `CLAUDE_scientific_python.md`, a
   fill-in-the-blanks starter CLAUDE.md for new scientific-Python projects).
 - `settings/` - commit-safe global Claude Code settings plus restore notes.
@@ -81,7 +89,8 @@ bash scripts/sync.sh push
   Its precise trigger is `workflow_dispatch` fired by an external scheduler
   (cron-job.org) — the `schedule:` cron proved hours-late and is kept only as
   a coarse backup (see `window-warmup/README.md`). `lint.yml` checks skill and
-  agent frontmatter plus ShellCheck on every push/PR.
+  agent frontmatter, catalog-table drift, ShellCheck, and the `tests/` parser
+  smoke tests on every push/PR.
 - `tab-setup/` - external skill checkout from `dgilford/tab-setup`; `sync.sh
   push` refreshes this before copying its scripts into `skills/tab-setup/`.
 - `vscode-extension/` - small helper extension for applying pending Claude tab

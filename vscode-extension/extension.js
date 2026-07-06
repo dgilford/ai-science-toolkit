@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { readSessionFile } = require('./lib/session-status');
 
 const PENDING_FILE = path.join(os.homedir(), '.claude', '.pending-color');
 const SESSIONS_DIR = path.join(os.homedir(), '.claude', 'sessions');
@@ -82,10 +83,7 @@ async function waitForIdle(sessionId, timeoutMs = 30000, graceMs = 5000) {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
         try {
-            const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
-            const session = files
-                .map(f => { try { return JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, f))); } catch { return null; } })
-                .find(d => d && (!sessionId || d.sessionId === sessionId));
+            const session = readSessionFile(SESSIONS_DIR, sessionId);
             if (session) {
                 if (session.status !== 'busy') return;
             } else if (Date.now() - start >= graceMs) {

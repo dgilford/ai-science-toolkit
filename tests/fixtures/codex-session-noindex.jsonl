@@ -1,0 +1,2 @@
+{"payload": {"cwd": "/tmp/no-index-cwd", "id": "codex-fixture-noindex-id"}}
+{"type": "event_msg", "payload": {"type": "user_message", "message": "fallback description straight from the transcript"}}

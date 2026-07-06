@@ -35,4 +35,13 @@ jobs:
             scripts/sync.sh \
             scripts/gen-docs.sh \
             scripts/ai-sessions.sh \
-            vscode-extension/install.sh
+            vscode-extension/install.sh \
+            tests/smoke_test_parsers.sh
+
+  parser-smoke-tests:
+    name: Transcript parser smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run smoke tests against tests/fixtures/
+        run: bash tests/smoke_test_parsers.sh

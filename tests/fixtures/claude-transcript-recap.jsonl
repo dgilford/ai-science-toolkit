@@ -1,0 +1,2 @@
+{"type": "user", "message": {"role": "user", "content": "help me fix the login bug"}}
+{"type": "system", "subtype": "away_summary", "content": "Debugging the login redirect loop; found the root cause in the session cookie check (disable recaps in /config)"}

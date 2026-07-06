@@ -6,6 +6,18 @@
 #   source /path/to/ai-tools/scripts/ai-sessions.sh
 
 ai-sessions() {
+  # Locate this file's own directory to find scripts/lib/ai-sessions/*.py, whether
+  # sourced under bash (BASH_SOURCE) or zsh (BASH_SOURCE is unset there; %x is the
+  # zsh equivalent — https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html).
+  local self_path
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    # shellcheck disable=SC2296  # zsh-only prompt expansion, not a bash bad-substitution
+    self_path="${(%):-%x}"
+  else
+    self_path="${BASH_SOURCE[0]}"
+  fi
+  local lib_dir
+  lib_dir="$(cd "$(dirname "$self_path")/lib/ai-sessions" && pwd)"
 
   # interactive CLI sessions: current user, real tty (exclude no-tty: ? on Linux, ?? on BSD/macOS),
   # comm ends with claude/codex, skip app-server subprocs. Filtering out no-tty drops headless
@@ -51,85 +63,17 @@ ai-sessions() {
 
       if [[ -n "$transcript" ]]; then
         # away_summary first (Claude's own "* recap:" block), fall back to last user message
-        description=$(python3 - "$transcript" 2>/dev/null <<'PYEOF'
-import sys, json, re
-recap = ""
-last_user = ""
-for line in open(sys.argv[1]):
-    try:
-        d = json.loads(line)
-    except:
-        continue
-    if d.get("type") == "system" and d.get("subtype") == "away_summary":
-        c = (d.get("content") or "").strip()
-        if c:
-            recap = c
-    elif d.get("type") == "user":
-        c = d.get("message", {}).get("content", "")
-        if isinstance(c, list):
-            if all(x.get("type") == "tool_result" for x in c):
-                continue
-            text = " ".join(x.get("text", "") for x in c if x.get("type") == "text")
-        else:
-            text = c if isinstance(c, str) else ""
-        text = re.sub(r'<[a-zA-Z][a-zA-Z0-9_-]*(?:\s[^>]*)?>.*?</[a-zA-Z][a-zA-Z0-9_-]*>', '', text, flags=re.DOTALL).strip()
-        if text:
-            last_user = text
-if recap:
-    recap = re.sub(r'\s*\(disable recaps in /config\)\s*$', '', recap)
-    print(recap.replace("\n", " ").strip())
-elif last_user:
-    print(last_user[:120].replace("\n", " "))
-PYEOF
-)
+        description=$(python3 "$lib_dir/claude-description.py" "$transcript" 2>/dev/null)
       fi
 
     elif [[ "$cmd" == "codex" ]]; then
-      session_id=$(python3 - "$cwd" 2>/dev/null <<'PYEOF'
-import sys, json, os, glob
-cwd = sys.argv[1]
-base = os.path.expanduser("~/.codex/sessions")
-for f in sorted(glob.glob(f"{base}/**/*.jsonl", recursive=True), reverse=True):
-    try:
-        d = json.loads(open(f).readline())
-        if d.get("payload", {}).get("cwd") == cwd:
-            print(d["payload"]["id"]); break
-    except: pass
-PYEOF
-)
+      session_id=$(python3 "$lib_dir/codex-session-id.py" "$cwd" 2>/dev/null)
       [[ -n "$session_id" ]] \
         && resume_cmd="codex resume $session_id" \
         || resume_cmd="codex resume --last  # (session ID not found)"
 
       # try session_index thread_name first; fall back to first user_message in session file
-      description=$(python3 - "$session_id" 2>/dev/null <<'PYEOF'
-import sys, json, os, glob
-sid = sys.argv[1]
-idx = os.path.expanduser("~/.codex/session_index.jsonl")
-try:
-    with open(idx) as f:
-        for line in f:
-            d = json.loads(line)
-            if d.get("id") == sid:
-                name = d.get("thread_name", "")
-                if name and not name.startswith("<bash") and not name.startswith("<local"):
-                    print(name[:120]); sys.exit(0)
-except: pass
-base = os.path.expanduser("~/.codex/sessions")
-for f in sorted(glob.glob(f"{base}/**/*.jsonl", recursive=True), reverse=True):
-    try:
-        first = json.loads(open(f).readline())
-        if first.get("payload", {}).get("id") != sid:
-            continue
-        for line in open(f):
-            d = json.loads(line)
-            if d.get("type") == "event_msg" and d.get("payload", {}).get("type") == "user_message":
-                msg = d["payload"].get("message", "").strip()
-                if msg:
-                    print(msg[:120].replace("\n", " ")); sys.exit(0)
-    except: pass
-PYEOF
-)
+      description=$(python3 "$lib_dir/codex-description.py" "$session_id" 2>/dev/null)
     fi
 
     printf "  \033[1m%s\033[0m  pid=%-6s  tty=%-8s  %s\n" "$cmd" "$pid" "$tty" "$started"
