@@ -4,6 +4,9 @@ description: SLASH COMMAND — type /ai-review for a comprehensive senior-engine
 disable-model-invocation: true
 allowed-tools: Bash Read Grep Glob Task
 argument-hint: "[path] [--since <ref>] [--fix]"
+catalog:
+  order: 13
+  summary: 'Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs.'
 ---
 
 **Run me on the strongest model at high (or higher) reasoning effort.** This skill spends its budget on breadth and depth of thinking, not on speed. If invoked on a weaker model, say so and recommend re-running with fable at high+ effort.

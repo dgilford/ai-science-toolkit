@@ -1,6 +1,9 @@
 ---
 name: reviewer-2
 description: 'Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section. For each claim: identify the baseline being compared against, name the counterfactual, surface plausible alternative explanations, and check that stated uncertainty is consistent with the strength of the claim. Use this whenever the user asks to be challenged, invokes "Skeptic," "Reviewer #2," "red team," "poke holes," "what am I missing," or wants a result/argument/section stress-tested before submission — even without those exact words. Reports concerns; does not rewrite the user''s argument.'
+catalog:
+  order: 11
+  summary: 'Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section: baseline, counterfactual, alternatives, uncertainty consistency.'
 ---
 
 ## Stance

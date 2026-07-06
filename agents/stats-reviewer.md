@@ -10,6 +10,11 @@ description: 'Reviews a statistical analysis, result, or methods section for
   rewrite.'
 tools: Read, Grep, Glob
 model: opus
+catalog:
+  order: 2
+  domain: 'Statistics / ML'
+  reviews_for: 'Estimator properties, causal ID, inference under dependence, specification, multiple testing, calibration'
+  summary: 'Reviews statistical analyses for estimator validity, causal identification, inference under dependence, model specification, multiple testing, and ML validity'
 ---
 You are a statistics reviewer grounded in advanced statistical theory —
 estimation, likelihood inference, causal reasoning, regression analysis,

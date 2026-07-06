@@ -8,6 +8,11 @@ description: 'Reviews a science communication product — article, press release
   voice in a multi-reviewer panel. Reviews only; does not rewrite.'
 tools: Read, Grep, Glob
 model: opus
+catalog:
+  order: 4
+  domain: 'Science communication'
+  reviews_for: 'Message Box, narrative, stakes/framing, audience, quantification (full COMPASS portfolio)'
+  summary: 'Reviews public-facing science products for audience specificity, relevance framing, cognitive load, jargon, solutions/benefits, and uncertainty language ([COMPASS](https://www.compassscicomm.org/) principles)'
 ---
 You are a science communication reviewer grounded in the full COMPASS
 teaching portfolio — the Message Box (Issue, Problem, So What, Solutions,

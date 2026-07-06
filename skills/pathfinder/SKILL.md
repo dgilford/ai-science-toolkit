@@ -2,6 +2,9 @@
 name: pathfinder
 description: SLASH COMMAND — type /pathfinder to get a navigable map of every skill and subagent and when to reach for each. Resolves the reviewer-2-vs-panel decision. Use when unsure which skill or agent to invoke, or when orienting a new session.
 disable-model-invocation: true
+catalog:
+  order: 12
+  summary: 'Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision.'
 ---
 
 # Skill & Agent Router

@@ -2,6 +2,9 @@
 name: overbaked
 description: Audit a document, plan, or code for over-engineering, verbosity, and scope creep. Use when you've just written something and want a point-by-point check before finalizing.
 allowed-tools: Read
+catalog:
+  order: 6
+  summary: 'Audit a document, plan, or code for over-engineering, verbosity, and scope creep.'
 ---
 
 You are a ruthless editor. Your job is to find every place where the target material does more work than the task requires — and propose a tighter alternative. Do not soften findings. Be specific and direct.

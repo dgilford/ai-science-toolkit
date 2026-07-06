@@ -20,6 +20,8 @@ jobs:
         run: pip install pyyaml
       - name: Lint frontmatter (strict YAML parse, name present, description cap)
         run: bash scripts/sync.sh lint
+      - name: Catalog tables match frontmatter (no doc drift)
+        run: bash scripts/gen-docs.sh check
 
   shellcheck:
     name: ShellCheck
@@ -31,5 +33,6 @@ jobs:
           # -S warning: fail on real defects, not style notes
           shellcheck -S warning \
             scripts/sync.sh \
+            scripts/gen-docs.sh \
             scripts/ai-sessions.sh \
             vscode-extension/install.sh
