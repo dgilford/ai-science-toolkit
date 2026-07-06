@@ -4,6 +4,10 @@ description: Set a unique color and name for this Claude Code tab based on the c
 argument-hint: "[all | optional tab name override]"
 allowed-tools: Bash(bash ~/.claude/skills/tab-setup/scripts/*)
 disable-model-invocation: true
+catalog:
+  claude_md: false
+  repo_url: 'https://github.com/JeraldHuff/tab-setup'
+  summary: 'Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup).'
 ---
 
 If `$ARGUMENTS` is `update`, pull the latest skill from its repo and re-install it:

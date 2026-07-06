@@ -2,6 +2,9 @@
 name: write-new-skill
 description: Create new Claude Code skills with proper structure and progressive disclosure. Use when user wants to create, write, or build a new skill.
 disable-model-invocation: true
+catalog:
+  order: 8
+  summary: 'Create new Claude Code skills with proper structure and progressive disclosure.'
 ---
 
 # Writing Skills
@@ -57,12 +60,12 @@ The description is what Claude scans to decide whether to auto-invoke the skill.
 
 ## When to split files
 
-Split into separate files when SKILL.md exceeds 100 lines or content has clearly distinct domains. Keep the split shallow — one level of references only.
+Split into separate files when SKILL.md exceeds ~100 lines or content has clearly distinct domains. Keep the split shallow — one level of references only. Dense routing or orchestration content that would lose coherence if split (e.g. a decision tree, a lane table) may justify running over — say so rather than splitting badly.
 
 ## Review checklist
 
 - [ ] Description includes specific triggers ("Use when...")
-- [ ] SKILL.md under 100 lines
+- [ ] SKILL.md under ~100 lines, or the overage justified (see "When to split files")
 - [ ] Shell injection added if skill needs live repo or git state
 - [ ] Output template uses `<!-- comment -->` not placeholder prose, to distinguish instructions from content
 - [ ] Skill handles missing files gracefully (no `.ai/`, no `CLAUDE.md`, not a git repo)

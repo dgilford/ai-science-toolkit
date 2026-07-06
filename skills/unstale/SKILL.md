@@ -3,6 +3,9 @@ name: unstale
 description: Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers. Use this whenever you want to clean up after a refactor, fix a comment that no longer matches the code, remove unused imports, check for leftover TODOs, detect doc drift, or tidy a notebook before sharing or submission — even without the word "unstale." Default mode auto-detects library .py scope and runs ruff + vulture (deterministic), then LLM semantic checks; never touches notebooks. `--artifact <nb.ipynb>` cleans a notebook as a deliverable (full treatment including dead-code detection). `--exploratory <nb.ipynb>` tidies a working notebook non-destructively (structural + semantic only, no removals ever). Always emits a structured report before any edit.
 allowed-tools: Bash Read Edit Write
 argument-hint: "[--auto] [--artifact <paths>] [--exploratory <paths>]"
+catalog:
+  order: 9
+  summary: 'Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes.'
 ---
 
 **Governing principle: deterministic where you can, LLM where you must — adapt to the repo, never dictate its structure.**

@@ -10,6 +10,11 @@ description: 'Reviews a weather event analysis, synoptic narrative, or atmospher
   Reviews only; does not rewrite.'
 tools: Read, Grep, Glob
 model: opus
+catalog:
+  order: 3
+  domain: 'Meteorology (AMS CCM)'
+  reviews_for: 'Dynamical/thermodynamic consistency, physical basis, observational adequacy, competing drivers, hydrology'
+  summary: 'Reviews weather event analyses and atmospheric mechanism claims for dynamical, physical, observational, and hydrological rigor'
 ---
 You are a meteorologist reviewer grounded in AMS CCM-level competence across
 atmospheric dynamics, thermodynamics, physical meteorology, synoptic analysis,

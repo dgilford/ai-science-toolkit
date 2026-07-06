@@ -4,6 +4,7 @@
 # Usage:
 #   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
+#   ./scripts/sync.sh lint   — lint skill + agent frontmatter only (used by CI)
 
 set -euo pipefail
 
@@ -19,9 +20,10 @@ EXTERNAL_SKILLS=(
 )
 
 usage() {
-  echo "Usage: $0 [push|pull]"
+  echo "Usage: $0 [push|pull|lint]"
   echo "  push  Deploy skills from repo to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
+  echo "  lint  Lint skill + agent frontmatter only"
   exit 1
 }
 
@@ -32,7 +34,27 @@ sync_external_skills() {
     local dest_path="$REPO_DIR/$dest"
     if [ -d "$dest_path/.git" ]; then
       echo "  ↻ $repo (pull)"
+      local before after
+      before=$(git -C "$dest_path" rev-parse HEAD)
       git -C "$dest_path" pull --ff-only --quiet
+      after=$(git -C "$dest_path" rev-parse HEAD)
+      # Review gate: fetched scripts become a SessionStart hook, so never deploy
+      # unseen upstream changes. Show what changed and require explicit consent
+      # (SYNC_EXTERNAL_ACCEPT=1 for non-interactive runs).
+      if [ "$before" != "$after" ]; then
+        echo "  ! $repo changed since last sync:"
+        git -C "$dest_path" log --oneline "$before..$after" | sed 's/^/      /'
+        git -C "$dest_path" diff --stat "$before" "$after" -- scripts/ vscode-extension/ | sed 's/^/      /'
+        if [ "${SYNC_EXTERNAL_ACCEPT:-0}" != "1" ]; then
+          printf "  Deploy these upstream changes? [y/N] "
+          read -r reply
+          if [ "$reply" != "y" ] && [ "$reply" != "Y" ]; then
+            echo "  ✗ declined — rolling back to $before (re-run to review again)"
+            git -C "$dest_path" reset --hard --quiet "$before"
+            continue
+          fi
+        fi
+      fi
     else
       echo "  ↓ $repo (clone)"
       git clone --quiet "https://github.com/$repo" "$dest_path"
@@ -50,26 +72,31 @@ sync_external_skills() {
   done
 }
 
-# Validate that every agent file's YAML frontmatter parses and has a name.
-# Catches the silent-drop failure mode where a malformed agent .md deploys
-# fine but never registers as an invokable subagent type (e.g. an unquoted
-# multi-line description containing a ": " colon-space, which YAML reads as a
-# stray mapping key). Aborts the push so the breakage surfaces here, not later.
-lint_agents() {
-  python3 - "$AGENTS_SRC" <<'EOF'
-import os, re, sys
-agents_dir = sys.argv[1]
+# Validate that every agent's and skill's YAML frontmatter parses and has a
+# name, and that descriptions stay under the selection-context cap.
+# Catches the silent-drop failure mode where a malformed .md deploys fine but
+# the agent/skill never registers (e.g. an unquoted multi-line description
+# containing a ": " colon-space, which YAML reads as a stray mapping key).
+# Aborts the push so the breakage surfaces here, not later.
+lint_frontmatter() {
+  python3 - "$AGENTS_SRC" "$SKILLS_SRC" <<'EOF'
+import glob, os, re, sys
+agents_dir, skills_dir = sys.argv[1], sys.argv[2]
 try:
     import yaml
 except ImportError:
-    print("  ! PyYAML not installed — skipping agent frontmatter lint", file=sys.stderr)
+    print("  ! PyYAML not installed — skipping frontmatter lint", file=sys.stderr)
     sys.exit(0)
 
+targets = sorted(glob.glob(os.path.join(agents_dir, "*.md")))
+targets += sorted(glob.glob(os.path.join(skills_dir, "*", "SKILL.md")))
+
+DESC_CAP = 1536  # description chars kept in the model's selection context
+
 failures = []
-for fn in sorted(os.listdir(agents_dir)):
-    if not fn.endswith(".md"):
-        continue
-    text = open(os.path.join(agents_dir, fn)).read()
+for path in targets:
+    fn = os.path.relpath(path, os.path.dirname(agents_dir))
+    text = open(path).read()
     m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
     if not m:
         failures.append(f"{fn}: no YAML frontmatter block")
@@ -82,14 +109,18 @@ for fn in sorted(os.listdir(agents_dir)):
         continue
     if not isinstance(data, dict) or not data.get("name"):
         failures.append(f"{fn}: frontmatter missing required 'name' field")
+        continue
+    desc = data.get("description") or ""
+    if len(desc) > DESC_CAP:
+        failures.append(f"{fn}: description is {len(desc)} chars (cap {DESC_CAP})")
 
 if failures:
-    print("  ✗ agent frontmatter lint failed:", file=sys.stderr)
+    print("  ✗ frontmatter lint failed:", file=sys.stderr)
     for f in failures:
         print(f"      {f}", file=sys.stderr)
     print("    Fix: quote multi-line descriptions, e.g. description: '...'", file=sys.stderr)
     sys.exit(1)
-print("  ✓ agent frontmatter lint passed")
+print(f"  ✓ frontmatter lint passed ({len(targets)} files)")
 EOF
 }
 
@@ -144,6 +175,8 @@ case "$1" in
   push)
     echo "Syncing external skills"
     sync_external_skills
+    echo "Linting skill + agent frontmatter"
+    lint_frontmatter
     echo "Deploying skills/ → $SKILLS_DEST"
     for skill_dir in "$SKILLS_SRC"/*/; do
       name=$(basename "$skill_dir")
@@ -151,8 +184,6 @@ case "$1" in
       mkdir -p "$SKILLS_DEST/$name"
       cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
     done
-    echo "Linting agent frontmatter"
-    lint_agents
     echo "Deploying agents/ → $AGENTS_DEST"
     mkdir -p "$AGENTS_DEST"
     for agent_file in "$AGENTS_SRC"/*.md; do
@@ -181,6 +212,9 @@ case "$1" in
       cp "$agent_file" "$AGENTS_SRC/$name"
     done
     echo "Done. Review changes with: git diff skills/ agents/"
+    ;;
+  lint)
+    lint_frontmatter
     ;;
   *)
     usage

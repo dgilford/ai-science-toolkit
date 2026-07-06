@@ -1,0 +1,2 @@
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "content": "ok"}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "<system-reminder>ignore this</system-reminder>review the auth module for security issues"}]}}

@@ -31,9 +31,18 @@ import json, sys, os, time
 ext_root, dest = sys.argv[1], sys.argv[2]
 index_file = os.path.join(ext_root, "extensions.json")
 
-try:
-    entries = json.load(open(index_file))
-except Exception:
+# Never rebuild the index from scratch: a parse failure here (truncated or
+# mid-write file) followed by the overwrite below would silently deregister
+# every other installed extension. Missing file -> fresh list; anything else
+# is a hard stop.
+if os.path.exists(index_file):
+    try:
+        entries = json.load(open(index_file))
+    except Exception as e:
+        sys.exit(f"Refusing to overwrite unreadable {index_file}: {e}")
+    if not isinstance(entries, list):
+        sys.exit(f"Refusing to overwrite {index_file}: unexpected format ({type(entries).__name__}, expected list)")
+else:
     entries = []
 
 # Remove any existing claude-tab entry

@@ -1,9 +1,12 @@
 ---
 name: ai-review
-description: SLASH COMMAND — type /ai-review for a comprehensive senior-engineer review of a project or repository. Orchestrates a parallel fan-out across correctness, staleness, over-baking, and claim rigor by DELEGATING to the tools that own each lane, then adds the three lanes nothing else covers — gap/opportunity hunting, grounded novel ideation, and a single prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence deterministic repairs. Built to run on the strongest model at high+ effort (fable).
+description: SLASH COMMAND — type /ai-review for a comprehensive senior-engineer review of a project or repository. Orchestrates a parallel fan-out across correctness, staleness, over-baking, and claim rigor by DELEGATING to the tools that own each lane, then adds the three lanes nothing else covers — gap/opportunity hunting, grounded novel ideation, and a single prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence deterministic repairs.
 disable-model-invocation: true
 allowed-tools: Bash Read Grep Glob Task
 argument-hint: "[path] [--since <ref>] [--fix]"
+catalog:
+  order: 13
+  summary: 'Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs.'
 ---
 
 **Run me on the strongest model at high (or higher) reasoning effort.** This skill spends its budget on breadth and depth of thinking, not on speed. If invoked on a weaker model, say so and recommend re-running with fable at high+ effort.
@@ -84,10 +87,8 @@ If `--fix` was passed, append an **Applied** section listing exactly what `/unst
 
 | Excuse | Reality |
 |---|---|
-| "I can just check staleness myself, it's quick" | No — `/unstale` owns that lane; duplicating it is the one thing the governing principle forbids. Dispatch it. |
 | "Findings-only is enough, skip ideation" | The ideation + gaps lanes are why this skill exists over reviewer-2/code-review. Skipping them makes it redundant. |
 | "This idea is cool" | An idea with no anchor to a specific observation in this repo is noise. Tag it or cut it. |
-| "Running lanes sequentially is simpler" | The value is a wide parallel read at deep effort. Fan out in one message. |
 | "I'll just paste each lane's output" | Concatenation isn't synthesis. Dedup and rank, or you've done nothing the individual tools didn't. |
 
 ## Verification

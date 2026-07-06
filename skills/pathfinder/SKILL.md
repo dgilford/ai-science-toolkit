@@ -2,6 +2,9 @@
 name: pathfinder
 description: SLASH COMMAND — type /pathfinder to get a navigable map of every skill and subagent and when to reach for each. Resolves the reviewer-2-vs-panel decision. Use when unsure which skill or agent to invoke, or when orienting a new session.
 disable-model-invocation: true
+catalog:
+  order: 12
+  summary: 'Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision.'
 ---
 
 # Skill & Agent Router
@@ -102,6 +105,4 @@ Any reviewer can flag missing citations. To retrieve them, route to `/lit-review
 ## Composition rule (for skills that call other skills)
 
 A user-invoked skill may call model-invokable skills; never another user-invoked one.
-
-Current cross-skill call: `handoff` → `update-claude-md`
-Status: ✓ valid (`update-claude-md` is model-invokable)
+(Example: `handoff` → `update-claude-md`.)

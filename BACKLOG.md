@@ -6,9 +6,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 
 ## Open
 
-- [x] **Commit + push the `disable-model-invocation` reorg.** Done — `8accf59`
-  (the 6 skill one-liners + CLAUDE.md) and `dd4aed6` (pathfinder, bundled with the
-  BACKLOG.md commit). All pushed to `main`.
 - [ ] **Bug-watch routine notification channel — finish the webhook.** Routine
   `trig_01YR15V8NzaehoWj1hMMukRW` currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
@@ -16,16 +13,16 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   Webhook app is awaiting Slack admin approval. Once approved: create the webhook URL,
   swap the routine's `slack_send_message` step for a `Bash` `curl` to the webhook, and
   strip the now-unused Gmail/bioRxiv/Slack/Notion connectors from the routine.
-- [ ] **Watch upstream PR #6** —
-  https://github.com/JeraldHuff/tab-setup/pull/6
-  (`dgilford:feat/disable-model-invocation` → `JeraldHuff:main`). Status (2026-06-19):
-  still OPEN, mergeable, awaiting Jerald. After merge, fast-forward the fork's `main` and
-  run `sync.sh push`. (The field is already live in the deployed `skills/tab-setup/SKILL.md`
-  regardless of merge.)
-- [ ] **Retire the bug-watch routine once the upstream bug lands.** When
-  anthropics/claude-code#31935 or #41417 closes (i.e. `disable-model-invocation` reclaims
-  token budget), revisit the ai-tools token-budget goal and delete the routine at
-  https://claude.ai/code/routines.
+- [ ] **Retire the bug-watch routine once the upstream bug lands.** The trigger is
+  anthropics/claude-code#22345 closing with `state_reason == "completed"` **or** a CHANGELOG
+  entry (#31935 and #41417 are already closed as duplicates of #22345 — their closure means
+  nothing). Caveat: #22345 is titled as a *plugin*-skills issue, a weak proxy for the
+  token-reclaim fix — on any FIXED signal, verify empirically that `disable-model-invocation`
+  reclaims description token budget before revisiting the ai-tools token-budget goal and
+  deleting the routine at https://claude.ai/code/routines.
+- [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
+  workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
+  repo session).
 
 ## Someday / explore
 

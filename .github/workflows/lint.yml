@@ -1,0 +1,47 @@
+name: Lint
+# Enforces in CI what scripts/sync.sh enforces at push time, so a broken
+# frontmatter block (the silent-drop failure mode documented in CLAUDE.md)
+# or a shell regression can never land on main unnoticed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontmatter:
+    name: Skill + agent frontmatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Lint frontmatter (strict YAML parse, name present, description cap)
+        run: bash scripts/sync.sh lint
+      - name: Catalog tables match frontmatter (no doc drift)
+        run: bash scripts/gen-docs.sh check
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck all tracked shell scripts
+        run: |
+          # -S warning: fail on real defects, not style notes
+          shellcheck -S warning \
+            scripts/sync.sh \
+            scripts/gen-docs.sh \
+            scripts/ai-sessions.sh \
+            vscode-extension/install.sh \
+            tests/smoke_test_parsers.sh
+
+  parser-smoke-tests:
+    name: Transcript parser smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run smoke tests against tests/fixtures/
+        run: bash tests/smoke_test_parsers.sh
