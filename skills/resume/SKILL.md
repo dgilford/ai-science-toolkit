@@ -4,7 +4,7 @@ description: Resume work from repo-local handoff state. Use when starting a new 
 allowed-tools: Bash Read
 disable-model-invocation: true
 catalog:
-  order: 2
+  order: 20
   summary: 'Resume work from repo-local handoff state.'
 ---
 

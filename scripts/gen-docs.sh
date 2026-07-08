@@ -57,6 +57,7 @@ for path in sorted(glob.glob(os.path.join(repo_dir, "skills", "*", "SKILL.md")))
         "summary": cat["summary"],
         "repo_url": cat.get("repo_url"),
         "claude_md": cat.get("claude_md", True),
+        "provenance": cat.get("provenance"),
     })
 
 # --- Load agents (agents/*.md) ---
@@ -80,18 +81,39 @@ def skill_name_cell(s, linked):
         return f"**[{s['name']}]({s['repo_url']})**"
     return bare
 
+# Provenance is a structured `catalog.provenance` block (relation/author/url)
+# so attribution is derived, not hand-typed into each summary — which is how
+# "By" and "Adapted from" drifted apart for the same skill. Omit the block for
+# original work (no suffix rendered).
+RELATION_VERB = {"authored": "By", "adapted": "Adapted from", "forked": "Forked from"}
+
+def render_summary(s):
+    text = s["summary"]
+    prov = s.get("provenance")
+    if not prov:
+        return text
+    verb = RELATION_VERB.get(prov.get("relation"))
+    if verb is None:
+        sys.exit(f"{s['name']}: catalog.provenance.relation must be one of "
+                 f"{sorted(RELATION_VERB)}, got {prov.get('relation')!r}")
+    author, url = prov.get("author"), prov.get("url")
+    if not author:
+        sys.exit(f"{s['name']}: catalog.provenance needs an 'author'")
+    credit = f"[{author}]({url})" if url else author
+    return f"{text} {verb} {credit}."
+
 def gen_skills_table_claude_md():
     rows = sorted((s for s in skills if s["claude_md"]), key=lambda s: s["order"])
     lines = ["| Skill | Trigger | Purpose |", "|---|---|---|"]
     for s in rows:
-        lines.append(f"| `{s['name']}` | `/{s['name']}` | {s['summary']} |")
+        lines.append(f"| `{s['name']}` | `/{s['name']}` | {render_summary(s)} |")
     return lines
 
 def gen_skills_table_readme():
     rows = sorted(skills, key=lambda s: s["name"].lower())
     lines = ["| Skill | Command | Purpose |", "|---|---|---|"]
     for s in rows:
-        lines.append(f"| {skill_name_cell(s, linked=True)} | `/{s['name']}` | {s['summary']} |")
+        lines.append(f"| {skill_name_cell(s, linked=True)} | `/{s['name']}` | {render_summary(s)} |")
     return lines
 
 def gen_agents_table_claude_md():

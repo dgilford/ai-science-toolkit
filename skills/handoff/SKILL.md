@@ -4,7 +4,7 @@ description: Create or update a durable project handoff for the next AI agent/se
 allowed-tools: Bash Read Write Edit
 disable-model-invocation: true
 catalog:
-  order: 1
+  order: 10
   summary: 'Create or update a durable project handoff (`.ai/HANDOFF.md`) for the next AI agent/session.'
 ---
 
@@ -28,6 +28,8 @@ git diff --stat HEAD 2>/dev/null | head -30 || echo "(no diff)"
 
 Read these if they exist: `.ai/HANDOFF.md`, `CLAUDE.md`, `AGENTS.md`. Scan recently modified files for TODO/FIXME markers. Do not invent results for commands that were not run.
 
+Do not duplicate content already captured in durable artifacts (specs, plans, ADRs, issues, commits, diffs, CLAUDE.md). Reference them by path or URL and summarize only what the next agent needs to act. Redact anything sensitive — API keys, tokens, passwords, PII — even though `.ai/` is gitignored.
+
 ## Write `.ai/HANDOFF.md`
 
 Create `.ai/` if missing. Append `.ai/` to `.gitignore` if not already present.
@@ -38,9 +40,10 @@ Use only the sections that have real content. Skip empty ones.
 <!-- one sentence -->
 
 ## Next actions
-<!-- numbered, concrete, specific — most important section; each action must be immediately executable without a follow-up question -->
+<!-- numbered, concrete, specific — most important section; each action must be immediately executable without a follow-up question. Where a skill or subagent is the right tool, name it in the action itself (e.g. `/grilling` before a state-changing step; the stats-reviewer subagent once the estimator is drafted); point at `/pathfinder` if the next agent won't know which to reach for. -->
 
 <!-- **Good**: `Run scripts/validate.py --baseline 1991-2020 and check the NaN count in coastal cells` -->
+<!-- **Good**: `Run /grilling on the resampling design before editing pipeline.py` -->
 <!-- **Bad**: `Continue working on the validation` -->
 
 ## State

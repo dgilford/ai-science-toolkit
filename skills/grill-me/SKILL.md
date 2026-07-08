@@ -3,13 +3,13 @@ name: grill-me
 description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".
 disable-model-invocation: true
 catalog:
-  order: 4
+  order: 40
   repo_url: 'https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me'
-  summary: 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock).'
+  provenance:
+    relation: authored
+    author: 'Matt Pocock'
+    url: 'https://github.com/mattpocock'
+  summary: 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core.'
 ---
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
-
-Ask the questions one at a time.
-
-If a question can be answered by exploring the codebase, explore the codebase instead.
+Run a `/grilling` session.

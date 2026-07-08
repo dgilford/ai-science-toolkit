@@ -7,7 +7,11 @@ disable-model-invocation: true
 catalog:
   claude_md: false
   repo_url: 'https://github.com/JeraldHuff/tab-setup'
-  summary: 'Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup).'
+  provenance:
+    relation: forked
+    author: 'Jerald Huff'
+    url: 'https://github.com/JeraldHuff/tab-setup'
+  summary: 'Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session.'
 ---
 
 If `$ARGUMENTS` is `update`, pull the latest skill from its repo and re-install it:

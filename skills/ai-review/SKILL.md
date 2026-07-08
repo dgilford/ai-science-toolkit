@@ -5,7 +5,7 @@ disable-model-invocation: true
 allowed-tools: Bash Read Grep Glob Task
 argument-hint: "[path] [--since <ref>] [--fix]"
 catalog:
-  order: 13
+  order: 140
   summary: 'Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs.'
 ---
 

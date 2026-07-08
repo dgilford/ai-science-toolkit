@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install PyYAML
         run: pip install pyyaml
-      - name: Lint frontmatter (strict YAML parse, name present, description cap)
+      - name: Lint frontmatter + skill references (strict YAML parse, name, description cap, ref resolution)
         run: bash scripts/sync.sh lint
       - name: Catalog tables match frontmatter (no doc drift)
         run: bash scripts/gen-docs.sh check

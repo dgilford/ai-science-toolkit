@@ -4,7 +4,7 @@
 # Usage:
 #   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
-#   ./scripts/sync.sh lint   — lint skill + agent frontmatter only (used by CI)
+#   ./scripts/sync.sh lint   — lint skill + agent frontmatter + skill refs (used by CI)
 
 set -euo pipefail
 
@@ -23,7 +23,7 @@ usage() {
   echo "Usage: $0 [push|pull|lint]"
   echo "  push  Deploy skills from repo to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  pull  Pull skills from ~/.claude/skills/ into repo"
-  echo "  lint  Lint skill + agent frontmatter only"
+  echo "  lint  Lint skill + agent frontmatter and intra-repo skill references only"
   exit 1
 }
 
@@ -124,6 +124,49 @@ print(f"  ✓ frontmatter lint passed ({len(targets)} files)")
 EOF
 }
 
+# Verify every backticked `/slash-command` in a skill or agent body resolves to
+# a real skill in skills/ (or a known Claude Code built-in / delegated command).
+# Catches a launcher whose target was renamed or deleted — e.g. grill-me's body
+# is just "Run a `/grilling` session.", so if `grilling` vanished the launcher
+# would deploy fine and silently no-op. Frontmatter lint can't see this.
+lint_skill_refs() {
+  python3 - "$SKILLS_SRC" "$AGENTS_SRC" <<'EOF'
+import glob, os, re, sys
+skills_dir, agents_dir = sys.argv[1], sys.argv[2]
+
+known = {os.path.basename(os.path.dirname(p))
+         for p in glob.glob(os.path.join(skills_dir, "*", "SKILL.md"))}
+
+# Slash commands that are NOT skills in this repo and so are legitimate to
+# reference: Claude Code built-ins plus the external review commands ai-review
+# delegates to. Add to this set when a body starts citing a new built-in.
+BUILTINS = {
+    "code-review", "security-review",
+    "rename", "color", "clear", "compact", "model", "effort", "review",
+    "help", "cost", "fast", "memory",
+}
+
+REF = re.compile(r"`/([a-z][a-z0-9-]+)`")
+targets = sorted(glob.glob(os.path.join(skills_dir, "*", "SKILL.md")))
+targets += sorted(glob.glob(os.path.join(agents_dir, "*.md")))
+
+failures = []
+for path in targets:
+    fn = os.path.relpath(path, os.path.dirname(skills_dir))
+    for name in sorted(set(REF.findall(open(path).read()))):
+        if name not in known and name not in BUILTINS:
+            failures.append(f"{fn}: references `/{name}`, neither a skill in skills/ nor a known built-in")
+
+if failures:
+    print("  ✗ skill-reference lint failed:", file=sys.stderr)
+    for f in failures:
+        print(f"      {f}", file=sys.stderr)
+    print("    Fix: correct the reference, add the missing skill, or allowlist a new built-in in lint_skill_refs().", file=sys.stderr)
+    sys.exit(1)
+print(f"  ✓ skill-reference lint passed ({len(targets)} files)")
+EOF
+}
+
 install_startup_hook() {
   local config_dest="$HOME/.claude/session-init-config.json"
   local hook_cmd="bash ~/.claude/skills/tab-setup/scripts/hook-startup.sh"
@@ -177,6 +220,7 @@ case "$1" in
     sync_external_skills
     echo "Linting skill + agent frontmatter"
     lint_frontmatter
+    lint_skill_refs
     echo "Deploying skills/ → $SKILLS_DEST"
     for skill_dir in "$SKILLS_SRC"/*/; do
       name=$(basename "$skill_dir")
@@ -215,6 +259,7 @@ case "$1" in
     ;;
   lint)
     lint_frontmatter
+    lint_skill_refs
     ;;
   *)
     usage
