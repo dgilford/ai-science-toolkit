@@ -24,7 +24,8 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 |---|---|---|
 | **ai-review** | `/ai-review` | Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs. |
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style. |
-| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. By [Matt Pocock](https://github.com/mattpocock). |
+| **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core. By [Matt Pocock](https://github.com/mattpocock). |
+| **[grilling](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)** | `/grilling` | Grill the user relentlessly about a plan or design, one decision at a time, until shared understanding — the model-invokable core behind `/grill-me`. Adapted from [Matt Pocock](https://github.com/mattpocock). |
 | **handoff** | `/handoff` | Create or update a durable project handoff (`.ai/HANDOFF.md`) for the next AI agent/session. |
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus. Zotero write support needs `ZOTERO_*` env vars in `~/.claude/settings.json`. |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep. |
@@ -38,7 +39,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure. |
 <!-- gen-docs:skills:end -->
 
-Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`ai-review`, `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
+Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`ai-review`, `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
 
 ## Installation
 

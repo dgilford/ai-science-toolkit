@@ -4,7 +4,7 @@ description: Draft an internal Slack message grounded in current project context
 allowed-tools: Bash Read
 disable-model-invocation: true
 catalog:
-  order: 7
+  order: 80
   summary: 'Draft an internal Slack message grounded in current project context and recent workflow.'
 ---
 

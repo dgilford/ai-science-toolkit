@@ -4,7 +4,7 @@ description: Detect and repair staleness residue in Python library code and note
 allowed-tools: Bash Read Edit Write
 argument-hint: "[--auto] [--artifact <paths>] [--exploratory <paths>]"
 catalog:
-  order: 9
+  order: 100
   summary: 'Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes.'
 ---
 

@@ -3,7 +3,7 @@ name: pathfinder
 description: SLASH COMMAND — type /pathfinder to get a navigable map of every skill and subagent and when to reach for each. Resolves the reviewer-2-vs-panel decision. Use when unsure which skill or agent to invoke, or when orienting a new session.
 disable-model-invocation: true
 catalog:
-  order: 12
+  order: 130
   summary: 'Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision.'
 ---
 
@@ -32,7 +32,7 @@ Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.m
 | resume | `/resume` | Starting a new session; reconstructs context from `.ai/HANDOFF.md` |
 | handoff | `/handoff` | Ending a session or switching agents; calls `update-claude-md` internally |
 | update-claude-md | `/update-claude-md` | Standalone CLAUDE.md update without a full handoff |
-| grill-me | `/grill-me` | Stress-testing a plan or design before implementing |
+| grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
 | tab-setup | `/tab-setup [all]` | Naming / coloring this Claude Code tab; `all` recolors every active session |
 | write-new-skill | `/write-new-skill` | Scaffolding a new skill from scratch |
@@ -43,6 +43,7 @@ Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.m
 
 | Skill | Reach for it when… |
 |---|---|
+| `grilling` | Stress-testing a plan one decision at a time — and *proactively* before a step that changes running state, grabs a shared resource (GPUs/ports/memory), or could invalidate an earlier decision. `/grill-me` is the explicit launcher |
 | `figure-review` | User shares or references a figure/plot and wants it checked for publication readiness |
 | `lit-review` | Searching or synthesizing scientific literature; citation checks from a review flow |
 | `overbaked` | Auditing any artifact for over-engineering, verbosity, or scope creep |
@@ -105,4 +106,4 @@ Any reviewer can flag missing citations. To retrieve them, route to `/lit-review
 ## Composition rule (for skills that call other skills)
 
 A user-invoked skill may call model-invokable skills; never another user-invoked one.
-(Example: `handoff` → `update-claude-md`.)
+(Examples: `handoff` → `update-claude-md`; `grill-me` → `grilling`.)

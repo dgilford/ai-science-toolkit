@@ -3,7 +3,7 @@ name: overbaked
 description: Audit a document, plan, or code for over-engineering, verbosity, and scope creep. Use when you've just written something and want a point-by-point check before finalizing.
 allowed-tools: Read
 catalog:
-  order: 6
+  order: 70
   summary: 'Audit a document, plan, or code for over-engineering, verbosity, and scope creep.'
 ---
 

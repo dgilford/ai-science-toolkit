@@ -3,7 +3,7 @@ name: lit-review
 description: Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus. Use when framing a research question, designing methods, interpreting results, mapping the field landscape, or identifying future directions.
 allowed-tools: mcp__zotero__zotero_search_items mcp__zotero__zotero_item_metadata mcp__zotero__zotero_item_fulltext mcp__arxiv__search_papers mcp__arxiv__semantic_search mcp__arxiv__get_abstract mcp__google-scholar__search_google_scholar_key_words mcp__google-scholar__search_google_scholar_advanced mcp__claude_ai_bioRxiv__search_preprints mcp__claude_ai_Consensus__authenticate mcp__claude_ai_Consensus__complete_authentication Bash Write Edit
 catalog:
-  order: 5
+  order: 60
   summary: 'Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus. Zotero write support needs `ZOTERO_*` env vars in `~/.claude/settings.json`.'
 ---
 

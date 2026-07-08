@@ -4,7 +4,7 @@ description: 'Audit a scientific figure for publication-readiness: colormaps, un
 allowed-tools: Read
 argument-hint: "[--style]"
 catalog:
-  order: 10
+  order: 110
   summary: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style.'
 ---
 
