@@ -70,4 +70,4 @@ Ask me at most one question, only if it would materially improve the handoff.
 
 ## Finally
 
-Run the `update-claude-md` skill to promote any durable session knowledge into `CLAUDE.md`.
+Run the `evolve-claude-md` skill to promote any durable session knowledge into `CLAUDE.md`.
