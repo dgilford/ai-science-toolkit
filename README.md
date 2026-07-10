@@ -23,6 +23,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | Skill | Command | Purpose |
 |---|---|---|
 | **ai-review** | `/ai-review` | Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs. |
+| **evolve-claude-md** | `/evolve-claude-md` | Update CLAUDE.md with durable knowledge from the current session. |
 | **figure-review** | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style. |
 | **[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)** | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core. By [Matt Pocock](https://github.com/mattpocock). |
 | **[grilling](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)** | `/grilling` | Grill the user relentlessly about a plan or design, one decision at a time, until shared understanding — the model-invokable core behind `/grill-me`. Adapted from [Matt Pocock](https://github.com/mattpocock). |
@@ -35,11 +36,10 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow. |
 | **[tab-setup](https://github.com/JeraldHuff/tab-setup)** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup). |
 | **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes. |
-| **update-claude-md** | `/update-claude-md` | Update CLAUDE.md with durable knowledge from the current session. |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure. |
 <!-- gen-docs:skills:end -->
 
-Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`ai-review`, `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `update-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
+Skills split on an invocation axis. **User-invoked** orchestrators you type explicitly carry `disable-model-invocation: true` (`ai-review`, `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`); **model-invokable** skills Claude may reach mid-task are left discoverable (`figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `evolve-claude-md`). See [CLAUDE.md](CLAUDE.md) for the composition rule and a known token-budget caveat.
 
 ## Installation
 
@@ -166,7 +166,7 @@ After `pull`, review `git diff skills/ agents/` — pull brings in all globally 
 ```
 /resume          # start of session — loads handoff, reports state
 /handoff         # end of session — writes handoff, updates CLAUDE.md
-/update-claude-md  # anytime — promote new knowledge to CLAUDE.md
+/evolve-claude-md  # anytime — promote new knowledge to CLAUDE.md
 ```
 
 The `.ai/` directory is repo-local (gitignored) and holds session state. Add it to `.gitignore` in any project where you use these skills.

@@ -19,8 +19,8 @@ Nothing here fires automatically; this is a navigation aid only.
 ```
 Start of session   →  /resume
                          ↓ (do work)
-End of session     →  /handoff           writes .ai/HANDOFF.md, then calls /update-claude-md
-Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.md only
+End of session     →  /handoff           writes .ai/HANDOFF.md, then calls /evolve-claude-md
+Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.md only
 ```
 
 ---
@@ -30,8 +30,8 @@ Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.m
 | Skill | Command | Reach for it when… |
 |---|---|---|
 | resume | `/resume` | Starting a new session; reconstructs context from `.ai/HANDOFF.md` |
-| handoff | `/handoff` | Ending a session or switching agents; calls `update-claude-md` internally |
-| update-claude-md | `/update-claude-md` | Standalone CLAUDE.md update without a full handoff |
+| handoff | `/handoff` | Ending a session or switching agents; calls `evolve-claude-md` internally |
+| evolve-claude-md | `/evolve-claude-md` | Standalone CLAUDE.md update without a full handoff |
 | grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
 | tab-setup | `/tab-setup [all]` | Naming / coloring this Claude Code tab; `all` recolors every active session |
@@ -49,7 +49,7 @@ Standalone update  →  /update-claude-md  promote session knowledge to CLAUDE.m
 | `overbaked` | Auditing any artifact for over-engineering, verbosity, or scope creep |
 | `reviewer-2` | Quick generalist stress-test of a claim, result, or section (any domain) |
 | `unstale` | Cleaning up dead imports, stale comments, resolved TODOs after a refactor |
-| `update-claude-md` | Promoting session knowledge to CLAUDE.md (called by `handoff`; also invokable standalone) |
+| `evolve-claude-md` | Promoting session knowledge to CLAUDE.md (called by `handoff`; also invokable standalone) |
 
 ---
 
@@ -106,4 +106,4 @@ Any reviewer can flag missing citations. To retrieve them, route to `/lit-review
 ## Composition rule (for skills that call other skills)
 
 A user-invoked skill may call model-invokable skills; never another user-invoked one.
-(Examples: `handoff` → `update-claude-md`; `grill-me` → `grilling`.)
+(Examples: `handoff` → `evolve-claude-md`; `grill-me` → `grilling`.)

@@ -1,5 +1,5 @@
 ---
-name: update-claude-md
+name: evolve-claude-md
 description: Update CLAUDE.md with durable knowledge from the current session. Use at the end of a working session to promote new findings, renamed variables, refined definitions, or corrected assumptions into the permanent project record.
 allowed-tools: Bash Read Edit
 catalog:
