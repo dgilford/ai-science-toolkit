@@ -214,7 +214,8 @@ EOF
 
 install_statusline() {
   # Deploy the status-line command script and ensure settings.json references it.
-  # Non-destructive: only adds the statusLine block if absent, like the hook merge.
+  # Reconciles the statusLine block to settings/settings.json on every push, so
+  # footer config changes propagate (a non-destructive merge silently skipped them).
   local script_src="$REPO_DIR/settings/statusline-command.sh"
   local script_dest="$HOME/.claude/statusline-command.sh"
 
@@ -226,27 +227,29 @@ install_statusline() {
   chmod +x "$script_dest"
   echo "  → statusline-command.sh deployed to ~/.claude/"
 
-  python3 - <<'EOF'
+  REPO_DIR="$REPO_DIR" python3 - <<'EOF'
 import json, os
 settings_path = os.path.expanduser("~/.claude/settings.json")
 if not os.path.exists(settings_path):
     print("  ! ~/.claude/settings.json not found, skipping statusLine merge")
     raise SystemExit(0)
 
+# Canonical statusLine block lives in the repo's settings/settings.json.
+repo_settings = os.path.join(os.environ["REPO_DIR"], "settings", "settings.json")
+with open(repo_settings) as f:
+    desired = json.load(f)["statusLine"]
+
 with open(settings_path) as f:
     settings = json.load(f)
 
-if "statusLine" not in settings:
-    settings["statusLine"] = {
-        "type": "command",
-        "command": "bash ~/.claude/statusline-command.sh",
-    }
+if settings.get("statusLine") == desired:
+    print("  → statusLine already up to date, skipping")
+else:
+    settings["statusLine"] = desired
     with open(settings_path, "w") as f:
         json.dump(settings, f, indent=2)
         f.write("\n")
-    print("  → statusLine block added to ~/.claude/settings.json")
-else:
-    print("  → statusLine already configured, skipping")
+    print("  → statusLine block reconciled in ~/.claude/settings.json")
 EOF
 }
 
