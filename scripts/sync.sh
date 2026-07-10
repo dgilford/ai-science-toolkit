@@ -212,6 +212,44 @@ else:
 EOF
 }
 
+install_statusline() {
+  # Deploy the status-line command script and ensure settings.json references it.
+  # Non-destructive: only adds the statusLine block if absent, like the hook merge.
+  local script_src="$REPO_DIR/settings/statusline-command.sh"
+  local script_dest="$HOME/.claude/statusline-command.sh"
+
+  if [ ! -f "$script_src" ]; then
+    echo "  ! settings/statusline-command.sh not found, skipping status line"
+    return 0
+  fi
+  cp "$script_src" "$script_dest"
+  chmod +x "$script_dest"
+  echo "  → statusline-command.sh deployed to ~/.claude/"
+
+  python3 - <<'EOF'
+import json, os
+settings_path = os.path.expanduser("~/.claude/settings.json")
+if not os.path.exists(settings_path):
+    print("  ! ~/.claude/settings.json not found, skipping statusLine merge")
+    raise SystemExit(0)
+
+with open(settings_path) as f:
+    settings = json.load(f)
+
+if "statusLine" not in settings:
+    settings["statusLine"] = {
+        "type": "command",
+        "command": "bash ~/.claude/statusline-command.sh",
+    }
+    with open(settings_path, "w") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
+    print("  → statusLine block added to ~/.claude/settings.json")
+else:
+    print("  → statusLine already configured, skipping")
+EOF
+}
+
 [ "${1:-}" = "" ] && usage
 
 case "$1" in
@@ -237,6 +275,7 @@ case "$1" in
       cp "$agent_file" "$AGENTS_DEST/$name"
     done
     install_startup_hook
+    install_statusline
     echo "Done."
     ;;
   pull)

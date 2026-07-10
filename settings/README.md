@@ -2,6 +2,8 @@
 
 `settings.json` — global Claude Code settings. Safe to commit; contains no secrets or machine-specific paths.
 
+`statusline-command.sh` — the status-line (footer) script. Renders `Context: X% used (Y% remaining) | Model | effort: N | 5h: Z%`, with the remaining-context figure glowing salmon below 60%. `scripts/sync.sh push` deploys it to `~/.claude/statusline-command.sh` and adds the `statusLine` block to the live `~/.claude/settings.json` if absent (non-destructive — same merge as the SessionStart hook). To propagate to another environment, just run `bash scripts/sync.sh push` there.
+
 `settings.local.json` — machine-specific permissions and allowed commands. Gitignored. To back it up manually:
 
 ```bash
