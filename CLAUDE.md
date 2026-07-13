@@ -97,10 +97,13 @@ The `.ai/` directory is repo-local and is gitignored.
 | Hook | Script | Purpose |
 |---|---|---|
 | `SessionStart` | `~/.claude/skills/tab-setup/scripts/hook-startup.sh` | Auto-name and color-code each session on boot |
+| `SessionStart` | inline `jq` command | Re-pin `model: opus` + `effortLevel: low` as the default on every boot (self-heals a mid-session `/model`/`/effort` change) |
 
 `hook-startup.sh` is part of the `tab-setup` skill (deployed from `dgilford/tab-setup`). It is fully self-contained — no dependency on this repo. It generates a session name via Haiku API (requires `ANTHROPIC_API_KEY` in the `env` block of `~/.claude/settings.json`) with a wordlist fallback, assigns a tab color, and prints `[resume]` / `[env]` reminders to stderr. `sync.sh push` registers it in `~/.claude/settings.json` automatically.
 
 Tab color assignments are persisted in `~/.claude/project-colors.json` (cwd → {color, name, pid}), which is written by `hook-startup.sh` and never touched by the watcher. This drives color persistence through `/clear` (same PID) and `claude -c` (same cwd, dead PID not in use).
+
+**Model/effort pin hook.** Interactive `/model` and `/effort` write their new value straight into `~/.claude/settings.json` ("saved as your default for new sessions") — there is *no* per-session opt-in for model/effort (only `fastModePerSessionOptIn` exists, and it covers fast mode alone). To keep a durable default without giving that up, a second `SessionStart` hook re-pins the desired default on every boot via `jq '.model="opus" | .effortLevel="low"'` (tmp-file + `mv`, with `|| rm -f` cleanup so a failed `jq` never corrupts the file). A mid-session change still applies to the current session; the *next* boot heals it back — with a one-session-lag caveat (the session immediately after a change may briefly boot at the changed value before the hook fires; live-correction depends on the settings watcher, unverified). This hook is **added manually per machine, not deployed by `sync.sh`** — but it *survives* `push`, because `sync.sh`'s `SessionStart` merge only appends `hook-startup.sh` when absent (`any("hook-startup" in str(h) ...)`) and never rewrites the existing matcher entry, and statusLine reconciliation touches only `statusLine`. To set it up on a new machine, add a second command to the `SessionStart` matcher `""` hooks array: `jq '.model="opus" | .effortLevel="low"' ~/.claude/settings.json > ~/.claude/settings.json.tmp 2>/dev/null && mv ~/.claude/settings.json.tmp ~/.claude/settings.json || rm -f ~/.claude/settings.json.tmp`.
 
 ## Syncing skills
 
