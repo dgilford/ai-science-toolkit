@@ -5,6 +5,9 @@
 #   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 #   ./scripts/sync.sh lint   — lint skill + agent frontmatter + skill refs (used by CI)
+#
+# Machine-local exclusions: list skill dir names (one per line) in
+# ~/.claude/sync-skills-exclude to skip them during `push` on this machine only.
 
 set -euo pipefail
 
@@ -18,6 +21,22 @@ AGENTS_DEST="$HOME/.claude/agents"
 EXTERNAL_SKILLS=(
   "dgilford/tab-setup:tab-setup"
 )
+
+# Machine-local push exclusions. Names (one skill dir per line, # comments ok)
+# listed in ~/.claude/sync-skills-exclude are skipped by `push` on THIS machine
+# only — the file is not tracked in the repo, so the choice stays machine-local.
+EXCLUDE_FILE="$HOME/.claude/sync-skills-exclude"
+
+is_excluded() {
+  [ -f "$EXCLUDE_FILE" ] || return 1
+  local name="$1" line
+  while IFS= read -r line; do
+    line="${line%%#*}"                       # strip comments
+    line="$(echo "$line" | tr -d '[:space:]')"
+    [ -n "$line" ] && [ "$line" = "$name" ] && return 0
+  done < "$EXCLUDE_FILE"
+  return 1
+}
 
 usage() {
   echo "Usage: $0 [push|pull|lint]"
@@ -265,6 +284,10 @@ case "$1" in
     echo "Deploying skills/ → $SKILLS_DEST"
     for skill_dir in "$SKILLS_SRC"/*/; do
       name=$(basename "$skill_dir")
+      if is_excluded "$name"; then
+        echo "  ⤫ $name (excluded on this machine via $EXCLUDE_FILE)"
+        continue
+      fi
       echo "  → $name"
       mkdir -p "$SKILLS_DEST/$name"
       cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
