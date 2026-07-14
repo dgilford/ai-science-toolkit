@@ -68,6 +68,14 @@ Preserve useful prior content. Remove stale or superseded details. Distinguish f
 
 Ask me at most one question, only if it would materially improve the handoff.
 
+## Ship a worklog entry
+
+After `.ai/HANDOFF.md` is written, run the `worklog` skill to capture this session
+to its three targets (local `.ai/` mirror, talim-server cache, Notion weekly
+page). Pass it the session summary and next actions you wrote above so it does not
+re-derive them. `worklog` is best-effort by design — it must never block or fail
+the handoff.
+
 ## Finally
 
 Run the `evolve-claude-md` skill to promote any durable session knowledge into `CLAUDE.md`.

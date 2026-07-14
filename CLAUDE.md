@@ -14,6 +14,7 @@ The canonical "when to reach for each" catalog is `skills/pathfinder/SKILL.md` (
 | Skill | Trigger | Purpose |
 |---|---|---|
 | `handoff` | `/handoff` | Create or update a durable project handoff (`.ai/HANDOFF.md`) for the next AI agent/session. |
+| `worklog` | `/worklog` | Log a work entry to the Notion Work Journal + talim-server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something. |
 | `resume` | `/resume` | Resume work from repo-local handoff state. |
 | `evolve-claude-md` | `/evolve-claude-md` | Update CLAUDE.md with durable knowledge from the current session. |
 | `grill-me` | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core. By [Matt Pocock](https://github.com/mattpocock). |
@@ -74,9 +75,9 @@ Shell commands in ` ```! ` blocks run before Claude sees the skill content — u
 
 Skills carry the field on the **user-invoked vs model-invokable** axis:
 - **User-invoked** (`disable-model-invocation: true`) — orchestrators you type explicitly: `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`, `ai-review`, `commit-batch`.
-- **Model-invokable** (no field) — Claude or another skill may reach them mid-task: `figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `evolve-claude-md`, `commit-batching`.
+- **Model-invokable** (no field) — Claude or another skill may reach them mid-task: `figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `evolve-claude-md`, `commit-batching`, `worklog`.
 
-**Composition rule:** a user-invoked skill may invoke model-invokable skills, never another user-invoked one. (`handoff` → `evolve-claude-md` is why `evolve-claude-md` is model-invokable; `grill-me` → `grilling` is the same pattern — `grill-me` is a thin launcher so the `grilling` core stays reachable mid-task.) The 4 reviewer subagents are out of scope for this field — subagents use their own description-based invocation.
+**Composition rule:** a user-invoked skill may invoke model-invokable skills, never another user-invoked one. (`handoff` → `evolve-claude-md` and `handoff` → `worklog` are why both are model-invokable; `grill-me` → `grilling` is the same pattern — `grill-me` is a thin launcher so the `grilling` core stays reachable mid-task.) The 4 reviewer subagents are out of scope for this field — subagents use their own description-based invocation.
 
 Skills may include companion reference files (e.g., `REFERENCE.md`, `CC-STYLE.md`, `COLORBLIND.md`) in the same skill directory. Load them at runtime using the same `!` block syntax above, pointing at the deployed path: `cat ~/.claude/skills/<name>/COMPANION.md 2>/dev/null || echo "(not found)"`. This keeps SKILL.md lean while injecting richer context at load time. Only the deployed path (`~/.claude/skills/`) is referenced — the repo copy in `skills/` is synced there by `sync.sh push`.
 
@@ -93,6 +94,15 @@ These skills form a session lifecycle:
 - **Planning**: `/grill-me` — stress-test a design before implementing
 
 The `.ai/` directory is repo-local and is gitignored.
+
+## Worklog → Notion journal
+
+The `worklog` skill captures a single work-log entry to **three** targets (all best-effort — none may block the caller): a local `.ai/worklog-YYYY-MM-DD.jsonl` mirror (source of truth), a redundant copy SSH-appended to `~/worklog/inbox/<date>.jsonl` on talim-server, and a bullet appended to the current week's page in the **Work Journal** Notion space. It is model-invokable — it fires whenever the user asks to log/note/record something, and `/handoff` calls it after writing `.ai/HANDOFF.md`. An end-of-day Claude routine summarizes the day's raw entries into narrative sections on that weekly page.
+
+- **Configuration:** the server target (`WORKLOG_SSH_TARGET`) and the Notion Work Journal home page id (`WORKLOG_NOTION_HOME`) live in the `env` block of `~/.claude/settings.json` (machine-local, not in this public repo) — the skill skips any target whose var is unset. The specific IDs are recorded in machine-local memory, not here.
+- **Weekly pages** are sub-pages titled `Week of YYYY-MM-DD (…)` (Monday-anchored). Raw entries live under a `## 🗂️ Raw entries` heading pinned as the **last** section — the append is an `insert_content` at page-end and depends on that section staying last.
+- **Why OAuth, not a Notion token:** the Climate Central workspace disables internal integration tokens, so the pipeline reuses the claude.ai **Notion OAuth MCP** (available in interactive sessions and cloud routines). This also means the summarization step must be a **Claude cloud routine** (which inherits the OAuth), not the talim-server cron — a server cron can't reach Notion with OAuth *and* can't be reached from the cloud (private Tailscale network). The server hop is a redundant archive only.
+- **Toggle→heading tradeoff:** raw entries use a plain heading, not a collapsible toggle — reliably appending *inside* a toggle via the API is fragile (append tools add page-level blocks; nesting needs exact-match search-replace). The nightly routine clears the section, so it stays short regardless.
 
 ## Boot hooks
 

@@ -38,6 +38,7 @@ Subagent personas live in `agents/` and are deployed to `~/.claude/agents/`. Eac
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow. |
 | **[tab-setup](https://github.com/JeraldHuff/tab-setup)** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup). |
 | **unstale** | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes. |
+| **worklog** | `/worklog` | Log a work entry to the Notion Work Journal + talim-server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something. |
 | **write-new-skill** | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure. |
 <!-- gen-docs:skills:end -->
 
