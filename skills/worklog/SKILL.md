@@ -8,10 +8,16 @@ catalog:
   summary: 'Log a work entry to the Notion Work Journal + talim-server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something.'
 ---
 
-Capture one work-log entry into **three** targets. All three are best-effort —
-**never fail or block the caller** if a target is unreachable; the local mirror is
-the source of truth. An end-of-day cloud routine summarizes the Notion raw
-entries into narrative sections, so this skill only appends; it never summarizes.
+Capture one work-log entry into **three** targets. Distinguish two failure kinds:
+
+- **Misconfiguration is loud.** If a target's env var is unset, that is a setup
+  error — **report it prominently** so it gets fixed, don't skip it quietly.
+- **Transient failure is best-effort.** If a *configured* target is momentarily
+  unreachable (server down, Notion MCP disconnected), never block the caller —
+  note it and move on. The local mirror is the source of truth.
+
+An end-of-day cloud routine summarizes the Notion raw entries into narrative
+sections, so this skill only appends; it never summarizes.
 
 ## Compose the entry
 
@@ -26,9 +32,11 @@ Keep it tight: `summary` is 3-5 short bullets; `next` is the top 1-3 next action
 ## Configuration
 
 Two targets are configured via env vars (set in the `env` block of
-`~/.claude/settings.json`, alongside the `ZOTERO_*` keys). **If a var is unset,
-skip that target silently** — no personal infrastructure is hardcoded in this
-skill:
+`~/.claude/settings.json`, alongside the `ZOTERO_*` keys) — no personal
+infrastructure is hardcoded in this skill. **If a var is unset, surface it
+loudly as a setup error** (`worklog: <VAR> unset — this target is not
+configured; set it in ~/.claude/settings.json`) so the gap gets fixed, rather
+than silently dropping the target:
 
 - `WORKLOG_SSH_TARGET` — `user@host` for the server cache (e.g. a Tailscale host).
 - `WORKLOG_NOTION_HOME` — the Notion "Work Journal" home page id (raw entries are
@@ -55,15 +63,17 @@ if [ -n "${WORKLOG_SSH_TARGET:-}" ]; then
     && echo "worklog: shipped to server" \
     || echo "worklog: server unreachable — kept local copy at .ai/worklog-$DAY.jsonl"
 else
-  echo "worklog: WORKLOG_SSH_TARGET unset — local mirror only"
+  echo "worklog: WORKLOG_SSH_TARGET unset — server cache not configured; set it in ~/.claude/settings.json (kept local copy at .ai/worklog-$DAY.jsonl)" >&2
 fi
 ```
 
 ## 3 — Append to the Notion weekly page
 
-Use the Notion MCP tools. Skip this step silently if `WORKLOG_NOTION_HOME` is
-unset or the Notion MCP is not connected — the local + server copies already
-captured the entry.
+Use the Notion MCP tools. If `WORKLOG_NOTION_HOME` is **unset**, report it
+loudly as a setup error (`worklog: WORKLOG_NOTION_HOME unset — Notion journal not
+configured; set it in ~/.claude/settings.json`) — the local + server copies
+still captured the entry. If the var is set but the **Notion MCP is not
+connected**, that is a transient failure: note it and move on.
 
 - **Work Journal home page id:** the value of `$WORKLOG_NOTION_HOME`.
 - **Weekly page title convention:** `Week of YYYY-MM-DD (…)`, dated to the
@@ -95,7 +105,7 @@ Steps:
 
 | Excuse | Reality |
 |---|---|
-| "The server was down, so the log failed." | The local `.ai/` mirror is the source of truth — a down server or missing Notion MCP is a non-event, not a failure. Report which targets succeeded and move on. |
+| "The server was down, so the log failed." | A *transiently* down server or disconnected Notion MCP is a non-event — the local `.ai/` mirror is the source of truth. Report which targets succeeded and move on. (An **unset** env var is different: report it loudly so config gets fixed.) |
 | "This is minor, no need to log it." | If the user asked to log it, log it. Terse is fine; skipping is not. |
 | "I'll summarize the whole day into one entry." | This skill only appends a single raw entry. The nightly routine does summarization — don't pre-empt it. |
 | "I'll just write to Notion, the JSON mirror is redundant." | The mirror and server copy are the durable/offline record; Notion is the readable view. Write all reachable targets. |
@@ -103,5 +113,5 @@ Steps:
 ## Verification
 
 - [ ] A JSON line was appended to `.ai/worklog-<today>.jsonl` locally.
-- [ ] The server push reported success, or its failure was reported (not swallowed).
-- [ ] The bullet appears under **🗂️ Raw entries** on the current weekly page, or the Notion step was explicitly skipped (MCP not connected).
+- [ ] The server push reported success, or its failure was reported (not swallowed) — including a loud setup error if `WORKLOG_SSH_TARGET` is unset.
+- [ ] The bullet appears under **🗂️ Raw entries** on the current weekly page; or a loud setup error was reported if `WORKLOG_NOTION_HOME` is unset; or a transient MCP-disconnected note if the var is set but Notion is unreachable.
