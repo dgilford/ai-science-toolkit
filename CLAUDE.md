@@ -27,6 +27,8 @@ The canonical "when to reach for each" catalog is `skills/pathfinder/SKILL.md` (
 | `reviewer-2` | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section: baseline, counterfactual, alternatives, uncertainty consistency. |
 | `pathfinder` | `/pathfinder` | Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision. |
 | `ai-review` | `/ai-review` | Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs. |
+| `commit-batch` | `/commit-batch` | Batch the working tree into logical, single-concern commits, then commit and push if asked. Thin launcher for the model-invokable `commit-batching` core. |
+| `commit-batching` | `/commit-batching` | Batch a dirty working tree into logical, single-concern commits (survey → group → stage by path → commit → push if asked) — the model-invokable core behind `/commit-batch`. |
 <!-- gen-docs:skills:end -->
 
 ## Review agents (subagent panel)
@@ -71,8 +73,8 @@ Shell commands in ` ```! ` blocks run before Claude sees the skill content — u
 **Non-obvious gotcha:** on Claude Code 2.1.181 the field does **not** reclaim description token budget — the description stays in the model's selection context (the model still *sees* it and may try to invoke it; only the tool-call is blocked). This is a known open bug (anthropics/claude-code#31935, #41417). The only real token lever is keeping the `description` short (a 1,536-char cap was observed on 2.1.181; unsourced in official docs — re-verify before relying on the exact number; the lint enforces it). Don't add this field expecting token savings — add it for invocation control.
 
 Skills carry the field on the **user-invoked vs model-invokable** axis:
-- **User-invoked** (`disable-model-invocation: true`) — orchestrators you type explicitly: `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`, `ai-review`.
-- **Model-invokable** (no field) — Claude or another skill may reach them mid-task: `figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `evolve-claude-md`.
+- **User-invoked** (`disable-model-invocation: true`) — orchestrators you type explicitly: `grill-me`, `handoff`, `resume`, `slack-message`, `tab-setup`, `write-new-skill`, `pathfinder`, `ai-review`, `commit-batch`.
+- **Model-invokable** (no field) — Claude or another skill may reach them mid-task: `figure-review`, `grilling`, `lit-review`, `overbaked`, `reviewer-2`, `unstale`, `evolve-claude-md`, `commit-batching`.
 
 **Composition rule:** a user-invoked skill may invoke model-invokable skills, never another user-invoked one. (`handoff` → `evolve-claude-md` is why `evolve-claude-md` is model-invokable; `grill-me` → `grilling` is the same pattern — `grill-me` is a thin launcher so the `grilling` core stays reachable mid-task.) The 4 reviewer subagents are out of scope for this field — subagents use their own description-based invocation.
 
