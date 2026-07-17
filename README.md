@@ -1,4 +1,4 @@
-![ai-tools](assets/ai-tools-banner_rounded.png)
+![ai-science-toolkit](assets/ai-science-toolkit_banner_071726_rounded.png)
 
 # ai-science-toolkit
 

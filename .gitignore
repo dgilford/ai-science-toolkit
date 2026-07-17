@@ -12,3 +12,6 @@ skills/tab-setup/vscode-extension/
 **/*.pyc
 **/*.pyo
 .ipynb_checkpoints/
+.DS_Store
+assets/*_unrounded.png
+assets/LEGACY_*
