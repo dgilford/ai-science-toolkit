@@ -122,9 +122,12 @@ Tab color assignments are persisted in `~/.claude/project-colors.json` (cwd → 
 Skills in `skills/` are the source of truth. Use `scripts/sync.sh` — do not use `cp -r` directly (it creates nested directories when the destination already exists).
 
 ```bash
-bash scripts/sync.sh push   # deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/; register hook-startup.sh
-bash scripts/sync.sh pull   # pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
+bash scripts/sync.sh push             # deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/; register hook-startup.sh
+bash scripts/sync.sh push <name>...   # deploy only the named skills/agents (piecemeal install)
+bash scripts/sync.sh pull             # pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
 ```
+
+**Named push** auto-detects each name as a skill (`skills/<name>/`) or agent (`agents/<name>.md`) and transitively auto-includes hard runtime dependencies from the `skill_deps()` map in `sync.sh` (`grill-me`→`grilling`, `commit-batch`→`commit-batching`, `handoff`→`worklog`+`evolve-claude-md`, `ai-review`→`unstale`+`overbaked`+`reviewer-2`) — **update `skill_deps()` when skill-to-skill wiring changes** (`lint_skill_refs()` catches in-repo renames but not this map). A named push skips settings registration (hook/statusline) unless `tab-setup` is among the resolved names, and skips the external-repo refresh likewise. Exclusion interplay: an *explicitly named* skill overrides its machine-local exclusion; a *dependency-added* one still honors it.
 
 After `pull`, review `git diff skills/ agents/` — pull brings in all globally installed skills and agents, including any not yet tracked in this repo.
 

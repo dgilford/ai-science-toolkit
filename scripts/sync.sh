@@ -2,12 +2,20 @@
 # Sync skills and agents between this repo and ~/.claude/
 #
 # Usage:
-#   ./scripts/sync.sh push   — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
-#   ./scripts/sync.sh pull   — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
-#   ./scripts/sync.sh lint   — lint skill + agent frontmatter + skill refs (used by CI)
+#   ./scripts/sync.sh push             — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
+#   ./scripts/sync.sh push <name>...   — deploy only the named skills/agents (plus hard dependencies)
+#   ./scripts/sync.sh pull             — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
+#   ./scripts/sync.sh lint             — lint skill + agent frontmatter + skill refs (used by CI)
+#
+# Named push: each <name> is auto-detected as a skill (skills/<name>/) or an
+# agent (agents/<name>.md). Skills that invoke other skills at runtime pull
+# those in automatically (see skill_deps) so a partial install can't silently
+# no-op. Hook/statusline registration runs only when tab-setup is included.
 #
 # Machine-local exclusions: list skill dir names (one per line) in
 # ~/.claude/sync-skills-exclude to skip them during `push` on this machine only.
+# An explicitly named skill overrides its exclusion; a dependency-added one
+# does not.
 
 set -euo pipefail
 
@@ -39,11 +47,63 @@ is_excluded() {
 }
 
 usage() {
-  echo "Usage: $0 [push|pull|lint]"
-  echo "  push  Deploy skills from repo to ~/.claude/skills/ and agents to ~/.claude/agents/"
-  echo "  pull  Pull skills from ~/.claude/skills/ into repo"
-  echo "  lint  Lint skill + agent frontmatter and intra-repo skill references only"
+  echo "Usage: $0 [push [name...]|pull|lint]"
+  echo "  push           Deploy all skills to ~/.claude/skills/ and agents to ~/.claude/agents/"
+  echo "  push <name>... Deploy only the named skills/agents, plus their hard dependencies"
+  echo "  pull           Pull skills from ~/.claude/skills/ into repo"
+  echo "  lint           Lint skill + agent frontmatter and intra-repo skill references only"
   exit 1
+}
+
+# Hard runtime dependencies: a launcher or orchestrator that invokes another
+# skill mid-run silently no-ops if the target isn't installed. Named pushes
+# expand these transitively. (lint_skill_refs catches in-repo renames; this map
+# keeps *partial installs* coherent — update both when wiring changes.)
+skill_deps() {
+  case "$1" in
+    grill-me)     echo "grilling" ;;
+    commit-batch) echo "commit-batching" ;;
+    handoff)      echo "worklog evolve-claude-md" ;;
+    ai-review)    echo "unstale overbaked reviewer-2" ;;
+  esac
+}
+
+# Named-push resolution state (space-separated; bash-3.2-safe, no assoc arrays).
+RESOLVED_SKILLS=""
+RESOLVED_AGENTS=""
+EXPLICIT_NAMES=""
+
+is_explicit() { case "$EXPLICIT_NAMES" in *" $1 "*) return 0 ;; esac; return 1; }
+
+is_resolved() { case " $RESOLVED_SKILLS $RESOLVED_AGENTS " in *" $1 "*) return 0 ;; esac; return 1; }
+
+# Classify a name as skill or agent and recurse into its hard dependencies.
+resolve_name() {
+  local name="$1" dep
+  is_resolved "$name" && return 0
+  if [ -d "$SKILLS_SRC/$name" ]; then
+    RESOLVED_SKILLS="$RESOLVED_SKILLS $name"
+    for dep in $(skill_deps "$name"); do
+      resolve_name "$dep"
+    done
+  elif [ -f "$AGENTS_SRC/$name.md" ]; then
+    RESOLVED_AGENTS="$RESOLVED_AGENTS $name"
+  else
+    echo "✗ '$name' is neither a skill (skills/$name/) nor an agent (agents/$name.md)" >&2
+    echo "  skills: $(cd "$SKILLS_SRC" && printf '%s ' */ | tr -d '/')" >&2
+    echo "  agents: $(cd "$AGENTS_SRC" && for f in *.md; do printf '%s ' "${f%.md}"; done)" >&2
+    exit 1
+  fi
+}
+
+deploy_skill() {
+  mkdir -p "$SKILLS_DEST/$1"
+  cp -r "$SKILLS_SRC/$1/." "$SKILLS_DEST/$1/"
+}
+
+deploy_agent() {
+  mkdir -p "$AGENTS_DEST"
+  cp "$AGENTS_SRC/$1.md" "$AGENTS_DEST/$1.md"
 }
 
 sync_external_skills() {
@@ -276,33 +336,80 @@ EOF
 
 case "$1" in
   push)
-    echo "Syncing external skills"
-    sync_external_skills
-    echo "Linting skill + agent frontmatter"
-    lint_frontmatter
-    lint_skill_refs
-    echo "Deploying skills/ → $SKILLS_DEST"
-    for skill_dir in "$SKILLS_SRC"/*/; do
-      name=$(basename "$skill_dir")
-      if is_excluded "$name"; then
-        echo "  ⤫ $name (excluded on this machine via $EXCLUDE_FILE)"
-        continue
+    shift
+    if [ "$#" -gt 0 ]; then
+      # Named push: deploy only the requested skills/agents (+ hard deps).
+      EXPLICIT_NAMES=" $* "
+      for name in "$@"; do
+        resolve_name "$name"
+      done
+      # Refresh external checkouts only when one of them was requested.
+      if is_resolved "tab-setup"; then
+        echo "Syncing external skills"
+        sync_external_skills
       fi
-      echo "  → $name"
-      mkdir -p "$SKILLS_DEST/$name"
-      cp -r "$skill_dir/." "$SKILLS_DEST/$name/"
-    done
-    echo "Deploying agents/ → $AGENTS_DEST"
-    mkdir -p "$AGENTS_DEST"
-    for agent_file in "$AGENTS_SRC"/*.md; do
-      [ -f "$agent_file" ] || continue
-      name=$(basename "$agent_file")
-      echo "  → $name"
-      cp "$agent_file" "$AGENTS_DEST/$name"
-    done
-    install_startup_hook
-    install_statusline
-    echo "Done."
+      echo "Linting skill + agent frontmatter"
+      lint_frontmatter
+      lint_skill_refs
+      if [ -n "$RESOLVED_SKILLS" ]; then
+        echo "Deploying skills → $SKILLS_DEST"
+        for name in $RESOLVED_SKILLS; do
+          if is_excluded "$name" && ! is_explicit "$name"; then
+            echo "  ⤫ $name (dependency; excluded on this machine via $EXCLUDE_FILE)"
+            continue
+          fi
+          if is_explicit "$name"; then
+            if is_excluded "$name"; then
+              echo "  → $name (explicitly named — overriding machine-local exclusion)"
+            else
+              echo "  → $name"
+            fi
+          else
+            echo "  + $name (auto-included dependency)"
+          fi
+          deploy_skill "$name"
+        done
+      fi
+      if [ -n "$RESOLVED_AGENTS" ]; then
+        echo "Deploying agents → $AGENTS_DEST"
+        for name in $RESOLVED_AGENTS; do
+          echo "  → $name.md"
+          deploy_agent "$name"
+        done
+      fi
+      # Settings registration is tab-setup's concern; skip it otherwise so a
+      # one-skill install never touches ~/.claude/settings.json.
+      if is_resolved "tab-setup"; then
+        install_startup_hook
+      fi
+      echo "Done."
+    else
+      echo "Syncing external skills"
+      sync_external_skills
+      echo "Linting skill + agent frontmatter"
+      lint_frontmatter
+      lint_skill_refs
+      echo "Deploying skills/ → $SKILLS_DEST"
+      for skill_dir in "$SKILLS_SRC"/*/; do
+        name=$(basename "$skill_dir")
+        if is_excluded "$name"; then
+          echo "  ⤫ $name (excluded on this machine via $EXCLUDE_FILE)"
+          continue
+        fi
+        echo "  → $name"
+        deploy_skill "$name"
+      done
+      echo "Deploying agents/ → $AGENTS_DEST"
+      for agent_file in "$AGENTS_SRC"/*.md; do
+        [ -f "$agent_file" ] || continue
+        name=$(basename "$agent_file" .md)
+        echo "  → $name.md"
+        deploy_agent "$name"
+      done
+      install_startup_hook
+      install_statusline
+      echo "Done."
+    fi
     ;;
   pull)
     echo "Pulling $SKILLS_DEST → skills/"
