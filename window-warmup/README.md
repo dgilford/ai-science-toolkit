@@ -39,7 +39,7 @@ An always-on remote server runs the same warmup ping via cron at 05:05 / 10:05 /
 where GitHub itself is down or the external scheduler (cron-job.org) fails to fire.
 
 The Tier 2 script (`tier2-remote-heartbeat.sh`), deployment steps, and server details live in the
-**private `talim-server` repo** (they carry the server's address/auth, so they stay out of this
+**private server-config repo** (they carry the server's address/auth, so they — and the repo's name — stay out of this
 public repo). A ping inside an already-open window is a harmless no-op, so running both tiers is safe.
 
 ## Health record & monthly check

@@ -1,11 +1,11 @@
 ---
 name: worklog
-description: Capture a work-log entry to the Notion Work Journal, the talim-server cache, and a local mirror. Use whenever the user asks to log, note, record, or journal progress, a decision, or what they just did — and as the capture step invoked by /handoff.
+description: Capture a work-log entry to the Notion Work Journal, a remote server cache, and a local mirror. Use whenever the user asks to log, note, record, or journal progress, a decision, or what they just did — and as the capture step invoked by /handoff.
 allowed-tools: mcp__claude_ai_Notion__notion-search mcp__claude_ai_Notion__notion-fetch mcp__claude_ai_Notion__notion-create-pages mcp__claude_ai_Notion__notion-update-page Bash Read
 argument-hint: "[what to log]"
 catalog:
   order: 15
-  summary: 'Log a work entry to the Notion Work Journal + talim-server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something.'
+  summary: 'Log a work entry to the Notion Work Journal + remote server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something.'
 ---
 
 Capture one work-log entry into **three** targets. Distinguish two failure kinds:
