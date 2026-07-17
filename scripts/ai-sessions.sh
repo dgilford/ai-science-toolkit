@@ -3,7 +3,7 @@
 # Usage: ai-sessions
 #
 # Install (add to ~/.zshrc or ~/.bashrc):
-#   source /path/to/ai-tools/scripts/ai-sessions.sh
+#   source /path/to/ai-science-toolkit/scripts/ai-sessions.sh
 
 ai-sessions() {
   # Locate this file's own directory to find scripts/lib/ai-sessions/*.py, whether

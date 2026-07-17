@@ -7,7 +7,7 @@
 `settings.local.json` — machine-specific permissions and allowed commands. Gitignored. To back it up manually:
 
 ```bash
-cp ~/.claude/settings.local.json ~/Projects/ai-tools/settings/settings.local.json
+cp ~/.claude/settings.local.json ~/Projects/ai-science-toolkit/settings/settings.local.json
 ```
 
 To restore on a **new** machine (no existing `~/.claude/settings.json`):

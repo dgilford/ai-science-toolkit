@@ -41,7 +41,7 @@ cp "$FIXTURES/codex-session.jsonl" "$SANDBOX/.codex/sessions/"
 cp "$FIXTURES/codex-session-noindex.jsonl" "$SANDBOX/.codex/sessions/"
 cp "$FIXTURES/codex-session-index.jsonl" "$SANDBOX/.codex/session_index.jsonl"
 
-out=$(HOME="$SANDBOX" python3 "$LIB/codex-session-id.py" "/Users/dgilford/Projects/ai-tools")
+out=$(HOME="$SANDBOX" python3 "$LIB/codex-session-id.py" "/Users/dgilford/Projects/ai-science-toolkit")
 check "finds session id by matching cwd" "codex-fixture-session-id" "$out"
 
 out=$(HOME="$SANDBOX" python3 "$LIB/codex-session-id.py" "/no/such/cwd")

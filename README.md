@@ -1,6 +1,6 @@
 ![ai-tools](assets/ai-tools-banner_rounded.png)
 
-# ai-tools
+# ai-science-toolkit
 
 Global Claude Code skills and agent personas for scientific computing workflows.
 
@@ -49,8 +49,8 @@ Skills split on an invocation axis. **User-invoked** orchestrators you type expl
 Clone the repo and deploy all skills and hooks:
 
 ```bash
-git clone https://github.com/dgilford/ai-tools.git ~/Projects/ai-tools
-cd ~/Projects/ai-tools
+git clone https://github.com/dgilford/ai-science-toolkit.git ~/Projects/ai-science-toolkit
+cd ~/Projects/ai-science-toolkit
 bash scripts/sync.sh push
 ```
 
@@ -148,7 +148,7 @@ rm ~/.claude/session-init-config.json
 `scripts/ai-sessions.sh` defines an `ai-sessions` shell function that lists your running Claude/Codex CLI sessions with their resume commands. Source it directly from the repo (no copy — `git pull` keeps it current) by adding to `~/.bashrc` (or `~/.zshrc`):
 
 ```bash
-source ~/Projects/ai-tools/scripts/ai-sessions.sh
+source ~/Projects/ai-science-toolkit/scripts/ai-sessions.sh
 ```
 
 Run `ai-sessions` to list sessions. Claude's own recap (`away_summary`) is shown by default for each session.

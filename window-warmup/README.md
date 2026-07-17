@@ -23,10 +23,10 @@ accordingly (old Tier 2 → Tier 1, old Tier 3 → Tier 2).
 subject to the schedule-queue delay) and keeps a coarse `schedule:` backup. The precise trigger
 is an external scheduler:
 
-1. Create a fine-grained PAT (repo `dgilford/ai-tools` only, **Actions: Read and write**).
+1. Create a fine-grained PAT (repo `dgilford/ai-science-toolkit` only, **Actions: Read and write**).
 2. On [cron-job.org](https://cron-job.org) (free), create 3 jobs at 5:00 / 10:00 / 15:00 ET, each:
    - **Method** `POST`
-   - **URL** `https://api.github.com/repos/dgilford/ai-tools/actions/workflows/window-warmup.yml/dispatches`
+   - **URL** `https://api.github.com/repos/dgilford/ai-science-toolkit/actions/workflows/window-warmup.yml/dispatches`
    - **Headers** `Authorization: Bearer <PAT>`, `Accept: application/vnd.github+json`
    - **Body** `{"ref":"main"}`
 
@@ -48,7 +48,7 @@ GitHub retains Actions run history for ~90 days, and the monthly health check on
 the current month — always well inside that window — so there's no separate durable log to
 maintain. A monthly **cloud routine** (`warmup health check`) fires on the last day of each
 month, reads the current month's `window-warmup.yml` runs straight from the GitHub Actions API
-(`GET /repos/dgilford/ai-tools/actions/workflows/window-warmup.yml/runs`, unauthenticated —
+(`GET /repos/dgilford/ai-science-toolkit/actions/workflows/window-warmup.yml/runs`, unauthenticated —
 the repo is public), and for each one checks `event` (`workflow_dispatch` vs the coarse
 `schedule` backup), `created_at` (trigger time, compared to the nearest 05/10/15 ET anchor), and
 `conclusion` (`success` covers both a real ping and an already-capped window; anything else is a
