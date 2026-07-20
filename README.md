@@ -124,9 +124,9 @@ State lives in a repo-local `.ai/` directory — add it to `.gitignore` in any p
 
 ## Citation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21461069.svg)](https://doi.org/10.5281/zenodo.21461069)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21461068.svg)](https://doi.org/10.5281/zenodo.21461068)
 
-If this toolkit supports your work, please cite it. GitHub's "Cite this repository" button reads [`CITATION.cff`](CITATION.cff) and generates APA/BibTeX for you, and the DOI badge above resolves to the archived Zenodo record.
+If this toolkit supports your work, please cite it. GitHub's "Cite this repository" button reads [`CITATION.cff`](CITATION.cff) and generates APA/BibTeX for the specific release, while the DOI badge above (the Zenodo concept DOI) always resolves to the latest archived version.
 
 ## License
 
