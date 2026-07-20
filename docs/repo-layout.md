@@ -8,10 +8,17 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   skill-development conventions, sync behavior, and session lifecycle.
 - `BACKLOG.md` — durable in-repo task tracker (open tasks, someday/explore,
   connector notes). Transient per-session state lives in the gitignored `.ai/`.
+- `CITATION.cff` — citation metadata; powers GitHub's "Cite this repository"
+  button (APA/BibTeX).
+- `.zenodo.json` — Zenodo DOI metadata, applied when a tagged release is
+  archived to Zenodo.
 - `agents/` — source copies of Claude Code subagent personas. Edit here first,
   then deploy with `scripts/sync.sh push` (syncs to `~/.claude/agents/`).
 - `skills/` — source copies of Claude Code skills. Edit here first, then deploy
   with `scripts/sync.sh push` (syncs to `~/.claude/skills/`).
+- `.claude-plugin/` — Claude Code plugin manifests (`marketplace.json` +
+  `plugin.json`) enabling one-line `/plugin` install. See
+  [Installation](../README.md#installation).
 - `scripts/sync.sh` — deploys skills and agents (all of them, or just the ones
   you name), syncs the external `tab-setup` skill, and registers the startup
   hook. See [Installation](../README.md#installation).
@@ -41,5 +48,6 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   [dgilford/tab-setup](https://github.com/dgilford/tab-setup); `sync.sh push`
   refreshes this before copying its scripts into `skills/tab-setup/`. Fork
   maintenance: [tab-setup-maintenance.md](tab-setup-maintenance.md).
+- `assets/` — static image assets (e.g. the README banner).
 - `vscode-extension/` — small helper extension for applying pending Claude tab
   colors/names in VS Code-compatible remote servers.
