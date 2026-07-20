@@ -150,7 +150,7 @@ The repo is also installable as a **Claude Code plugin** via `.claude-plugin/mar
 
 - **Single bundle plugin**, `source: "."` (repo root). `plugin.json` carries metadata only — no `skills`/`agents` component fields — so Claude Code **auto-discovers** `skills/*/SKILL.md` and `agents/*.md`. This ships the same skills and agents as a full `sync.sh push` (everything, including `tab-setup`; unlike `push`, it isn't narrowed by a machine's local exclude-list and doesn't register the boot hook or refresh the tab-setup fork), so no manifest edit is needed when adding a skill or agent. Note the default `skills/` scan **always** runs and the `skills` field only *adds* to it — there is no way to exclude a skill (e.g. `tab-setup`) short of relocating it out of `skills/`.
 - **`tab-setup` under the plugin path is inert, not broken:** its SessionStart auto-naming hook is registered by `sync.sh` into `~/.claude/settings.json`, not by a `hooks/hooks.json`, so a plugin install ships the `/tab-setup` command but never activates the boot hook. Users who want the hook must use `sync.sh push`.
-- **`${CLAUDE_PLUGIN_ROOT}` gotcha (companion files):** a plugin installs under `~/.claude/plugins/cache/…`, *not* `~/.claude/skills/`, so any skill that loads a companion file must **not** hardcode `~/.claude/skills/<name>/`. Use `${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/<name>}` with a `$HOME/.claude/skills/<name>` fallback so the same line resolves under **both** plugin install (var set → plugin root) and `sync.sh` deploy (var unset → home). `figure-review`'s `COLORBLIND.md`/`CC-STYLE.md` loads are the reference example; `lit-review`'s relative markdown link to `REFERENCE.md` needs no such handling (resolved from the SKILL.md's own dir). Apply this rule to any new companion-file skill.
+- **`${CLAUDE_PLUGIN_ROOT}` gotcha (companion files):** a plugin installs under `~/.claude/plugins/cache/…`, *not* `~/.claude/skills/`, so any skill that loads a companion file must **not** hardcode `~/.claude/skills/<name>/`. Use `${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/<name>}` with a `$HOME/.claude/skills/<name>` fallback so the same line resolves under **both** plugin install (var set → plugin root) and `sync.sh` deploy (var unset → home). **Empirically confirmed (2026-07-20):** Claude Code *does* export `CLAUDE_PLUGIN_ROOT` into a skill's `` ```! `` preamble under a plugin install (not just for hooks/commands) — verified by loading `/figure-review` from a real `/plugin install` and seeing both companion files resolve — so the plugin-root branch actually fires; the pattern is not merely theoretical. `figure-review`'s `COLORBLIND.md`/`CC-STYLE.md` loads are the reference example; `lit-review`'s relative markdown link to `REFERENCE.md` needs no such handling (resolved from the SKILL.md's own dir). Apply this rule to any new companion-file skill.
 - **Versioning:** two `version` fields — the marketplace manifest's top-level `version` and `plugin.json` (the plugin entry in `marketplace.json` carries no metadata beyond `name`/`source`/`category`/`description`; everything else is inherited from `plugin.json`, the authoritative source). Bump both on a tagged release so `/plugin marketplace update` surfaces the change. Nothing lints these against git tags yet.
 
 ## Cloud routines
@@ -160,6 +160,14 @@ Warmup infrastructure (the two-tier `claude -p` window-anchoring system and its 
 A weekly cloud routine, `disable-model-invocation bug watch` (ID in `.ai/routines.md`), polls anthropics/claude-code#22345 + the CHANGELOG and alerts when the token-reclaim bug (see Skill file format) is fixed; retire it then. **Caveat:** #22345 is titled as a *plugin*-skills issue — a weak proxy in both directions — so on any FIXED alert, verify token reclaim empirically before acting.
 
 Manage routines at https://claude.ai/code/routines — IDs and creation notes in `.ai/routines.md` (gitignored, machine-local).
+
+## Releases & citation
+
+Tagged releases are archived to Zenodo (the repo↔Zenodo webhook is enabled), which mints a DOI. Non-obvious convention for the two DOI slots — **do not swap them on future releases:**
+- **`CITATION.cff` → the version DOI** (pins the specific release; bump it each release alongside `version`/`date-released`).
+- **`README.md` badge → the concept (all-versions) DOI** (always resolves to the latest release; leave it unchanged across releases).
+
+Zenodo only captures releases published *after* the webhook was enabled, and only a real GitHub **Release** (not a bare `git tag`) fires it. Cutting a release: publish a GitHub Release for tag `vX.Y.Z` from `main` (e.g. `gh release create vX.Y.Z --target main`, or the web UI).
 
 ## Commits
 
