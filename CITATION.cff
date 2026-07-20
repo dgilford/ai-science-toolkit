@@ -23,5 +23,4 @@ keywords:
   - reviewer-agents
 version: 1.0.0
 date-released: "2026-07-20"
-# Added after Zenodo mints the DOI for the v1.0.0 release:
-# doi: "10.5281/zenodo.XXXXXXX"
+doi: "10.5281/zenodo.21461069"

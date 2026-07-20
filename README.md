@@ -124,7 +124,9 @@ State lives in a repo-local `.ai/` directory — add it to `.gitignore` in any p
 
 ## Citation
 
-If this toolkit supports your work, please cite it. GitHub's "Cite this repository" button reads [`CITATION.cff`](CITATION.cff) and generates APA/BibTeX for you. A versioned DOI (via Zenodo) will be added at the first tagged release.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21461069.svg)](https://doi.org/10.5281/zenodo.21461069)
+
+If this toolkit supports your work, please cite it. GitHub's "Cite this repository" button reads [`CITATION.cff`](CITATION.cff) and generates APA/BibTeX for you, and the DOI badge above resolves to the archived Zenodo record.
 
 ## License
 
