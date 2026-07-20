@@ -11,13 +11,13 @@ catalog:
 ## Colorblind reference (loaded at runtime)
 
 ```!
-cat ~/.claude/skills/figure-review/COLORBLIND.md 2>/dev/null || echo "(colorblind guide not found)"
+D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/figure-review}"; D="${D:-$HOME/.claude/skills/figure-review}"; cat "$D/COLORBLIND.md" 2>/dev/null || echo "(colorblind guide not found)"
 ```
 
 ## House style (loaded at runtime)
 
 ```!
-cat ~/.claude/skills/figure-review/CC-STYLE.md 2>/dev/null || echo "(no house style configured — criterion 6 skipped)"
+D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/figure-review}"; D="${D:-$HOME/.claude/skills/figure-review}"; cat "$D/CC-STYLE.md" 2>/dev/null || echo "(no house style configured — criterion 6 skipped)"
 ```
 
 ## Inputs
