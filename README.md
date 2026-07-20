@@ -122,6 +122,10 @@ State lives in a repo-local `.ai/` directory — add it to `.gitignore` in any p
 - [docs/repo-layout.md](docs/repo-layout.md) — what every file and directory in this repo is for
 - [CLAUDE.md](CLAUDE.md) — skill-development conventions, sync internals, and repo workflow notes
 
+## Citation
+
+If this toolkit supports your work, please cite it. GitHub's "Cite this repository" button reads [`CITATION.cff`](CITATION.cff) and generates APA/BibTeX for you. A versioned DOI (via Zenodo) will be added at the first tagged release.
+
 ## License
 
 Released under the [MIT License](LICENSE) — Copyright (c) 2026 Daniel Gilford.

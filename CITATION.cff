@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this toolkit, please cite it using the metadata below."
+title: "ai-science-toolkit"
+abstract: >-
+  A toolkit for AI-assisted scientific computing: Claude Code skills,
+  domain-expert reviewer agents (climate attribution, statistics, meteorology,
+  science communication), and shell utilities for scientific research workflows.
+type: software
+authors:
+  - family-names: Gilford
+    given-names: Daniel
+    affiliation: "Climate Central"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: fill in ORCID
+repository-code: "https://github.com/dgilford/ai-science-toolkit"
+url: "https://github.com/dgilford/ai-science-toolkit"
+license: MIT
+keywords:
+  - claude-code
+  - scientific-computing
+  - climate-science
+  - atmospheric-science
+  - open-science
+  - reviewer-agents
+# On the first tagged release, add these and re-cut the release so Zenodo mints a DOI:
+# version: 1.0.0
+# date-released: "2026-07-20"
+# doi: "10.5281/zenodo.XXXXXXX"
