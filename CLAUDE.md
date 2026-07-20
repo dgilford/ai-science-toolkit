@@ -139,6 +139,20 @@ After `pull`, review `git diff skills/ agents/` — pull brings in all globally 
 
 **External skills** (`tab-setup`) are a special case: `push` pulls from `github.com/dgilford/tab-setup` (a fork of `JeraldHuff/tab-setup`) into `tab-setup/` *before* copying into `skills/tab-setup/`, so **edits to `skills/tab-setup/` are overwritten by this pull** — edit `tab-setup/scripts/`, commit/push to the fork, then `sync.sh push`. The push now shows a diff and asks before deploying changed upstream code (it becomes a SessionStart hook). Fork-maintenance procedures (upstream sync, `/tab-setup update`, caveats): `docs/tab-setup-maintenance.md`.
 
+## Plugin distribution
+
+The repo is also installable as a **Claude Code plugin** via `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json` at the repo root. One-line adoption:
+
+```
+/plugin marketplace add dgilford/ai-science-toolkit
+/plugin install ai-science-toolkit@ai-science-toolkit
+```
+
+- **Single bundle plugin**, `source: "."` (repo root). `plugin.json` carries metadata only — no `skills`/`agents` component fields — so Claude Code **auto-discovers** `skills/*/SKILL.md` and `agents/*.md`. This ships exactly what `sync.sh push` deploys (everything, including `tab-setup`), so no manifest edit is needed when adding a skill or agent. Note the default `skills/` scan **always** runs and the `skills` field only *adds* to it — there is no way to exclude a skill (e.g. `tab-setup`) short of relocating it out of `skills/`.
+- **`tab-setup` under the plugin path is inert, not broken:** its SessionStart auto-naming hook is registered by `sync.sh` into `~/.claude/settings.json`, not by a `hooks/hooks.json`, so a plugin install ships the `/tab-setup` command but never activates the boot hook. Users who want the hook must use `sync.sh push`.
+- **`${CLAUDE_PLUGIN_ROOT}` gotcha (companion files):** a plugin installs under `~/.claude/plugins/cache/…`, *not* `~/.claude/skills/`, so any skill that loads a companion file must **not** hardcode `~/.claude/skills/<name>/`. Use `${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/<name>}` with a `$HOME/.claude/skills/<name>` fallback so the same line resolves under **both** plugin install (var set → plugin root) and `sync.sh` deploy (var unset → home). `figure-review`'s `COLORBLIND.md`/`CC-STYLE.md` loads are the reference example; `lit-review`'s relative markdown link to `REFERENCE.md` needs no such handling (resolved from the SKILL.md's own dir). Apply this rule to any new companion-file skill.
+- **Versioning:** two `version` fields (the marketplace manifest and the plugin entry/manifest) — bump both on a tagged release so `/plugin marketplace update` surfaces the change. Nothing lints these against git tags yet.
+
 ## Scheduled window warmup (two-tier)
 
 The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it (a claude.ai **cloud routine** spends tokens but does *not* anchor; single test 2026-06-24 — **do not** move it back to a cloud routine, and re-verify after major Claude Code/plan changes). Anchoring at ~5/10/15:00 ET weekdays runs in **two independent tiers**; a minimal Haiku ping inside an already-open window is a harmless no-op, so running both is safe. Assets in `window-warmup/`; full rationale, empirics, and setup in `window-warmup/README.md`.

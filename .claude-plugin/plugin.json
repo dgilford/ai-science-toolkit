@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "ai-science-toolkit",
+  "version": "1.0.0",
+  "description": "Claude Code skills and domain-expert reviewer subagents for AI-assisted scientific computing.",
+  "author": {
+    "name": "Daniel Gilford",
+    "url": "https://github.com/dgilford"
+  },
+  "homepage": "https://github.com/dgilford/ai-science-toolkit",
+  "repository": "https://github.com/dgilford/ai-science-toolkit",
+  "license": "MIT",
+  "keywords": [
+    "science",
+    "climate-science",
+    "atmospheric-science",
+    "research",
+    "reviewer-agents",
+    "open-science"
+  ]
+}

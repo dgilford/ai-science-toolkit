@@ -6,6 +6,19 @@ A toolkit for AI-assisted scientific computing: [Claude Code](https://claude.com
 
 ## Installation
 
+### As a plugin (one line)
+
+If you use Claude Code's plugin system, add this repo as a marketplace and install the bundle:
+
+```
+/plugin marketplace add dgilford/ai-science-toolkit
+/plugin install ai-science-toolkit@ai-science-toolkit
+```
+
+This installs every skill and reviewer agent. Updates come via `/plugin marketplace update ai-science-toolkit`. To cherry-pick individual pieces or register the session-naming boot hook, use the `sync.sh` workflow below.
+
+### With `sync.sh` (clone and deploy)
+
 Clone the repo, then deploy everything:
 
 ```bash

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ai-science-toolkit",
+  "owner": {
+    "name": "Daniel Gilford",
+    "url": "https://github.com/dgilford"
+  },
+  "description": "Claude Code skills and domain-expert reviewer agents for AI-assisted scientific computing.",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "ai-science-toolkit",
+      "source": ".",
+      "description": "A bundle of Claude Code skills (session lifecycle, literature review, figure review, over-engineering audits, commit batching) and domain-expert reviewer subagents (climate attribution, statistics, meteorology, science communication) for scientific research workflows.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Gilford",
+        "url": "https://github.com/dgilford"
+      },
+      "homepage": "https://github.com/dgilford/ai-science-toolkit",
+      "repository": "https://github.com/dgilford/ai-science-toolkit",
+      "license": "MIT",
+      "keywords": [
+        "science",
+        "climate-science",
+        "atmospheric-science",
+        "research",
+        "reviewer-agents",
+        "literature-review",
+        "open-science"
+      ],
+      "category": "productivity"
+    }
+  ]
+}
