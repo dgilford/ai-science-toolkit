@@ -10,7 +10,7 @@ authors:
   - family-names: Gilford
     given-names: Daniel
     affiliation: "Climate Central"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: fill in ORCID
+    orcid: "https://orcid.org/0000-0003-2422-0887"
 repository-code: "https://github.com/dgilford/ai-science-toolkit"
 url: "https://github.com/dgilford/ai-science-toolkit"
 license: MIT

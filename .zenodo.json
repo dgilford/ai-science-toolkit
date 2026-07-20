@@ -1,0 +1,22 @@
+{
+  "title": "ai-science-toolkit",
+  "description": "A toolkit for AI-assisted scientific computing: Claude Code skills, domain-expert reviewer agents (climate attribution, statistics, meteorology, science communication), and shell utilities for scientific research workflows.",
+  "upload_type": "software",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Gilford, Daniel",
+      "affiliation": "Climate Central",
+      "orcid": "0000-0003-2422-0887"
+    }
+  ],
+  "keywords": [
+    "claude-code",
+    "scientific-computing",
+    "climate-science",
+    "atmospheric-science",
+    "open-science",
+    "reviewer-agents"
+  ]
+}
