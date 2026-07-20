@@ -11,8 +11,8 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   `"version": "1.0.0"` to `.zenodo.json`; (2) after Zenodo mints the DOI, paste it into
   `CITATION.cff`'s `doi` field and add a DOI badge to `README.md` (replacing the "will be
   added at the first tagged release" line). Zenodo↔GitHub webhook is already enabled.
-- [ ] **Bug-watch routine notification channel — finish the webhook.** Routine
-  `trig_01YR15V8NzaehoWj1hMMukRW` currently DMs the FIXED report to the user's Slack
+- [ ] **Bug-watch routine notification channel — finish the webhook.** The routine
+  (ID in `.ai/routines.md`) currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
   Real fix pending: a Slack **incoming webhook** (app posts → real notification).
   Webhook app is awaiting Slack admin approval. Once approved: create the webhook URL,

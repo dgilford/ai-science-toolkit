@@ -157,7 +157,7 @@ The repo is also installable as a **Claude Code plugin** via `.claude-plugin/mar
 
 Warmup infrastructure (the two-tier `claude -p` window-anchoring system and its `warmup health check` routine) lives in the private infra repo, not here.
 
-A weekly cloud routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`), polls anthropics/claude-code#22345 + the CHANGELOG and alerts when the token-reclaim bug (see Skill file format) is fixed; retire it then. **Caveat:** #22345 is titled as a *plugin*-skills issue — a weak proxy in both directions — so on any FIXED alert, verify token reclaim empirically before acting.
+A weekly cloud routine, `disable-model-invocation bug watch` (ID in `.ai/routines.md`), polls anthropics/claude-code#22345 + the CHANGELOG and alerts when the token-reclaim bug (see Skill file format) is fixed; retire it then. **Caveat:** #22345 is titled as a *plugin*-skills issue — a weak proxy in both directions — so on any FIXED alert, verify token reclaim empirically before acting.
 
 Manage routines at https://claude.ai/code/routines — IDs and creation notes in `.ai/routines.md` (gitignored, machine-local).
 
