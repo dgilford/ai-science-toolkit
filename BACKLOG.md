@@ -20,9 +20,6 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
   token-reclaim fix — on any FIXED signal, verify empirically that `disable-model-invocation`
   reclaims description token budget before revisiting the ai-science-toolkit token-budget goal and
   deleting the routine at https://claude.ai/code/routines.
-- [ ] **Delete the now-unused `warmup-heartbeat` orphan branch** on GitHub (the routine and
-  workflow no longer write to it as of 2026-07-06; the branch itself isn't deletable from a
-  repo session).
 
 ## Someday / explore
 
