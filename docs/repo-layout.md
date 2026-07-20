@@ -34,14 +34,9 @@ A tour of what lives where. For install and usage, see the [README](../README.md
 - `docs/` — user and maintainer documentation (this file, per-skill
   [configuration](configuration.md), [tab-setup details](tab-setup.md), fork
   maintenance runbooks).
-- `window-warmup/` — assets for a scheduled `claude -p` "warmup" that anchors
-  the 5-hour usage window on weekdays; rationale and setup in
-  `window-warmup/README.md`.
-- `.github/workflows/` — GitHub Actions. `window-warmup.yml` runs the weekday
-  warmup (triggered by an external scheduler via `workflow_dispatch`; the
-  `schedule:` cron is a coarse backup — see `window-warmup/README.md`).
-  `lint.yml` checks skill and agent frontmatter, catalog-table drift,
-  ShellCheck, and the `tests/` parser smoke tests on every push/PR.
+- `.github/workflows/` — GitHub Actions. `lint.yml` checks skill and agent
+  frontmatter, catalog-table drift, ShellCheck, and the `tests/` parser smoke
+  tests on every push/PR.
 - `tab-setup/` — external skill checkout from
   [dgilford/tab-setup](https://github.com/dgilford/tab-setup); `sync.sh push`
   refreshes this before copying its scripts into `skills/tab-setup/`. Fork

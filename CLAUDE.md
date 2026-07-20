@@ -153,16 +153,9 @@ The repo is also installable as a **Claude Code plugin** via `.claude-plugin/mar
 - **`${CLAUDE_PLUGIN_ROOT}` gotcha (companion files):** a plugin installs under `~/.claude/plugins/cache/…`, *not* `~/.claude/skills/`, so any skill that loads a companion file must **not** hardcode `~/.claude/skills/<name>/`. Use `${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/<name>}` with a `$HOME/.claude/skills/<name>` fallback so the same line resolves under **both** plugin install (var set → plugin root) and `sync.sh` deploy (var unset → home). `figure-review`'s `COLORBLIND.md`/`CC-STYLE.md` loads are the reference example; `lit-review`'s relative markdown link to `REFERENCE.md` needs no such handling (resolved from the SKILL.md's own dir). Apply this rule to any new companion-file skill.
 - **Versioning:** two `version` fields (the marketplace manifest and the plugin entry/manifest) — bump both on a tagged release so `/plugin marketplace update` surfaces the change. Nothing lints these against git tags yet.
 
-## Scheduled window warmup (two-tier)
+## Cloud routines
 
-The 5-hour usage window is **rolling and anchored to the first real session message** — and only a genuine **`claude -p`** session anchors it (a claude.ai **cloud routine** spends tokens but does *not* anchor; single test 2026-06-24 — **do not** move it back to a cloud routine, and re-verify after major Claude Code/plan changes). Anchoring at ~5/10/15:00 ET weekdays runs in **two independent tiers**; a minimal Haiku ping inside an already-open window is a harmless no-op, so running both is safe. Assets in `window-warmup/`; full rationale, empirics, and setup in `window-warmup/README.md`.
-
-- **Tier 1 — GitHub workflow via external cron (the precise anchor, ~0–2 min):** cron-job.org POSTs `workflow_dispatch` at 5/10/15:00 ET; `on: schedule:` is a coarse backup only (observed 1.5–3h late). Auth via `CLAUDE_CODE_OAUTH_TOKEN` repo secret; do **not** set `ANTHROPIC_API_KEY` (precedence → bills API) or pass `--bare`. Warmup helps only the 5-hour window, never the weekly cap.
-- **Tier 2 — remote server cron** at :05 offsets; independent redundancy covering "GitHub/scheduler down". Script/deploy/server details live in the private server-config repo (name recorded in machine-local memory) — do not re-add them here.
-
-**Retired 2026-07-06:** the macOS launchd tier (local `WakeSystem` wake + `warmup.sh`) was dropped — it fired late whenever the Mac was asleep at an anchor (mechanism never conclusively identified) and not at all when powered off, and the remote-server tier already covers the same failure mode without those gaps. `window-warmup/install.sh`, `warmup.sh`, and the plist template were removed from this repo; the old Tier 2 (GitHub) and Tier 3 (remote server) were renumbered to Tier 1 and Tier 2 above.
-
-**Health record:** a monthly cloud routine (`warmup health check`, last day of month) reads the current month's runs of `window-warmup.yml` directly from the GitHub Actions API (trigger type, timestamp, conclusion) and alerts only on degradation. Details in `window-warmup/README.md`.
+Warmup infrastructure (the two-tier `claude -p` window-anchoring system and its `warmup health check` routine) lives in the private infra repo, not here.
 
 A weekly cloud routine, `disable-model-invocation bug watch` (`trig_01YR15V8NzaehoWj1hMMukRW`), polls anthropics/claude-code#22345 + the CHANGELOG and alerts when the token-reclaim bug (see Skill file format) is fixed; retire it then. **Caveat:** #22345 is titled as a *plugin*-skills issue — a weak proxy in both directions — so on any FIXED alert, verify token reclaim empirically before acting.
 
