@@ -21,7 +21,7 @@ keywords:
   - atmospheric-science
   - open-science
   - reviewer-agents
-# On the first tagged release, add these and re-cut the release so Zenodo mints a DOI:
-# version: 1.0.0
-# date-released: "2026-07-20"
+version: 1.0.0
+date-released: "2026-07-20"
+# Added after Zenodo mints the DOI for the v1.0.0 release:
 # doi: "10.5281/zenodo.XXXXXXX"

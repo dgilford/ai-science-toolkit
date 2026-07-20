@@ -2,6 +2,7 @@
   "title": "ai-science-toolkit",
   "description": "A toolkit for AI-assisted scientific computing: Claude Code skills, domain-expert reviewer agents (climate attribution, statistics, meteorology, science communication), and shell utilities for scientific research workflows.",
   "upload_type": "software",
+  "version": "1.0.0",
   "license": "MIT",
   "access_right": "open",
   "creators": [
