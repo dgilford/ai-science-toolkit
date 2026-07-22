@@ -97,6 +97,8 @@ These skills form a session lifecycle:
 
 The `.ai/` directory is repo-local and is gitignored.
 
+**Review-report archiving:** the five review skills (`ai-review`, `figure-review`, `reviewer-2`, `overbaked`, `unstale`) archive each report to `.ai/reviews/<YYYY-MM-DD>-<skill>[-<slug>].md` by default; `--no-archive` opts out. Archiving is best-effort (never blocks the review) and warns — without editing anything — when `.ai/` isn't gitignored in the target repo. When adding a new report-producing skill, adopt the same `## Archive` block.
+
 ## Worklog → Notion journal
 
 The `worklog` skill captures a single work-log entry to **three** targets (all best-effort — none may block the caller): a local `.ai/worklog-YYYY-MM-DD.jsonl` mirror (source of truth), a redundant copy SSH-appended to `~/worklog/inbox/<date>.jsonl` on the configured server (`WORKLOG_SSH_TARGET`), and a bullet appended to the current week's page in the **Work Journal** Notion space. It is model-invokable — it fires whenever the user asks to log/note/record something, and `/handoff` calls it after writing `.ai/HANDOFF.md`. An end-of-day Claude routine summarizes the day's raw entries into narrative sections on that weekly page.

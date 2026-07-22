@@ -1,6 +1,7 @@
 ---
 name: reviewer-2
 description: 'Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section. For each claim: identify the baseline being compared against, name the counterfactual, surface plausible alternative explanations, and check that stated uncertainty is consistent with the strength of the claim. Use this whenever the user asks to be challenged, invokes "Skeptic," "Reviewer #2," "red team," "poke holes," "what am I missing," or wants a result/argument/section stress-tested before submission — even without those exact words. Reports concerns; does not rewrite the user''s argument.'
+argument-hint: "[--no-archive]"
 catalog:
   order: 120
   summary: 'Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section: baseline, counterfactual, alternatives, uncertainty consistency.'
@@ -45,6 +46,10 @@ Prioritized concern list, most load-bearing weakness first. For each concern: wh
 Claims needing source verification: flag for `/lit-review`; do not verify here.
 
 Stop when findings become trivial or the user overrides. Do not manufacture concerns to fill space.
+
+## Archive
+
+Unless `--no-archive` was passed: after emitting the report, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-reviewer-2[-<topic-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — if the cwd isn't a git repo or the write fails, add a one-line note and move on; archiving never blocks or alters the review. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn and suggest adding `.ai/` to `.gitignore`.
 
 ## Does not
 

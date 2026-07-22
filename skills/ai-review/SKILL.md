@@ -2,8 +2,8 @@
 name: ai-review
 description: SLASH COMMAND — type /ai-review for a comprehensive senior-engineer review of a project or repository. Orchestrates a parallel fan-out across correctness, staleness, over-baking, and claim rigor by DELEGATING to the tools that own each lane, then adds the three lanes nothing else covers — gap/opportunity hunting, grounded novel ideation, and a single prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence deterministic repairs.
 disable-model-invocation: true
-allowed-tools: Bash Read Grep Glob Task
-argument-hint: "[path] [--since <ref>] [--fix]"
+allowed-tools: Bash Read Write Grep Glob Task
+argument-hint: "[path] [--since <ref>] [--fix] [--no-archive]"
 catalog:
   order: 140
   summary: 'Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs.'
@@ -83,6 +83,10 @@ After all lanes return: deduplicate (a stale comment flagged by both unstale and
 
 If `--fix` was passed, append an **Applied** section listing exactly what `/unstale --auto` changed. Nothing else is ever auto-applied.
 
+## Archive
+
+Unless `--no-archive` was passed: after emitting the report, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-ai-review[-<scope-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — if the target isn't a git repo or the write fails, add a one-line note and move on; archiving never blocks or alters the review. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn in the report and suggest adding `.ai/` to `.gitignore`.
+
 ## Anti-Rationalization
 
 | Excuse | Reality |
@@ -99,4 +103,5 @@ If `--fix` was passed, append an **Applied** section listing exactly what `/unst
 - [ ] Findings deduplicated and ranked, not concatenated
 - [ ] Every ideation item carries a confidence + effort tag and an anchor
 - [ ] Nothing edited unless `--fix` was passed (then only /unstale --auto changes, logged)
+- [ ] Report archived to `.ai/reviews/` (or `--no-archive` / non-repo noted)
 - [ ] Skipped lanes named with a reason

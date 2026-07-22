@@ -1,8 +1,8 @@
 ---
 name: figure-review
 description: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support. Use this whenever the user shares or references a figure, plot, panel, or colorbar for a paper, report, or brief and wants it checked, reviewed, or made publication-ready — even if they just say "does this figure work?" or "review my plot." Emits a per-criterion report; never silently rewrites plotting code.'
-allowed-tools: Read
-argument-hint: "[--style]"
+allowed-tools: Bash Read Write
+argument-hint: "[--style] [--no-archive]"
 catalog:
   order: 110
   summary: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style.'
@@ -49,6 +49,10 @@ Check colors against the CC palette above, graphic fonts (Effra/Bebas/Work Sans)
 
 **[Criterion]**: `pass` / `flag` / `cant-assess` — [detail; if flagged, specific fix]
 *Example: **Colormap**: `flag` — Uses jet. Replace with viridis or cmo.thermal.*
+
+## Archive
+
+Unless `--no-archive` was passed: after emitting the report, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-figure-review[-<figure-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — if the cwd isn't a git repo or the write fails, add a one-line note and move on; archiving never blocks or alters the review. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn and suggest adding `.ai/` to `.gitignore`.
 
 ## Does not
 

@@ -1,7 +1,8 @@
 ---
 name: overbaked
 description: Audit a document, plan, or code for over-engineering, verbosity, and scope creep. Use when you've just written something and want a point-by-point check before finalizing.
-allowed-tools: Read
+allowed-tools: Bash Read Write
+argument-hint: "[--no-archive]"
 catalog:
   order: 70
   summary: 'Audit a document, plan, or code for over-engineering, verbosity, and scope creep.'
@@ -57,6 +58,10 @@ Then for each finding:
 Rewrite: `tighter version`
 
 *Why cut: one-line explanation of what was lost vs. what was preserved.*
+
+## Archive
+
+Unless `--no-archive` was passed: after emitting the audit, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-overbaked[-<target-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — if the cwd isn't a git repo or the write fails, add a one-line note and move on; archiving never blocks or alters the audit. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn and suggest adding `.ai/` to `.gitignore`.
 
 ---
 

@@ -2,7 +2,7 @@
 name: unstale
 description: Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers. Use this whenever you want to clean up after a refactor, fix a comment that no longer matches the code, remove unused imports, check for leftover TODOs, detect doc drift, or tidy a notebook before sharing or submission — even without the word "unstale." Default mode auto-detects library .py scope and runs ruff + vulture (deterministic), then LLM semantic checks; never touches notebooks. `--artifact <nb.ipynb>` cleans a notebook as a deliverable (full treatment including dead-code detection). `--exploratory <nb.ipynb>` tidies a working notebook non-destructively (structural + semantic only, no removals ever). Always emits a structured report before any edit.
 allowed-tools: Bash Read Edit Write
-argument-hint: "[--auto] [--artifact <paths>] [--exploratory <paths>]"
+argument-hint: "[--auto] [--artifact <paths>] [--exploratory <paths>] [--no-archive]"
 catalog:
   order: 100
   summary: 'Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes.'
@@ -140,6 +140,10 @@ State mode and detected scope at the top. Then one row per finding:
 | `import foo` unused | `utils.py:3` | dead import | HIGH | ruff F401 | remove |
 | `MyClass._cache` | `store.py:88` | dead attr (92%) | MED | vulture 92% | flag only |
 | `# uses requests not httpx` | `api.py:14` | stale comment | — | LLM-JUDGED | flag only |
+
+## Archive
+
+Unless `--no-archive` was passed: after emitting the report, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-unstale[-<scope-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — a failed write never blocks or alters the run. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn and suggest adding `.ai/` to `.gitignore`. This is distinct from the `--auto` apply log below, which records only applied edits.
 
 ## Apply log (`--auto` only)
 
