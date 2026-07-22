@@ -28,7 +28,7 @@ git diff --stat HEAD 2>/dev/null | head -30 || echo "(no diff)"
 
 Read these if they exist: `.ai/HANDOFF.md`, `CLAUDE.md`, `AGENTS.md`. Scan recently modified files for TODO/FIXME markers. Do not invent results for commands that were not run.
 
-Do not duplicate content already captured in durable artifacts (specs, plans, ADRs, issues, commits, diffs, CLAUDE.md). Reference them by path or URL and summarize only what the next agent needs to act. Redact anything sensitive — API keys, tokens, passwords, PII — even though `.ai/` is gitignored.
+Do not duplicate content already captured in durable artifacts (specs, plans, ADRs, issues, commits, diffs, CLAUDE.md). Reference them by path or URL and summarize only what the next agent needs to act. This includes review reports archived under `.ai/reviews/` — point at them by path (e.g. in Next actions or Pitfalls) rather than restating findings. Redact anything sensitive — API keys, tokens, passwords, PII — even though `.ai/` is gitignored.
 
 ## Write `.ai/HANDOFF.md`
 
@@ -78,4 +78,4 @@ the handoff.
 
 ## Finally
 
-Run the `evolve-claude-md` skill to promote any durable session knowledge into `CLAUDE.md`.
+Run the `evolve-claude-md` skill to promote any durable session knowledge into the project's canonical agent file (`CLAUDE.md`, or the `AGENTS.md` it redirects to — the skill resolves which).

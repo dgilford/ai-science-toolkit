@@ -24,7 +24,7 @@ git log --oneline -12 2>/dev/null || echo "(no git log)"
 
 Check for `.ai/HANDOFF.md`. Two paths:
 
-**If found:** Read it, along with `CLAUDE.md` and `AGENTS.md` if present. Then verify it against current repo state: confirm the branch matches, check that referenced files exist, and flag any commits more recent than the handoff that aren't reflected in it.
+**If found:** Read it, along with `CLAUDE.md` and `AGENTS.md` if present. Then verify it against current repo state: confirm the branch matches, check that referenced files exist, and flag any commits more recent than the handoff that aren't reflected in it. If `.ai/reviews/` exists, note the most recent review report and surface any of its unresolved findings that bear on the next action.
 
 **If not found:** Tell the user explicitly that no handoff was found before doing anything else. Then reconstruct best-effort from the repo: scan recent git log, read recently modified files, and check for obvious entry points (scripts, notebooks, configs).
 
