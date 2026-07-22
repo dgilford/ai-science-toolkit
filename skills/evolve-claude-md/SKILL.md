@@ -1,15 +1,29 @@
 ---
 name: evolve-claude-md
-description: Update CLAUDE.md with durable knowledge from the current session. Use at the end of a working session to promote new findings, renamed variables, refined definitions, or corrected assumptions into the permanent project record.
+description: Update CLAUDE.md — or the canonical AGENTS.md it redirects to — with durable knowledge from the current session. Use at the end of a working session to promote new findings, renamed variables, refined definitions, or corrected assumptions into the permanent project record.
 allowed-tools: Bash Read Edit
 catalog:
   order: 30
-  summary: 'Update CLAUDE.md with durable knowledge from the current session.'
+  summary: 'Update CLAUDE.md — or the canonical AGENTS.md it redirects to — with durable knowledge from the current session.'
 ---
 
-Review the current session and update `CLAUDE.md` with anything durable that it doesn't yet know.
+Review the current session and update the project's canonical agent-guidance file with anything durable that it doesn't yet know.
 
-## What belongs in CLAUDE.md
+## Target file
+
+`CLAUDE.md` by default — but some repos keep a thin `CLAUDE.md` stub that redirects to a canonical `AGENTS.md` (the cross-tool convention scaffolded by `/repo-init`). Resolve the target before editing:
+
+A **redirect stub** is a `CLAUDE.md` whose only content is the redirect to AGENTS.md plus pointer lines (the shape `/repo-init` scaffolds) — nothing project-specific. A stray substantive line in an otherwise-stub file is *residue*: migrate it into `AGENTS.md` as part of this run and leave the stub clean.
+
+| Repo state | Edit |
+|---|---|
+| `CLAUDE.md` substantive, no `AGENTS.md` (the most common state) | `CLAUDE.md` |
+| `CLAUDE.md` is a redirect stub | `AGENTS.md` — leave the stub untouched (create `AGENTS.md` if the stub points at a missing file) |
+| No `CLAUDE.md`, but `AGENTS.md` exists | `AGENTS.md` |
+| Both exist with substantive content | `CLAUDE.md`, and flag the split-brain to the user so they can consolidate |
+| Neither exists | Create `CLAUDE.md` |
+
+## What belongs in the canonical file
 
 Promote only knowledge that is:
 - **Permanent** — true beyond this session (not current task state)
@@ -28,9 +42,9 @@ Do not add: session-specific state, task progress, anything already in CLAUDE.md
 
 ## Steps
 
-1. Read `CLAUDE.md` in full.
+1. Resolve the target file (table above) and read it in full.
 2. Scan the session for new knowledge: check git diff, recently modified files, and conversation context.
 3. Identify specific additions or corrections — be precise about what changed and why.
 4. If nothing meaningful warrants an update, say so explicitly and stop.
-5. Otherwise, make targeted edits to `CLAUDE.md`. Do not rewrite sections that don't need changing.
-6. Briefly summarize what was added or corrected and why.
+5. Otherwise, make targeted edits to the target file. Do not rewrite sections that don't need changing.
+6. Briefly summarize what was added or corrected, where, and why.
