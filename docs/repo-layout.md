@@ -31,7 +31,10 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   parsers (`ai-sessions.sh`'s Python helpers, the VS Code extension's
   session-status reader) — undocumented, version-dependent formats that can
   break silently on a Claude Code version bump. Run with
-  `bash tests/smoke_test_parsers.sh`; wired into `lint.yml`.
+  `bash tests/smoke_test_parsers.sh`; wired into `lint.yml`. Also
+  `tests/smoke_repo_init.py`, which validates the repo-init skill's stamped-out
+  templates (block parsing + gitignore contract + semantic spot-checks); run via
+  `scripts/sync.sh lint` on every push and in CI.
 - `templates/` — reusable scaffolds (e.g. `CLAUDE_scientific_python.md`, a
   fill-in-the-blanks starter CLAUDE.md for new scientific-Python projects).
 - `settings/` — commit-safe global Claude Code settings plus restore notes.
@@ -42,8 +45,8 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   [configuration](configuration.md), [tab-setup details](tab-setup.md), fork
   maintenance runbooks).
 - `.github/workflows/` — GitHub Actions. `lint.yml` checks skill and agent
-  frontmatter, catalog-table drift, ShellCheck, and the `tests/` parser smoke
-  tests on every push/PR.
+  frontmatter, skill references, repo-init template blocks, catalog-table
+  drift, ShellCheck, and the `tests/` parser smoke tests on every push/PR.
 - `tab-setup/` — external skill checkout from
   [dgilford/tab-setup](https://github.com/dgilford/tab-setup); `sync.sh push`
   refreshes this before copying its scripts into `skills/tab-setup/`. Fork

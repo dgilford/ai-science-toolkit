@@ -5,7 +5,7 @@
 #   ./scripts/sync.sh push             — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh push <name>...   — deploy only the named skills/agents (plus hard dependencies)
 #   ./scripts/sync.sh pull             — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
-#   ./scripts/sync.sh lint             — lint skill + agent frontmatter + skill refs (used by CI)
+#   ./scripts/sync.sh lint             — lint frontmatter + skill refs + repo-init templates (used by CI)
 #
 # Named push: each <name> is auto-detected as a skill (skills/<name>/) or an
 # agent (agents/<name>.md). Skills that invoke other skills at runtime pull
@@ -51,20 +51,22 @@ usage() {
   echo "  push           Deploy all skills to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  push <name>... Deploy only the named skills/agents, plus their hard dependencies"
   echo "  pull           Pull skills from ~/.claude/skills/ into repo"
-  echo "  lint           Lint skill + agent frontmatter and intra-repo skill references only"
+  echo "  lint           Lint skill + agent frontmatter, intra-repo skill references, and repo-init template blocks"
   exit 1
 }
 
-# Hard runtime dependencies: a launcher or orchestrator that invokes another
-# skill mid-run silently no-ops if the target isn't installed. Named pushes
-# expand these transitively. (lint_skill_refs catches in-repo renames; this map
-# keeps *partial installs* coherent — update both when wiring changes.)
+# Co-deployed runtime dependencies: a launcher or orchestrator that invokes another
+# skill mid-run degrades without it — some silently no-op (grill-me), others
+# fall back to a weaker inline path (repo-init asks its intake questions itself).
+# Named pushes expand these transitively. (lint_skill_refs catches in-repo
+# renames; this map keeps *partial installs* coherent — update it when wiring changes.)
 skill_deps() {
   case "$1" in
     grill-me)     echo "grilling" ;;
     commit-batch) echo "commit-batching" ;;
     handoff)      echo "worklog evolve-claude-md" ;;
     ai-review)    echo "unstale overbaked reviewer-2" ;;
+    repo-init)    echo "grilling" ;;
   esac
 }
 
@@ -225,7 +227,12 @@ BUILTINS = {
     "help", "cost", "fast", "memory",
 }
 
-REF = re.compile(r"`/([a-z][a-z0-9-]+)`")
+# Optional args before the closing backtick — bracket form (`/repo-init [--package]`,
+# `/tab-setup [all]`) or flag form (`/unstale --auto`) — are part of the reference.
+# Caveat: the arg group can also match non-command prose shaped like `/word [x]`
+# or `/word --x`; no such instance exists in the tree, but if one appears, prefer
+# rewording the prose over widening this regex.
+REF = re.compile(r"`/([a-z][a-z0-9-]+)(?: (?:\[[^`\]]*\]|--[^`]+))?`")
 targets = sorted(glob.glob(os.path.join(skills_dir, "*", "SKILL.md")))
 targets += sorted(glob.glob(os.path.join(agents_dir, "*.md")))
 
@@ -244,6 +251,19 @@ if failures:
     sys.exit(1)
 print(f"  ✓ skill-reference lint passed ({len(targets)} files)")
 EOF
+}
+
+# Templates a skill stamps into OTHER repos (repo-init's TEMPLATES.md) are the
+# one artifact class frontmatter/ref lints can't see — a broken pyproject or CI
+# block ships silently. Delegate to the smoke test, which parses every fenced
+# toml/yaml/python block and asserts the gitignore tracked/ignored contract.
+lint_templates() {
+  smoke="$(dirname "$0")/../tests/smoke_repo_init.py"
+  if [ -f "$smoke" ]; then
+    python3 "$smoke" || exit 1
+  else
+    echo "  ! tests/smoke_repo_init.py missing — repo-init templates NOT linted" >&2
+  fi
 }
 
 install_startup_hook() {
@@ -351,6 +371,7 @@ case "$1" in
       echo "Linting skill + agent frontmatter"
       lint_frontmatter
       lint_skill_refs
+      lint_templates
       if [ -n "$RESOLVED_SKILLS" ]; then
         echo "Deploying skills → $SKILLS_DEST"
         for name in $RESOLVED_SKILLS; do
@@ -389,6 +410,7 @@ case "$1" in
       echo "Linting skill + agent frontmatter"
       lint_frontmatter
       lint_skill_refs
+      lint_templates
       echo "Deploying skills/ → $SKILLS_DEST"
       for skill_dir in "$SKILLS_SRC"/*/; do
         name=$(basename "$skill_dir")
@@ -432,6 +454,7 @@ case "$1" in
   lint)
     lint_frontmatter
     lint_skill_refs
+    lint_templates
     ;;
   *)
     usage
