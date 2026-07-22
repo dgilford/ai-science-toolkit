@@ -29,6 +29,7 @@ Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.m
 
 | Skill | Command | Reach for it when… |
 |---|---|---|
+| repo-init | `/repo-init [--package]` | Starting a new repo (or retrofitting an old one): scaffolds the standard structure — research mode by default, `--package` for a distributable library. Idempotent |
 | resume | `/resume` | Starting a new session; reconstructs context from `.ai/HANDOFF.md` |
 | handoff | `/handoff` | Ending a session or switching agents; calls `evolve-claude-md` internally |
 | evolve-claude-md | `/evolve-claude-md` | Standalone CLAUDE.md update without a full handoff |

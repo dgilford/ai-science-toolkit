@@ -25,9 +25,9 @@ All four reviewer agents (`attribution-reviewer`, `stats-reviewer`,
 `meteo-reviewer`, `scicomm-reviewer`) and these skills:
 
 `ai-review`, `commit-batch`/`commit-batching`, `evolve-claude-md`,
-`figure-review`, `grill-me`/`grilling`, `overbaked`, `pathfinder`, `resume`,
-`reviewer-2`, `slack-message` (drafts from git context — no Slack connection
-needed), `write-new-skill`.
+`figure-review`, `grill-me`/`grilling`, `overbaked`, `pathfinder`, `repo-init`,
+`resume`, `reviewer-2`, `slack-message` (drafts from git context — no Slack
+connection needed), `write-new-skill`.
 
 `unstale` needs `ruff` and `vulture` (plus `nbqa` for notebook mode) but
 installs them into the project venv itself if missing.
