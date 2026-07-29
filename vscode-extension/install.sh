@@ -28,8 +28,9 @@ cp "$SCRIPT_DIR/package.json" "$DEST/"
 # Copying only the two files above installed an extension that threw
 # "Cannot find module './lib/session-status'" at activation — the extension
 # registered, never activated, and .pending-color was never consumed.
+# ${DEST:?} so an unset DEST can never make this "rm -rf /lib" (SC2115).
 if [ -d "$SCRIPT_DIR/lib" ]; then
-    rm -rf "$DEST/lib"
+    rm -rf "${DEST:?}/lib"
     cp -r "$SCRIPT_DIR/lib" "$DEST/lib"
 fi
 
