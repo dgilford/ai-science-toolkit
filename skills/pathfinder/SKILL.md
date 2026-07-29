@@ -35,6 +35,7 @@ Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.m
 | evolve-claude-md | `/evolve-claude-md` | Standalone CLAUDE.md update without a full handoff |
 | grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
+| create-alert | `/create-alert [--spec-only]` | Getting pinged on Slack when something changes/happens: grills a "tell me when X" ask into a testable trigger, dry-runs it, and (on sign-off) creates a scheduled cloud routine. `--spec-only` stops at the spec |
 | tab-setup | `/tab-setup [all]` | Naming / coloring this Claude Code tab; `all` recolors every active session |
 | write-new-skill | `/write-new-skill` | Scaffolding a new skill from scratch |
 | ai-review | `/ai-review` | Full comprehensive repo/project review; orchestrates code-review/security-review/unstale/overbaked/reviewer-2 in parallel and adds gap-hunting + grounded ideation + prioritized synthesis. Run on fable at high+ effort |

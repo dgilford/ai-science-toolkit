@@ -69,6 +69,29 @@ The Notion target expects a "Work Journal" home page (whose id is
 `WORKLOG_NOTION_HOME`) containing weekly sub-pages titled `Week of YYYY-MM-DD
 (…)`; the skill creates the weekly page if missing.
 
+## `create-alert`
+
+Authors a scheduled Slack alert as a claude.ai cloud routine. Needs the **Slack
+connector on claude.ai** (the routine sends through it at fire time). One
+optional env var supplies the default destination:
+
+| Setting | Needs | If unset |
+|---|---|---|
+| Default Slack destination | `ALERT_SLACK_DEFAULT_LOCATION` env var (a Slack `U…` user id for a self-DM, or a channel id) | The destination question requires an explicit answer; the skill offers to persist that answer as `ALERT_SLACK_DEFAULT_LOCATION` for reuse |
+
+The destination ID is **machine-local** — it lives in `~/.claude/settings.json`,
+is resolved at creation time, and is baked into the private (server-side) routine
+(a cloud routine cannot read your local settings at fire time). It is never
+written into the skill or the catalog. Each alert is logged to the current
+project's `.ai/routines.md` with the destination **redacted** (stored as the
+`$ALERT_SLACK_DEFAULT_LOCATION` reference or a masked `U…•••`, never the raw id),
+so the log stays safe regardless of whether the target repo gitignores `.ai/`;
+the skill verifies the ignore and warns if it's missing. If you decline the env
+var and answer the destination inline, the skill offers (after sign-off) to
+persist it to `settings.json` for reuse. Needs the Slack connector on claude.ai
+and the built-in `schedule` skill — with either absent, `/create-alert` stops at
+the spec rather than creating a routine it can't arm.
+
 ## `tab-setup`
 
 Works without config (deterministic wordlist names). Optional:
