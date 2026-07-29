@@ -23,6 +23,7 @@ The canonical "when to reach for each" catalog is `skills/pathfinder/SKILL.md` (
 | `lit-review` | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus. Zotero write support needs `ZOTERO_*` env vars in `~/.claude/settings.json`. |
 | `overbaked` | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep. |
 | `slack-message` | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow. |
+| `create-alert` | `/create-alert` | Author a scheduled Slack alert: grill a "tell me when X happens" ask into a testable trigger, dry-run it live, and — after you sign off on the synthesized spec — create a claude.ai cloud routine that messages Slack when it fires. |
 | `write-new-skill` | `/write-new-skill` | Create new Claude Code skills with proper structure and progressive disclosure. |
 | `unstale` | `/unstale` | Detect and repair staleness residue in Python library code and notebooks — dead imports, dead code, resolved TODOs, stale comments/docstrings, and HANDOFF blockers; `--auto` applies HIGH-confidence fixes. |
 | `figure-review` | `/figure-review` | Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style. |
