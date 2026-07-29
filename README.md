@@ -22,8 +22,8 @@ This installs every skill and reviewer agent. Updates come via `/plugin marketpl
 Clone the repo, then deploy everything:
 
 ```bash
-git clone https://github.com/dgilford/ai-science-toolkit.git ~/Projects/ai-science-toolkit
-cd ~/Projects/ai-science-toolkit
+git clone https://github.com/dgilford/ai-science-toolkit.git ~/ai-science-toolkit
+cd ~/ai-science-toolkit
 bash scripts/sync.sh push
 ```
 
@@ -100,7 +100,7 @@ Subagent personas deploy to `~/.claude/agents/`. Each adopts a domain-expert rev
 Beyond skills and agents, the toolkit ships shell utilities. `scripts/ai-sessions.sh` defines an `ai-sessions` function that lists your running Claude/Codex CLI sessions with their resume commands. Source it directly from the repo (no copy — `git pull` keeps it current) by adding to `~/.bashrc` (or `~/.zshrc`):
 
 ```bash
-source ~/Projects/ai-science-toolkit/scripts/ai-sessions.sh
+source ~/ai-science-toolkit/scripts/ai-sessions.sh
 ```
 
 Run `ai-sessions` to list sessions. Claude's own recap (`away_summary`) is shown by default for each session.
