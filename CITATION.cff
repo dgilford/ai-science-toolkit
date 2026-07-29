@@ -26,11 +26,11 @@ date-released: "2026-07-29"
 # `doi` is the *version* DOI — it pins the release named by `version` above, so it
 # must be re-pointed at each release. The all-versions *concept* DOI is carried in
 # `identifiers` (and in the README badge), and never changes.
-doi: "10.5281/zenodo.21461069"
+doi: "10.5281/zenodo.21682976"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.21461068"
     description: The concept DOI of the work, resolving to the latest version.
   - type: doi
-    value: "10.5281/zenodo.21461069"
-    description: The versioned DOI for version 1.0.0.
+    value: "10.5281/zenodo.21682976"
+    description: The versioned DOI for version 1.1.0.
