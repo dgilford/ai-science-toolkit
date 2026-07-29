@@ -6,11 +6,10 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 
 ## Open
 
-- [ ] **Finish citation metadata at the v1.0.0 release cut.** Two steps tied to tagging:
-  (1) before/at the tag, uncomment `version` + `date-released` in `CITATION.cff` and add
-  `"version": "1.0.0"` to `.zenodo.json`; (2) after Zenodo mints the DOI, paste it into
-  `CITATION.cff`'s `doi` field and add a DOI badge to `README.md` (replacing the "will be
-  added at the first tagged release" line). Zenodo↔GitHub webhook is already enabled.
+- [ ] **Paste the v1.1.0 version DOI into `CITATION.cff`.** Zenodo mints a fresh version
+  DOI on each published GitHub Release; `CITATION.cff`'s `doi` still points at the v1.0.0
+  version DOI (`10.5281/zenodo.21461069`). Update it once the v1.1.0 archive appears.
+  Leave the README badge alone — it is the concept DOI and must stay all-versions.
 - [ ] **Bug-watch routine notification channel — finish the webhook.** The routine
   (ID in `.ai/routines.md`) currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.

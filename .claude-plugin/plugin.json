@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "ai-science-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Claude Code skills and domain-expert reviewer subagents for AI-assisted scientific computing.",
   "author": {
     "name": "Daniel Gilford",

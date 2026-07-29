@@ -6,7 +6,7 @@
     "url": "https://github.com/dgilford"
   },
   "description": "Claude Code skills and domain-expert reviewer agents for AI-assisted scientific computing.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "plugins": [
     {
       "name": "ai-science-toolkit",
