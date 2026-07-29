@@ -53,6 +53,20 @@ async function applyPending() {
     // Delete now that the payload parsed, to prevent double-firing
     try { fs.unlinkSync(PENDING_FILE); } catch { return; }
 
+    // Reject embedded control characters before anything reaches the terminal.
+    // sendText submits what it's given, so a CR inside a value would terminate
+    // the /color or /rename line early and run the remainder as a second
+    // command. \n can't survive the line-based parse above, which makes \r the
+    // reachable case — and these values are not as trusted as they look: name
+    // defaults to `basename "$PWD"` in setup.sh, and Linux permits \r in
+    // directory names, so opening a session inside a hostile checkout is enough.
+    // Drop the payload rather than sanitizing it: a tab name is never worth
+    // guessing at, and the file is already consumed so this can't spin.
+    if (/[\r\n]/.test(color) || /[\r\n]/.test(name || '')) {
+        console.error('claude-tab: refusing pending payload with control characters');
+        return;
+    }
+
     // Capture the terminal up front: at event receipt the just-started Claude
     // session's terminal is the active one. Re-reading activeTerminal after the
     // idle wait would target whatever the user focused in the meantime.
