@@ -70,10 +70,17 @@ async function applyPending() {
         });
     } catch {}
 
-    terminal.sendText(`/color ${color}`);
+    // Prepend Ctrl-E + Ctrl-U so anything the user has typed into the prompt is
+    // cleared before the command is sent. sendText appends to the terminal input
+    // buffer, so without this the typed text merges into "/color"/"/rename" and
+    // corrupts both. Ctrl-E (end-of-line) then Ctrl-U (kill-to-start) clears the
+    // whole line regardless of cursor position; these are Claude Code's own
+    // readline bindings, so they behave the same as in the iTerm path.
+    const CLEAR_LINE = '\x05\x15';
+    terminal.sendText(`${CLEAR_LINE}/color ${color}`);
     if (name) {
         await sleep(400);
-        terminal.sendText(`/rename ${name}`);
+        terminal.sendText(`${CLEAR_LINE}/rename ${name}`);
     }
 }
 

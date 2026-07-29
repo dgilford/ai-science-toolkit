@@ -24,6 +24,15 @@ mkdir -p "$DEST"
 cp "$SCRIPT_DIR/extension.js" "$DEST/"
 cp "$SCRIPT_DIR/package.json" "$DEST/"
 
+# extension.js requires ./lib/*, so the whole lib/ tree has to ship with it.
+# Copying only the two files above installed an extension that threw
+# "Cannot find module './lib/session-status'" at activation — the extension
+# registered, never activated, and .pending-color was never consumed.
+if [ -d "$SCRIPT_DIR/lib" ]; then
+    rm -rf "$DEST/lib"
+    cp -r "$SCRIPT_DIR/lib" "$DEST/lib"
+fi
+
 # Register in extensions.json with the same format the server uses
 python3 - "$EXT_ROOT" "$DEST" <<'PYEOF'
 import json, sys, os, time
