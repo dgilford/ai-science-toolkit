@@ -7,9 +7,11 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 ## Open
 
 - [ ] **Paste the v1.1.0 version DOI into `CITATION.cff`.** Zenodo mints a fresh version
-  DOI on each published GitHub Release; `CITATION.cff`'s `doi` still points at the v1.0.0
-  version DOI (`10.5281/zenodo.21461069`). Update it once the v1.1.0 archive appears.
-  Leave the README badge alone — it is the concept DOI and must stay all-versions.
+  DOI on each published GitHub Release; `CITATION.cff` still carries the v1.0.0 version DOI
+  (`10.5281/zenodo.21461069`) in **two** places — the top-level `doi:` and the versioned
+  entry under `identifiers:` (whose `description` names the version too). Update all three
+  once the v1.1.0 archive appears. Leave the concept DOI (`…21461068`) and the README badge
+  alone — they are all-versions by design.
 - [ ] **Bug-watch routine notification channel — finish the webhook.** The routine
   (ID in `.ai/routines.md`) currently DMs the FIXED report to the user's Slack
   self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
