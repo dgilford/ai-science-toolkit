@@ -266,6 +266,33 @@ lint_templates() {
   fi
 }
 
+# The claude-tab extension exists in two places on purpose: tab-setup/ (the fork
+# checkout) is what actually deploys, but it's gitignored here, so the tracked
+# copy in vscode-extension/ is the only one CI can review and unit test. They
+# drifted for weeks in both directions — the fork missed a lib/ the deployed
+# install.sh never copied (extension dead on arrival, silent), the tracked copy
+# missed the CLEAR_LINE prompt fix. Authoring order is fork first, then mirror
+# to vscode-extension/; this fails the push when the mirror was skipped.
+# Skipped when tab-setup/ is absent (fresh clone, CI) — nothing to compare.
+lint_vscode_extension() {
+  local tracked fork
+  tracked="$REPO_DIR/vscode-extension"
+  fork="$REPO_DIR/tab-setup/vscode-extension"
+  [ -d "$fork" ] || return 0
+  if [ ! -d "$tracked" ]; then
+    echo "  ! vscode-extension/ missing — claude-tab extension NOT drift-checked" >&2
+    return 0
+  fi
+  if ! diff -r "$tracked" "$fork" >/dev/null 2>&1; then
+    echo "  ✗ claude-tab extension drift: vscode-extension/ != tab-setup/vscode-extension/" >&2
+    diff -r "$tracked" "$fork" 2>&1 | sed 's/^/      /' >&2
+    echo "    Fix: author in tab-setup/vscode-extension/ (the fork, which deploys), then" >&2
+    echo "    mirror into vscode-extension/ (the tracked, CI-tested copy) so both match." >&2
+    exit 1
+  fi
+  echo "  ✓ claude-tab extension in sync (vscode-extension/ == fork)"
+}
+
 install_startup_hook() {
   local config_dest="$HOME/.claude/session-init-config.json"
   local hook_cmd="bash ~/.claude/skills/tab-setup/scripts/hook-startup.sh"
@@ -372,6 +399,7 @@ case "$1" in
       lint_frontmatter
       lint_skill_refs
       lint_templates
+      lint_vscode_extension
       if [ -n "$RESOLVED_SKILLS" ]; then
         echo "Deploying skills → $SKILLS_DEST"
         for name in $RESOLVED_SKILLS; do
@@ -411,6 +439,7 @@ case "$1" in
       lint_frontmatter
       lint_skill_refs
       lint_templates
+      lint_vscode_extension
       echo "Deploying skills/ → $SKILLS_DEST"
       for skill_dir in "$SKILLS_SRC"/*/; do
         name=$(basename "$skill_dir")
@@ -455,6 +484,7 @@ case "$1" in
     lint_frontmatter
     lint_skill_refs
     lint_templates
+    lint_vscode_extension
     ;;
   *)
     usage
