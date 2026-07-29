@@ -5,7 +5,7 @@
 #   ./scripts/sync.sh push             — deploy skills/ → ~/.claude/skills/; agents/ → ~/.claude/agents/
 #   ./scripts/sync.sh push <name>...   — deploy only the named skills/agents (plus hard dependencies)
 #   ./scripts/sync.sh pull             — pull ~/.claude/skills/ → skills/; ~/.claude/agents/ → agents/
-#   ./scripts/sync.sh lint             — lint frontmatter + skill refs + repo-init templates (used by CI)
+#   ./scripts/sync.sh lint             — lint frontmatter, skill refs, repo-init templates, extension drift, shell (used by CI)
 #
 # Named push: each <name> is auto-detected as a skill (skills/<name>/) or an
 # agent (agents/<name>.md). Skills that invoke other skills at runtime pull
@@ -51,7 +51,7 @@ usage() {
   echo "  push           Deploy all skills to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  push <name>... Deploy only the named skills/agents, plus their hard dependencies"
   echo "  pull           Pull skills from ~/.claude/skills/ into repo"
-  echo "  lint           Lint skill + agent frontmatter, intra-repo skill references, and repo-init template blocks"
+  echo "  lint           Lint frontmatter, skill references, repo-init templates, claude-tab extension drift, and tracked shell scripts"
   exit 1
 }
 
@@ -293,6 +293,18 @@ lint_vscode_extension() {
   echo "  ✓ claude-tab extension in sync (vscode-extension/ == fork)"
 }
 
+# Shell lint, delegated to scripts/lint-shell.sh so CI and this push gate check
+# the same files. Was CI-only: an SC2115 landed on main because the local gate
+# never ran shellcheck (it was installed, just not on PATH).
+lint_shell() {
+  local script="$REPO_DIR/scripts/lint-shell.sh"
+  if [ -f "$script" ]; then
+    bash "$script" || exit 1
+  else
+    echo "  ! scripts/lint-shell.sh missing — shell scripts NOT linted" >&2
+  fi
+}
+
 install_startup_hook() {
   local config_dest="$HOME/.claude/session-init-config.json"
   local hook_cmd="bash ~/.claude/skills/tab-setup/scripts/hook-startup.sh"
@@ -400,6 +412,7 @@ case "$1" in
       lint_skill_refs
       lint_templates
       lint_vscode_extension
+      lint_shell
       if [ -n "$RESOLVED_SKILLS" ]; then
         echo "Deploying skills → $SKILLS_DEST"
         for name in $RESOLVED_SKILLS; do
@@ -440,6 +453,7 @@ case "$1" in
       lint_skill_refs
       lint_templates
       lint_vscode_extension
+      lint_shell
       echo "Deploying skills/ → $SKILLS_DEST"
       for skill_dir in "$SKILLS_SRC"/*/; do
         name=$(basename "$skill_dir")
@@ -485,6 +499,7 @@ case "$1" in
     lint_skill_refs
     lint_templates
     lint_vscode_extension
+    lint_shell
     ;;
   *)
     usage

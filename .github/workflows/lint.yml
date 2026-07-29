@@ -28,15 +28,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Delegated to the same script scripts/sync.sh runs at push time, so the
+      # local gate and CI can't check different files. The list used to be
+      # inlined here and had already drifted — it omitted
+      # settings/statusline-command.sh despite the step's name.
       - name: ShellCheck all tracked shell scripts
-        run: |
-          # -S warning: fail on real defects, not style notes
-          shellcheck -S warning \
-            scripts/sync.sh \
-            scripts/gen-docs.sh \
-            scripts/ai-sessions.sh \
-            vscode-extension/install.sh \
-            tests/smoke_test_parsers.sh
+        # REQUIRE_SHELLCHECK=1: fail the build if the linter is missing rather
+        # than skipping with a warning, which is the local-dev behavior.
+        run: REQUIRE_SHELLCHECK=1 bash scripts/lint-shell.sh
 
   parser-smoke-tests:
     name: Transcript parser smoke tests
