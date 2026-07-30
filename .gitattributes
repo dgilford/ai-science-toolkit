@@ -1,0 +1,30 @@
+# Line-ending normalisation.
+#
+# Git for Windows defaults to core.autocrlf=true, so without this file a Windows
+# clone checks out every shell script as CRLF. Bash tolerates that — sync.sh runs
+# and the status line renders — but shellcheck does not: scripts/lint-shell.sh
+# reported 471 x SC1017 (literal carriage return) and exited 1 on a Windows
+# clone, burying the genuine findings under cascading phantom parse errors. A
+# Windows contributor could not pass the project's own gate.
+#
+# Store everything as LF in the repo and check text out as LF everywhere.
+* text=auto eol=lf
+
+# Executed by bash. Explicit rather than relying on the wildcard above, because
+# this is the case that actually broke.
+*.sh    text eol=lf
+
+# PowerShell 7 reads LF fine; keep it consistent with the rest of the tree.
+*.ps1   text eol=lf
+
+# Batch files are the one real exception: CRLF is load-bearing, as labels and
+# goto can misbehave with LF endings.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binary — never touch.
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
