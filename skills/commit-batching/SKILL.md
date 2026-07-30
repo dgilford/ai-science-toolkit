@@ -12,10 +12,10 @@ You are about to commit. Do **not** `git add -A && git commit` the whole tree at
 ## Current working tree
 
 ```!
-git status --short 2>/dev/null || echo "(not a git repo)"
-echo "--- branch ---"; git rev-parse --abbrev-ref HEAD 2>/dev/null || true
-echo "--- staged/unstaged stat ---"; git diff --stat HEAD 2>/dev/null || true
-echo "--- untracked ---"; git ls-files --others --exclude-standard 2>/dev/null || true
+git status --short || echo "(not a git repo)"
+echo "--- branch ---"; git rev-parse --abbrev-ref HEAD || echo ""
+echo "--- staged/unstaged stat ---"; git diff --stat HEAD || echo ""
+echo "--- untracked ---"; git ls-files --others --exclude-standard || echo ""
 ```
 
 ## Method

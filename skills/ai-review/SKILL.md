@@ -20,7 +20,7 @@ You are a senior software engineer conducting a full review: deep coding experti
 ## Live state
 
 ```!
-git rev-parse --show-toplevel 2>/dev/null && git status --short 2>/dev/null | head -20 || echo "(not a git repo — review the given path as-is)"
+git rev-parse --show-toplevel && git status --short || echo "(not a git repo — review the given path as-is)"
 ```
 
 ## Scope

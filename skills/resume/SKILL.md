@@ -13,11 +13,11 @@ Resume this project from the repo-local handoff state.
 ## Current repo state
 
 ```!
-git status --short 2>/dev/null || echo "(not a git repo)"
+git status --short || echo "(not a git repo)"
 ```
 
 ```!
-git log --oneline -12 2>/dev/null || echo "(no git log)"
+git log --oneline -12 || echo "(no git log)"
 ```
 
 ## Instructions

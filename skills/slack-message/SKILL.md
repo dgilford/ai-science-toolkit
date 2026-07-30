@@ -13,9 +13,9 @@ You are drafting a first-draft Slack message for the user to review and edit bef
 ## Live context
 
 ```!
-echo "=== Recent commits ===" && git log --oneline -5 2>/dev/null || echo "(not a git repo)"
-echo "=== Working state ===" && git status --short 2>/dev/null | head -20 || echo ""
-echo "=== Directory ===" && basename "$(pwd)"
+echo "=== Recent commits ===" && git log --oneline -5 || echo "(not a git repo)"
+echo "=== Working state ===" && git status --short || echo ""
+echo "=== Directory ===" && pwd
 ```
 
 ## Interview

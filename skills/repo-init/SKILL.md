@@ -22,7 +22,7 @@ D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/repo-init}"; D="${D:-$HOME/.
 ## Live state
 
 ```!
-pwd && git rev-parse --show-toplevel 2>/dev/null || echo "(not a git repo yet)"
+pwd && git rev-parse --show-toplevel || echo "(not a git repo yet)"
 ```
 
 ## Modes

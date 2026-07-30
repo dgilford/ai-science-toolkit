@@ -13,15 +13,15 @@ Create or update `.ai/HANDOFF.md` so the next agent can resume without rereading
 ## Current repo state
 
 ```!
-git status --short 2>/dev/null || echo "(not a git repo)"
+git status --short || echo "(not a git repo)"
 ```
 
 ```!
-git log --oneline -12 2>/dev/null || echo "(no git log)"
+git log --oneline -12 || echo "(no git log)"
 ```
 
 ```!
-git diff --stat HEAD 2>/dev/null | head -30 || echo "(no diff)"
+git diff --stat HEAD || echo "(no diff)"
 ```
 
 ## Before writing

@@ -13,7 +13,7 @@ catalog:
 ## Live state
 
 ```!
-git status --short 2>/dev/null || echo "(not a git repo)"
+git status --short || echo "(not a git repo)"
 ```
 
 ## Mode overview
