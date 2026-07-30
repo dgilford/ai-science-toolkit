@@ -17,6 +17,8 @@ If you use Claude Code's plugin system, add this repo as a marketplace and insta
 
 This installs every skill and reviewer agent. Updates come via `/plugin marketplace update ai-science-toolkit`. To cherry-pick individual pieces or register the session-naming boot hook, use the `sync.sh` workflow below.
 
+**On Windows, this is the route to use** — it involves no shell. See [Platform support](#platform-support).
+
 ### With `sync.sh` (clone and deploy)
 
 Clone the repo, then deploy everything:
@@ -50,6 +52,26 @@ bash scripts/sync.sh pull   # ~/.claude/skills/ → skills/; ~/.claude/agents/ �
 ```
 
 After `pull`, review `git diff skills/ agents/` — it brings in every installed skill and agent, including ones not tracked here.
+
+## Platform support
+
+Developed on **macOS and Linux**, where everything works. On **Windows**, the half of the toolkit whose value is the prompt rather than the plumbing already works untouched; the shell layer does not.
+
+| | Windows |
+|---|---|
+| All 4 reviewer agents | ✅ works unmodified |
+| `commit-batch` · `evolve-claude-md` · `grill-me` · `grilling` · `overbaked` · `pathfinder` · `reviewer-2` · `write-new-skill` | ✅ works unmodified |
+| Plugin install | ✅ recommended route — no shell involved |
+| Status line | ⚠️ works once `jq` is installed, but spawns a ~176 ms subprocess per render |
+| `worklog` · `lit-review` | ⚠️ usable; their shell examples are Unix-only |
+| `sync.sh` and the other repo scripts | ⚠️ work under Git Bash, after setup |
+| 9 skills with a shell preamble (incl. `handoff`, `resume`, `figure-review`, `repo-init`) | ❌ **0 of 15 preamble blocks execute** |
+| Line endings | ❌ every `.sh` checks out CRLF; the repo's own shell lint fails with 471 errors |
+| Session auto-naming hook | ❌ terminal integration is iTerm2/VS Code only |
+
+Two causes dominate, both measured rather than assumed. **Preambles run in PowerShell**, where `2>/dev/null` resolves to `C:\dev\null` and *throws* instead of degrading — stripping it takes preambles from 0/15 to 7/15, and swapping `head`/`basename` for PowerShell equivalents reaches 10/15. Separately, the repo has **no `.gitattributes`**, so Git for Windows checks out every shell script with CRLF; execution survives this but `shellcheck` does not.
+
+Windows setup instructions, the per-skill matrix, and the full root-cause analysis are in **[docs/platform-support.md](docs/platform-support.md)**.
 
 ## Skills
 
@@ -119,6 +141,7 @@ State lives in a repo-local `.ai/` directory — add it to `.gitignore` in any p
 
 ## More documentation
 
+- [docs/platform-support.md](docs/platform-support.md) — what works on Windows today, what breaks and why, and Windows setup steps
 - [docs/configuration.md](docs/configuration.md) — per-skill setup: env vars, connectors, and what degrades gracefully without them
 - [docs/tab-setup.md](docs/tab-setup.md) — session auto-naming and color: startup reminders, machine-level config, uninstall
 - [docs/repo-layout.md](docs/repo-layout.md) — what every file and directory in this repo is for

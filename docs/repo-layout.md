@@ -42,8 +42,8 @@ A tour of what lives where. For install and usage, see the [README](../README.md
 - `evaluations/` — written evaluations of external AI tooling considered for
   this workflow (e.g. `ruflo.md`).
 - `docs/` — user and maintainer documentation (this file, per-skill
-  [configuration](configuration.md), [tab-setup details](tab-setup.md), fork
-  maintenance runbooks).
+  [configuration](configuration.md), [platform support](platform-support.md),
+  [tab-setup details](tab-setup.md), fork maintenance runbooks).
 - `.github/workflows/` — GitHub Actions. `lint.yml` checks skill and agent
   frontmatter, skill references, repo-init template blocks, catalog-table
   drift, ShellCheck, and the `tests/` parser smoke tests on every push/PR.
