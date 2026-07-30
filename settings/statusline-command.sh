@@ -5,17 +5,23 @@
 
 input=$(cat)
 
-# --- Context window ---
-used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
-
-# --- Model ---
-model=$(echo "$input" | jq -r '.model.display_name // empty')
-
-# --- Effort level (optional) ---
-effort=$(echo "$input" | jq -r '.effort.level // empty')
-
-# --- Rate limit: 5-hour window (Claude.ai subscribers) ---
-five_hr=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+# Extract all four fields in a single jq pass. This used to be four separate
+# `jq` invocations — nearly free on Linux, but not on Windows: measured on
+# Windows 11, bash spawn alone is ~36 ms while each additional jq inside Git
+# Bash costs ~70 ms, taking the whole render to ~316 ms against a ~300 ms
+# refresh cadence, so the status line never finished before the next was due.
+# One pass is ~112 ms. Fields, in order: context · model · effort · 5h-window.
+#
+# Two non-obvious constraints, both learned by shipping the wrong thing:
+#   1. The separator must NOT be tab. Tab is an IFS *whitespace* character, so
+#      bash collapses runs of it and an absent middle field silently shifts
+#      every later value left — an absent `effort` renders the 5h percentage as
+#      the effort level. US () is not IFS whitespace, so empty fields
+#      survive. Write it as a jq \u escape, never as a literal control byte.
+#   2. Keep the jq program on ONE line. This file is checked out CRLF on
+#      Windows, and a multi-line jq program carries those CRs into the values.
+_fields=$(echo "$input" | jq -r '[.context_window.used_percentage // "", .model.display_name // "", .effort.level // "", .rate_limits.five_hour.used_percentage // ""] | join("")')
+IFS=$'\x1f' read -r used_pct model effort five_hr <<< "$_fields"
 
 # --- Emoji cues per segment: 🪟 context · 🤖 model · 🪨 effort · ⏰ 5h ---
 # --- Build context segment: "🪟 Context: 28% used (72% remaining)" ---

@@ -134,20 +134,52 @@ pointed at the plugin install plus a short prerequisites list? The plugin path
 needs none of this. `install.ps1` is only worth building for people who want the
 repo scripts and the boot integrations.
 
-### 6. Status line — native PowerShell
+### 6. Status line — collapse the jq calls ✅ done
 
-**Currently works** on Windows once `jq` is installed, rendering correctly and in
-full. The objection is cost, not correctness: it spawns a Git Bash subprocess
-**per render, ~176 ms measured**, which is a cheap fork on Linux and an expensive
-process creation on Windows, on a hot UI path.
+**Currently works** on Windows once `jq` is installed. The objection was cost, not
+correctness. Decomposing where the time went:
 
-A `settings/statusline-command.ps1` computing the same four segments natively
-would remove both the subprocess and the `jq` dependency. This is the one place a
-second implementation is justified — the logic is ~60 lines of string formatting
-with no shared state, so drift risk is low and the payoff is direct.
+| | ms/render |
+|---|---|
+| bash spawn alone | 36 |
+| bash + 1 `jq` | 112 |
+| **bash + 4 `jq` (as shipped)** | **316** |
+| `pwsh` startup alone | 256 |
 
-Selection belongs in `sync.sh`'s settings merge: register the `.ps1` on Windows,
-the `.sh` elsewhere.
+Claude Code refreshes roughly every 300 ms, so at 316 ms the render never finished
+before the next was due — a saturated duty cycle continuously churning five
+processes. That is Windows-specific: the same four forks are nearly free on Linux.
+
+> **A rejected approach, recorded so it is not retried.** The original plan here
+> was a native `statusline-command.ps1`. It was written and measured: **342 ms,
+> *slower* than the bash version.** `pwsh` startup alone is 256 ms. The bottleneck
+> was never bash — bash spawn is only 36 ms — it was the four `jq` calls at ~70 ms
+> each. Any per-render subprocess is expensive on Windows; the language does not
+> matter. The port was deleted.
+
+**Shipped fix:** one `jq` pass instead of four. **278 → 141 ms, 2.0×**, verified
+byte-identical against the previous implementation across 8 input cases
+(missing effort, missing 5h, empty object, fractional percentages, every colour
+threshold). Keeps a single implementation, so principle 1 holds, and it helps
+Linux and macOS too — just less dramatically.
+
+Two traps found while doing it, both now commented in the script:
+
+- **The separator must not be tab.** Tab is an IFS *whitespace* character, so bash
+  collapses runs of it and an absent middle field shifts every later value left —
+  an absent `effort` rendered the 5h percentage as the effort level. Uses US
+  (``) instead, written as a jq escape rather than a literal control byte.
+- **The jq program must stay on one line.** The file is checked out CRLF on
+  Windows, and a multi-line jq program carries those CRs into the extracted
+  values, corrupting every field.
+
+Both bugs were caught only by byte-comparing output against the old script. Any
+further change here needs the same parity check.
+
+**Still unresolved:** whether this was ever the cause of the hard exits. The
+crashes stopped when the status line was disabled, and it is now 2× cheaper and
+under the refresh cadence — but that is correlation plus a plausible mechanism,
+not a proven diagnosis.
 
 ### 7. `tab-setup` — deliberately last
 
