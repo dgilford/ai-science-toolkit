@@ -162,20 +162,30 @@ carries 457 CRLF lines after a `sync.sh push`.
 
 ### Status line
 
-**Verified working**, contrary to an earlier draft of this page. With `jq`
-installed it renders correctly and completely:
+**Verified working** against a real captured payload:
 
 ```
-🪟 Context: 31% used (69% remaining) | 🤖 Opus 5 | 🪨 effort: high | ⏰ 5h: 12%
+🪟 Context: 24% used (76% remaining) | 🤖 Opus 5 | 🪨 effort: high | ⏰ 5h: 74%
 ```
 
-Two caveats:
+Both Windows problems it had are now fixed on the `pc-compatibility` branch; the
+notes below are what a Windows user hits on the released version.
 
-- **`jq` is a hard dependency** and is not a Windows default. Without it the line
-  degrades to `🪟 Context: -- | 🤖` — it does not fail loudly, it just goes blank.
-- **Cost.** It spawns a Git Bash subprocess **per render, measured at ~176 ms**.
-  That is a cheap fork on Linux and an expensive process creation on Windows, on a
-  hot UI path. A native PowerShell implementation would avoid it entirely.
+- **`jq` is a hard dependency**, is not a Windows default, and — the part that
+  actually bites — **installing it is not enough**. `winget install jqlang.jq`
+  writes the new directory to the *registry* PATH, but an already-running Claude
+  Code keeps the environment it launched with, so the status line's bash inherits
+  a PATH without `jq`. winget also creates no `WinGet\Links` shim for this
+  package, so the binary exists only under a hashed `Packages\jqlang.jq_*\`
+  directory and PATH is the only route to it. The symptom is a blank
+  `🪟 Context: -- | 🤖` that looks like "no data" rather than a missing
+  dependency. *Fixed:* the script now searches known install locations and says
+  what is wrong when it still cannot find `jq`.
+- **Cost.** Four separate `jq` calls put the render at **~316 ms** against a
+  ~300 ms refresh cadence, so it never settled. Decomposed: bash spawn is only
+  36 ms; each `jq` inside Git Bash costs ~70 ms. *Fixed:* one `jq` pass, **141 ms**.
+  Note a native PowerShell rewrite was measured and is **worse** (342 ms) — `pwsh`
+  startup alone is 256 ms. Any per-render subprocess is expensive on Windows.
 
 ### Skills whose shell the model runs
 
