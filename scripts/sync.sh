@@ -225,6 +225,10 @@ BUILTINS = {
     "code-review", "security-review",
     "rename", "color", "clear", "compact", "model", "effort", "review",
     "help", "cost", "fast", "memory",
+    # /resume is the built-in past-session picker. The repo's own skill is named
+    # `pickup` precisely so it doesn't shadow it, and both SKILL.md files cite
+    # `/resume` by name to explain why — so the linter has to know it exists.
+    "resume",
 }
 
 # Optional args before the closing backtick — bracket form (`/repo-init [--package]`,

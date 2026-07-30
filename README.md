@@ -23,8 +23,8 @@ Skills are slash commands and mid-task capabilities for Claude Code. Type `/path
 | **lit-review** | `/lit-review` | Search and synthesize scientific literature from Zotero, arxiv, bioRxiv, Google Scholar, and Consensus. Zotero write support needs `ZOTERO_*` env vars in `~/.claude/settings.json`. |
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep. |
 | **pathfinder** | `/pathfinder` | Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision. |
+| **pickup** | `/pickup` | Pick up work from repo-local handoff state — the read side of the `handoff` pair. |
 | **repo-init** | `/repo-init` | Scaffold a new repo (or retrofit an existing one) with a standard structure via a short intake grill: research mode by default, `--package` for a distributable library. Never overwrites; `--dry-run` previews. |
-| **resume** | `/resume` | Resume work from repo-local handoff state. |
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section: baseline, counterfactual, alternatives, uncertainty consistency. |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow. |
 | **[tab-setup](https://github.com/JeraldHuff/tab-setup)** | `/tab-setup` | Assign a unique high-contrast color and name to the current Claude Code session; `all` recolors every active session. Forked from [Jerald Huff](https://github.com/JeraldHuff/tab-setup). |
@@ -112,7 +112,7 @@ Run `ai-sessions` to list sessions. Claude's own recap (`away_summary`) is shown
 The handoff skills form a session lifecycle that keeps project state durable across sessions:
 
 ```
-/resume            # start of session — loads handoff, reports state
+/pickup            # start of session — loads handoff, reports state
 /handoff           # end of session — writes handoff, updates CLAUDE.md
 /evolve-claude-md  # anytime — promote new knowledge to CLAUDE.md
 ```
@@ -131,7 +131,7 @@ Developed on **macOS and Linux**, where everything works. On **Windows**, the pr
 | Status line | ⚠️ works once `jq` is installed |
 | `worklog` · `lit-review` | ⚠️ usable; their shell examples are Unix-only |
 | `sync.sh` and the other repo scripts | ⚠️ work under Git Bash, after setup |
-| 9 skills with a shell preamble (incl. `handoff`, `resume`, `figure-review`, `repo-init`) | ❌ preamble blocks don't execute |
+| 9 skills with a shell preamble (incl. `handoff`, `pickup`, `figure-review`, `repo-init`) | ❌ preamble blocks don't execute |
 | Line endings | ❌ every `.sh` checks out CRLF; the shell lint fails |
 | Session auto-naming hook | ❌ terminal integration is iTerm2/VS Code only |
 

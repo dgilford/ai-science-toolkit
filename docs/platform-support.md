@@ -88,8 +88,8 @@ skill body loads with an error where its repo context should be.
 | `create-alert` | 2 | `VAR=`, `${x:+y}`, `if/then/fi`, `2>/dev/null` |
 | `figure-review` | 2 | `VAR=`, `${x:+y}` |
 | `handoff` | 3 | `2>/dev/null`, `head -N` |
+| `pickup` | 2 | `2>/dev/null` |
 | `repo-init` | 2 | `VAR=`, `${x:+y}`, `2>/dev/null` |
-| `resume` | 2 | `2>/dev/null` |
 | `slack-message` | 1 | `2>/dev/null`, `head -N`, `basename` |
 | `unstale` | 1 | `2>/dev/null` |
 
