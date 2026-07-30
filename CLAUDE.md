@@ -175,6 +175,12 @@ A weekly cloud routine, `disable-model-invocation bug watch` (ID in `.ai/routine
 
 Manage routines at https://claude.ai/code/routines — IDs and creation notes in `.ai/routines.md` (gitignored, machine-local).
 
+**Routine conventions & constraints** (apply to any routine authored by `create-alert` or edited via the `schedule` skill / `RemoteTrigger` API):
+- **Standard alert output** follows `create-alert`'s house format: lead each Slack message with a status glyph — **🔵** the watched-for thing happened · **🟢** ran clean, nothing to report · **⚠️** couldn't run (source/auth failure) — in Slack mrkdwn (single-asterisk `*bold*`, `:emoji:`, `•`, `·`; never `**`/`#`), with fail-loud delivery (a 🔵 that fails to send is a hard error, never a silent success). The `disable-model-invocation bug watch` and the (infra-repo) `warmup health check` routines were standardized to this scheme.
+- **Cloud routines have no secret store.** Per Claude Code docs, "a dedicated secrets store is not yet available" — env vars set on a cloud environment are **plaintext-readable to anyone using that environment**. Use only for a single-user private environment, with a minimally-scoped, rotatable token.
+- **Never inline a secret in a routine prompt.** The `RemoteTrigger` create/update classifier **blocks any body containing an inline credential** (e.g. a `github_pat_…`), so a credentialed routine *must* reference it via an env var (e.g. `Bearer $SOME_PAT`) — this is both the security practice and a hard requirement for programmatic updates to go through.
+- **Setting a routine's env vars is a UI action** (no API, no standalone settings URL): claude.ai/code → open the routine's edit form → the cloud-icon environment selector below Instructions → hover the environment → gear → **Environment variables** (`.env` format).
+
 ## Releases & citation
 
 **Four version slots** must be bumped together, and nothing lints them against each other or against the git tag: `CITATION.cff` (plus `date-released`), `.zenodo.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`. **`.zenodo.json` is the easy one to miss** — it isn't referenced from the plugin docs and never surfaces in a `/plugin` workflow. Grep for the outgoing version across the repo before tagging.
