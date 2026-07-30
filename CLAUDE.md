@@ -119,7 +119,7 @@ The `worklog` skill captures a single work-log entry to **three** targets (all b
 | Hook | Script | Purpose |
 |---|---|---|
 | `SessionStart` | `~/.claude/skills/tab-setup/scripts/hook-startup.sh` | Auto-name and color-code each session on boot |
-| `SessionStart` | inline `jq` command | Re-pin `model: opus` + `effortLevel: low` as the default on every boot (self-heals a mid-session `/model`/`/effort` change) |
+| `SessionStart` | inline `jq` command | Re-pin `model: opus` + `effortLevel: medium` as the default on every boot (self-heals a mid-session `/model`/`/effort` change) |
 
 `hook-startup.sh` is part of the `tab-setup` skill (deployed from `dgilford/tab-setup`). It is fully self-contained — no dependency on this repo. It generates a session name via Haiku API (requires `ANTHROPIC_API_KEY` in the `env` block of `~/.claude/settings.json`) with a wordlist fallback, assigns a tab color, and prints `[pickup]` / `[env]` reminders to stderr. `sync.sh push` registers it in `~/.claude/settings.json` automatically.
 
