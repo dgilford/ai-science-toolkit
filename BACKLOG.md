@@ -8,7 +8,7 @@ Transient session state lives in `.ai/HANDOFF.md` (gitignored, overwritten each
 
 - [ ] **Bug-watch routine notification channel — finish the webhook.** The routine
   (ID in `.ai/routines.md`) currently DMs the FIXED report to the user's Slack
-  self-DM (`U0173PYR613`) as a placeholder — *lands but does not push a notification*.
+  self-DM (id in `.ai/routines.md`) as a placeholder — *lands but does not push a notification*.
   Real fix pending: a Slack **incoming webhook** (app posts → real notification).
   Webhook app is awaiting Slack admin approval. Once approved: create the webhook URL,
   swap the routine's `slack_send_message` step for a `Bash` `curl` to the webhook, and
