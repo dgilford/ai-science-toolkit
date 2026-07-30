@@ -18,8 +18,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install PyYAML
         run: pip install pyyaml
+      # REQUIRE_PYYAML=1: fail the build if PyYAML is missing rather than
+      # silently skipping the YAML-dependent checks, so a broken install step
+      # above can never turn into a quiet pass.
       - name: Lint frontmatter + skill references (strict YAML parse, name, description cap, ref resolution)
-        run: bash scripts/sync.sh lint
+        run: REQUIRE_PYYAML=1 bash scripts/sync.sh lint
       - name: Catalog tables match frontmatter (no doc drift)
         run: bash scripts/gen-docs.sh check
 

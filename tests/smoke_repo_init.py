@@ -25,6 +25,20 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Resolved once so every layer degrades the same way. Set REQUIRE_PYYAML=1 (CI
+# does) to make a missing PyYAML a hard failure instead of a skip — mirroring
+# REQUIRE_SHELLCHECK in scripts/lint-shell.sh, so a dependency that silently
+# vanishes can never turn into a quiet pass.
+try:
+    import yaml
+    HAVE_YAML = True
+except ImportError:
+    yaml = None
+    HAVE_YAML = False
+    if os.environ.get("REQUIRE_PYYAML") == "1":
+        print("  ✗ PyYAML not installed and REQUIRE_PYYAML=1 — refusing to skip", file=sys.stderr)
+        raise SystemExit(1)
+
 TEMPLATES = Path(__file__).resolve().parent.parent / "skills" / "repo-init" / "TEMPLATES.md"
 
 DUMMY = {
@@ -79,13 +93,19 @@ def check_block_validity(blocks):
         except ImportError:
             tomllib = None
             print("  ! no tomllib/tomli — TOML blocks not validated", file=sys.stderr)
+    # Resolve PyYAML once, outside the per-block try. Importing it inside meant a
+    # missing module was caught by the `except Exception` below and reported as
+    # "yaml block does not parse: No module named 'yaml'" — a fake parse failure
+    # naming the wrong cause, once per yaml block, while every other PyYAML
+    # consumer in this repo skipped with a warning.
+    if not HAVE_YAML:
+        print("  ! PyYAML absent — YAML blocks not validated", file=sys.stderr)
     for section, lang, body in blocks:
         body = substitute(body)
         try:
             if lang == "toml" and tomllib is not None:
                 tomllib.loads(body)
-            elif lang == "yaml":
-                import yaml
+            elif lang == "yaml" and HAVE_YAML:
                 yaml.safe_load(body)
             elif lang == "python":
                 compile(body, section, "exec")
@@ -171,9 +191,7 @@ def check_scaffold_semantics(blocks):
 
 def check_semantic_expectations(blocks):
     """Layer 3: known-wrong-but-parseable values that layer 1 cannot see."""
-    try:
-        import yaml
-    except ImportError:
+    if not HAVE_YAML:
         print("  ! PyYAML absent — semantic spot-checks skipped", file=sys.stderr)
         return
     pre = get_section_block(blocks, "PRECOMMIT", lang="yaml")

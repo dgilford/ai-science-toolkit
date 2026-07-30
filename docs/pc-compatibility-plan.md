@@ -122,7 +122,30 @@ every generated cloud-routine prompt — a silent skip would be a security
 regression, not a cosmetic one. That case may need to stay eager, in which case
 the fix is a PowerShell-safe rewrite rather than a link.
 
-### 4. `sync.sh` portability — two unfixed bugs
+### 4. `sync.sh` portability — two unfixed bugs ✅ done
+
+`bash scripts/sync.sh lint` now passes on Windows with **no workarounds** — no
+`PYTHONUTF8=1`, no `SYNC_EXTERNAL_ACCEPT=1`. Four changes:
+
+- **`encoding="utf-8"` on all 7 `open()` calls.** Retires the `PYTHONUTF8=1`
+  prefix, which was itself a Windows trap: the bash-style `PYTHONUTF8=1 cmd`
+  form is a syntax error in PowerShell.
+- **`read -r reply || reply=n`.** Verified: the gate now reaches its
+  decline-and-roll-back path on non-TTY stdin instead of aborting silently.
+- **PyYAML degrades consistently.** The real defect was narrower than "hard-fails
+  vs skips": `smoke_repo_init.py` imported yaml *inside* the per-block
+  `try/except Exception`, so a missing module was reported as `yaml block does
+  not parse: No module named 'yaml'` — a fake parse failure naming the wrong
+  cause, once per block, while every other consumer skipped with a warning.
+  Import is hoisted; all three sites now skip identically. `REQUIRE_PYYAML=1`
+  (set in CI) turns the skip into a hard failure, mirroring `REQUIRE_SHELLCHECK`.
+- **`diff --strip-trailing-cr` in `lint_vscode_extension()`.** A regression from
+  step 1: the tracked copy obeys the new `.gitattributes` (LF) while `tab-setup/`
+  is an independent clone that lands CRLF on Windows, so every file read as
+  drifted. The lint is for content drift; on Linux/macOS both are LF and this is
+  a no-op.
+
+**Original reasoning, retained:**
 
 Both already documented in CLAUDE.md; neither is Windows-specific in nature, only
 in symptom.

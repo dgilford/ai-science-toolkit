@@ -128,7 +128,12 @@ sync_external_skills() {
         git -C "$dest_path" diff --stat "$before" "$after" -- scripts/ vscode-extension/ | sed 's/^/      /'
         if [ "${SYNC_EXTERNAL_ACCEPT:-0}" != "1" ]; then
           printf "  Deploy these upstream changes? [y/N] "
-          read -r reply
+          # `|| reply=n` is load-bearing. Under `set -euo pipefail`, a non-TTY
+          # stdin (a piped or `!`-shell invocation) makes `read` return non-zero
+          # at EOF, which aborted the whole script *silently* — never reaching
+          # the decline path below, so nothing deployed and nothing rolled back.
+          # Defaulting to "n" makes the gate degrade to its intended answer.
+          read -r reply || reply=n
           if [ "$reply" != "y" ] && [ "$reply" != "Y" ]; then
             echo "  ✗ declined — rolling back to $before (re-run to review again)"
             git -C "$dest_path" reset --hard --quiet "$before"
@@ -166,6 +171,12 @@ agents_dir, skills_dir = sys.argv[1], sys.argv[2]
 try:
     import yaml
 except ImportError:
+    # REQUIRE_PYYAML=1 (CI sets it) turns the skip into a failure, mirroring
+    # REQUIRE_SHELLCHECK in lint-shell.sh: a linter that quietly vanishes must
+    # never become a quiet pass.
+    if os.environ.get("REQUIRE_PYYAML") == "1":
+        print("  ✗ PyYAML not installed and REQUIRE_PYYAML=1 — refusing to skip", file=sys.stderr)
+        sys.exit(1)
     print("  ! PyYAML not installed — skipping frontmatter lint", file=sys.stderr)
     sys.exit(0)
 
@@ -177,7 +188,9 @@ DESC_CAP = 1536  # description chars kept in the model's selection context
 failures = []
 for path in targets:
     fn = os.path.relpath(path, os.path.dirname(agents_dir))
-    text = open(path).read()
+    # encoding= is load-bearing: Windows defaults to cp1252 and the skill files
+    # already contain non-ASCII, so an unqualified open() raises UnicodeDecodeError.
+    text = open(path, encoding="utf-8").read()
     m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
     if not m:
         failures.append(f"{fn}: no YAML frontmatter block")
@@ -239,7 +252,7 @@ targets += sorted(glob.glob(os.path.join(agents_dir, "*.md")))
 failures = []
 for path in targets:
     fn = os.path.relpath(path, os.path.dirname(skills_dir))
-    for name in sorted(set(REF.findall(open(path).read()))):
+    for name in sorted(set(REF.findall(open(path, encoding="utf-8").read()))):
         if name not in known and name not in BUILTINS:
             failures.append(f"{fn}: references `/{name}`, neither a skill in skills/ nor a known built-in")
 
@@ -283,9 +296,14 @@ lint_vscode_extension() {
     echo "  ! vscode-extension/ missing — claude-tab extension NOT drift-checked" >&2
     return 0
   fi
-  if ! diff -r "$tracked" "$fork" >/dev/null 2>&1; then
+  # --strip-trailing-cr: this compares two *independent* checkouts. The tracked
+  # copy obeys this repo's .gitattributes (LF), while tab-setup/ is a separate
+  # clone with its own checkout rules, so on Windows it lands CRLF and every
+  # file reads as drifted. The lint is for content drift, not line endings. On
+  # Linux/macOS both are LF already, so this is a no-op there.
+  if ! diff -r --strip-trailing-cr "$tracked" "$fork" >/dev/null 2>&1; then
     echo "  ✗ claude-tab extension drift: vscode-extension/ != tab-setup/vscode-extension/" >&2
-    diff -r "$tracked" "$fork" 2>&1 | sed 's/^/      /' >&2
+    diff -r --strip-trailing-cr "$tracked" "$fork" 2>&1 | sed 's/^/      /' >&2
     echo "    Fix: author in tab-setup/vscode-extension/ (the fork, which deploys), then" >&2
     echo "    mirror into vscode-extension/ (the tracked, CI-tested copy) so both match." >&2
     exit 1
@@ -326,7 +344,7 @@ if not os.path.exists(settings_path):
     print("  ! ~/.claude/settings.json not found, skipping hook merge", file=sys.stderr)
     sys.exit(0)
 
-with open(settings_path) as f:
+with open(settings_path, encoding="utf-8") as f:
     settings = json.load(f)
 
 hook_entry = {
@@ -341,7 +359,7 @@ if not any("hook-startup" in str(h) for h in existing):
     existing = [h for h in existing if "session-init" not in str(h)]
     existing.append(hook_entry)
     hooks["SessionStart"] = existing
-    with open(settings_path, "w") as f:
+    with open(settings_path, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=2)
         f.write("\n")
     print("  → SessionStart hook added to ~/.claude/settings.json")
@@ -374,17 +392,17 @@ if not os.path.exists(settings_path):
 
 # Canonical statusLine block lives in the repo's settings/settings.json.
 repo_settings = os.path.join(os.environ["REPO_DIR"], "settings", "settings.json")
-with open(repo_settings) as f:
+with open(repo_settings, encoding="utf-8") as f:
     desired = json.load(f)["statusLine"]
 
-with open(settings_path) as f:
+with open(settings_path, encoding="utf-8") as f:
     settings = json.load(f)
 
 if settings.get("statusLine") == desired:
     print("  → statusLine already up to date, skipping")
 else:
     settings["statusLine"] = desired
-    with open(settings_path, "w") as f:
+    with open(settings_path, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=2)
         f.write("\n")
     print("  → statusLine block reconciled in ~/.claude/settings.json")
