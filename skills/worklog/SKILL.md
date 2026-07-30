@@ -82,7 +82,7 @@ connected**, that is a transient failure: note it and move on.
 Steps:
 1. Compute this week's Monday:
    ```!
-   python3 -c "import datetime; t=datetime.date.today(); print((t-datetime.timedelta(days=t.weekday())).isoformat())" 2>/dev/null || echo "(compute Monday manually)"
+   python3 -c "import datetime; t=datetime.date.today(); print((t-datetime.timedelta(days=t.weekday())).isoformat())" || echo "(compute Monday manually)"
    ```
 2. `notion-search` for `Week of <monday>`. If no matching page exists, create it
    under the Work Journal home page (`notion-create-pages`, parent `page_id`

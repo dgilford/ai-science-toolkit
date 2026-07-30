@@ -31,7 +31,7 @@ the result. Harnesses are described inline below so the numbers can be reproduce
 | Skills whose shell the *model* runs (3) | model can translate to PowerShell | ⚠️ **degraded** |
 | Repo scripts (`sync.sh` et al.) | need Git Bash + setup | ⚠️ **works with setup** |
 | Line endings | every `.sh` checks out CRLF | ❌ **breaks the lint gate** |
-| Skills with a `` ```! `` preamble (9) | **0 of 15 blocks execute** | ❌ **broken** |
+| Skills with a `` ```! `` preamble (10) | **0 of 16 blocks execute** | ❌ **broken** |
 | Session auto-naming hook | terminal integration is iTerm2/VS Code only | ❌ **feature absent** |
 
 **Roughly half the toolkit — everything whose value is the prompt rather than the
@@ -69,10 +69,11 @@ registers the bundle itself. It is the recommended Windows install route because
 it avoids `sync.sh`, Git Bash, and the CRLF problem entirely. It does not register
 the boot hook, which does not work on Windows anyway.
 
-## ❌ Preambles: 0 of 15 blocks execute
+## ❌ Preambles: 0 of 16 blocks execute
 
 Preamble blocks run **in PowerShell**, not bash. **Verified** by executing all 15
-blocks from the 9 skills that have them, verbatim, exactly as Claude Code would:
+blocks from the 9 skills the harness covered, verbatim, exactly as Claude Code
+would:
 
 ```
 TOTAL: 15 blocks | OK=0  FAIL=15
@@ -80,6 +81,13 @@ TOTAL: 15 blocks | OK=0  FAIL=15
 
 Every one fails. Because a preamble runs *before* Claude sees the skill, the
 skill body loads with an error where its repo context should be.
+
+A 16th block was missed by that harness run: `worklog` was filed under [skills
+whose shell the model runs](#skills-whose-shell-the-model-runs), but its
+week's-Monday computation is a genuine `` ```! `` preamble carrying `2>/dev/null`
+— and it was independently **verified failing** live (it "could not compute the
+week's Monday"). Counting it, the preamble surface is **16 blocks across 10
+skills**.
 
 | Skill | Blocks | Failing constructs |
 |---|---|---|
@@ -92,6 +100,7 @@ skill body loads with an error where its repo context should be.
 | `resume` | 2 | `2>/dev/null` |
 | `slack-message` | 1 | `2>/dev/null`, `head -N`, `basename` |
 | `unstale` | 1 | `2>/dev/null` |
+| `worklog` | 1 | `2>/dev/null` (verified separately, not in the harness total above) |
 
 ### How much does each fix buy?
 
@@ -102,6 +111,10 @@ Measured by rewriting every block and re-executing:
 | none (as shipped) | **0 / 15** |
 | strip `2>/dev/null` only | **7 / 15** |
 | + swap `head`/`basename` for PowerShell equivalents | **10 / 15** |
+
+The `/15` denominators are the harness run; `worklog`'s 16th block fails only on
+`2>/dev/null`, so it joins the strip-`2>/dev/null` cohort (its `python3` computation
+runs once Python is shimmed).
 
 > **Correction:** an earlier draft of this page claimed that fixing `2>/dev/null`
 > alone "unblocks most of the broken surface." Measurement shows it fixes **47%**,
