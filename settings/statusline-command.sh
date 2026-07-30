@@ -5,6 +5,36 @@
 
 input=$(cat)
 
+# Resolve jq without trusting PATH.
+#
+# On Windows this is not hypothetical: `winget install jqlang.jq` writes the new
+# directory to the registry PATH, but an already-running Claude Code keeps the
+# environment it launched with, so the status line's bash inherits a PATH with no
+# jq on it. winget also creates no shim in WinGet\Links for this package — the
+# binary only exists under a hashed Packages\jqlang.jq_*\ directory. The result
+# was every field silently empty: "🪟 Context: -- | 🤖".
+JQ=""
+if command -v jq >/dev/null 2>&1; then
+  JQ="jq"
+else
+  for _cand in \
+    "$HOME"/AppData/Local/Microsoft/WinGet/Links/jq.exe \
+    "$HOME"/AppData/Local/Microsoft/WinGet/Packages/jqlang.jq_*/jq.exe \
+    /c/ProgramData/chocolatey/bin/jq.exe \
+    "$HOME"/scoop/shims/jq.exe \
+    /usr/bin/jq /usr/local/bin/jq /opt/homebrew/bin/jq
+  do
+    if [ -x "$_cand" ]; then JQ="$_cand"; break; fi
+  done
+fi
+
+# Degrade loudly. A blank status line reads as "no data" and hides the cause;
+# this says what to fix.
+if [ -z "$JQ" ]; then
+  printf '%s' "🪟 status line needs jq — install it and restart Claude Code"
+  exit 0
+fi
+
 # Extract all four fields in a single jq pass. This used to be four separate
 # `jq` invocations — nearly free on Linux, but not on Windows: measured on
 # Windows 11, bash spawn alone is ~36 ms while each additional jq inside Git
@@ -20,7 +50,7 @@ input=$(cat)
 #      survive. Write it as a jq \u escape, never as a literal control byte.
 #   2. Keep the jq program on ONE line. This file is checked out CRLF on
 #      Windows, and a multi-line jq program carries those CRs into the values.
-_fields=$(echo "$input" | jq -r '[.context_window.used_percentage // "", .model.display_name // "", .effort.level // "", .rate_limits.five_hour.used_percentage // ""] | join("")')
+_fields=$(echo "$input" | "$JQ" -r '[.context_window.used_percentage // "", .model.display_name // "", .effort.level // "", .rate_limits.five_hour.used_percentage // ""] | join("")')
 IFS=$'\x1f' read -r used_pct model effort five_hr <<< "$_fields"
 
 # --- Emoji cues per segment: 🪟 context · 🤖 model · 🪨 effort · ⏰ 5h ---
