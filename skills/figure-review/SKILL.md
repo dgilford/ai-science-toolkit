@@ -8,17 +8,13 @@ catalog:
   summary: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style.'
 ---
 
-## Colorblind reference (loaded at runtime)
+## Companion references
 
-```!
-D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/figure-review}"; D="${D:-$HOME/.claude/skills/figure-review}"; cat "$D/COLORBLIND.md" 2>/dev/null || echo "(colorblind guide not found)"
-```
+**Read [COLORBLIND.md](COLORBLIND.md) now, before evaluating any criterion** — criterion 1 depends on it. If it cannot be read, say so and mark criterion 1 `unknown` rather than guessing which colormaps are unsafe.
 
-## House style (loaded at runtime)
+**Only when `--style` is passed**, also read [CC-STYLE.md](CC-STYLE.md) for criterion 6. Without the flag, skip both the file and criterion 6. If the flag is passed but the file is missing, report "no house style configured" and skip criterion 6.
 
-```!
-D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/figure-review}"; D="${D:-$HOME/.claude/skills/figure-review}"; cat "$D/CC-STYLE.md" 2>/dev/null || echo "(no house style configured — criterion 6 skipped)"
-```
+These are relative links, resolved from this file's own directory, so they work identically under a `sync.sh` deploy and a plugin install. They replaced shell preambles that used bash parameter expansion, which threw under PowerShell and took the whole skill down on Windows.
 
 ## Inputs
 
@@ -27,7 +23,7 @@ Accept any subset of: figure image, plotting code, caption, surrounding text cla
 ## Criteria
 
 **1. Colormap**
-Flag colormaps listed as unsafe in the colorblind reference above (jet, rainbow, red–green). Verify sequential vs diverging choice matches data type. Assess luminance contrast. Warn if color is the sole encoding channel (no redundant shape/line style).
+Flag colormaps listed as unsafe in [COLORBLIND.md](COLORBLIND.md) (jet, rainbow, red–green). Verify sequential vs diverging choice matches data type. Assess luminance contrast. Warn if color is the sole encoding channel (no redundant shape/line style).
 
 **2. Uncertainty**
 Flag if a quantitative claim is made and no uncertainty representation is shown (CI, spread, error bars, ensemble range, shading). If no quantitative claim is present, mark `pass`.

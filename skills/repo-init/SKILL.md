@@ -13,11 +13,11 @@ Initialize a repository with a standard, opinionated project structure. Run once
 
 **The intake is a hard gate.** Create nothing — no directories, no files, not even `git init` — until the step-2 intake is either completed with the user or skipped by an explicit flag (`--no-grill` / `--dry-run`). Scaffolding first and asking later defeats the skill: the answers determine what gets scaffolded.
 
-## File templates (loaded at runtime)
+## File templates
 
-```!
-D="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/skills/repo-init}"; D="${D:-$HOME/.claude/skills/repo-init}"; cat "$D/TEMPLATES.md" 2>/dev/null || echo "(TEMPLATES.md not found — abort and report a broken install)"
-```
+**Read [TEMPLATES.md](TEMPLATES.md) before scaffolding anything.** Every file this skill stamps comes from there — do not reconstruct a template from memory, and do not scaffold a file whose template you have not read. **If it cannot be read, abort and report a broken install** rather than improvising; a repo scaffolded from invented templates is worse than no scaffold.
+
+It stays a separate file because it is ~350 lines of literal file bodies. The relative link resolves from this file's own directory, so it works identically under a `sync.sh` deploy and a plugin install. It replaced a shell preamble that used bash parameter expansion, which threw under PowerShell and took the whole skill down on Windows.
 
 ## Live state
 

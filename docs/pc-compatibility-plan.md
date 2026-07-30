@@ -80,6 +80,33 @@ substituted — it needs replacing. These fail hardest: `create-alert` and
 `repo-init` are specified to **abort** when their companion is missing, so on
 Windows they refuse to run rather than degrading.
 
+✅ **Done.** Preambles now execute **11/11 under PowerShell and 11/11 under bash**
+(the block count fell from 15 because four preambles were deleted outright). The
+resolution split by whether the content is conditional and how large it is:
+
+| Companion | Size | Needed | Resolution |
+|---|---|---|---|
+| `create-alert` hardening | 12 lines | every invocation, verbatim | **inlined into SKILL.md**; file deleted |
+| `figure-review` `COLORBLIND.md` | 60 lines | every invocation | relative link + "read this first" |
+| `figure-review` `CC-STYLE.md` | 36 lines | only under `--style` | relative link, conditional |
+| `repo-init` `TEMPLATES.md` | 354 lines | before scaffolding | relative link + abort-if-missing |
+
+Inlining won for the hardening block because it is short, unconditional, and must
+be reproduced *verbatim* — indirection bought nothing and its failure mode was a
+routine that looks complete but has no injection defenses. The others are too
+large to inline, so they take the link, always paired with an explicit instruction
+about when to read it and what to do if it is missing, since **a link is lazy
+where a preamble was eager**.
+
+Two things fixed in passing: `create-alert`'s `ALERT_SLACK_DEFAULT_LOCATION` probe
+moved from shell into prose (no env-var test behaves the same in both shells, and
+one that silently reports "unset" on Windows would quietly drop the default), and
+its gitignore probe now anchors with `git -C "$(git rev-parse --show-toplevel)"`,
+which preserves the documented repo-root-anchoring gotcha *and* behaves
+identically in both shells.
+
+**Original reasoning, retained:**
+
 **Proposed fix: delete the preamble and use a relative Markdown link.**
 `lit-review` already does exactly this with `REFERENCE.md` — the link resolves from
 the SKILL.md's own directory, so it works identically under a `sync.sh` deploy and
