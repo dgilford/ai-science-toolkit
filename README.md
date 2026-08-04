@@ -131,7 +131,7 @@ Developed on **macOS and Linux**, where everything works. On **Windows**, the pr
 | Status line | ⚠️ works once `jq` is installed |
 | `worklog` · `lit-review` | ⚠️ usable; their shell examples are Unix-only |
 | `sync.sh` and the other repo scripts | ⚠️ work under Git Bash, after setup |
-| 9 skills with a shell preamble (incl. `handoff`, `pickup`, `figure-review`, `repo-init`) | ❌ preamble blocks don't execute |
+| Every skill with a shell preamble (incl. `handoff`, `pickup`, `figure-review`, `repo-init`) | ❌ preamble blocks don't execute |
 | Line endings | ❌ every `.sh` checks out CRLF; the shell lint fails |
 | Session auto-naming hook | ❌ terminal integration is iTerm2/VS Code only |
 
@@ -143,6 +143,7 @@ The root cause is that preambles run in PowerShell rather than bash, and the rep
 - [docs/configuration.md](docs/configuration.md) — per-skill setup: env vars, connectors, and what degrades gracefully without them
 - [docs/tab-setup.md](docs/tab-setup.md) — session auto-naming and color: startup reminders, machine-level config, uninstall
 - [docs/repo-layout.md](docs/repo-layout.md) — what every file and directory in this repo is for
+- [docs/harness-behavior.md](docs/harness-behavior.md) — observed (undocumented) Claude Code behavior, each claim tagged with its evidence tier and CLI version
 - [CLAUDE.md](CLAUDE.md) — skill-development conventions, sync internals, and repo workflow notes
 
 ## Citation

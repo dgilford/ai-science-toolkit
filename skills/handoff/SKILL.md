@@ -24,6 +24,10 @@ git log --oneline -12 2>/dev/null || echo "(no git log)"
 git diff --stat HEAD 2>/dev/null | head -30 || echo "(no diff)"
 ```
 
+```!
+claude --version 2>/dev/null || echo "(claude --version unavailable)"
+```
+
 ## Before writing
 
 Read these if they exist: `.ai/HANDOFF.md`, `CLAUDE.md`, `AGENTS.md`. Scan recently modified files for TODO/FIXME markers. Do not invent results for commands that were not run.
@@ -48,6 +52,9 @@ Use only the sections that have real content. Skip empty ones.
 
 ## State
 <!-- branch, environment, anything non-obvious; files changed and why -->
+<!-- If the session established harness-behavior facts (parser, hooks, skill
+     loading), record the `claude --version` from the preamble — those facts are
+     version-scoped. Register: docs/harness-behavior.md in ai-science-toolkit. -->
 
 ## Decisions
 <!-- non-obvious choices made this session: what, why, what was rejected -->

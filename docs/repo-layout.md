@@ -27,6 +27,9 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   scripts in `scripts/lib/ai-sessions/`.
 - `scripts/gen-docs.sh` — regenerates the skill/agent catalog tables in
   CLAUDE.md and README.md from `catalog:` frontmatter (see CLAUDE.md).
+- `scripts/hook-warn-stacked-commands.sh` — optional `UserPromptSubmit` hook
+  warning that a submission starts with 2+ slash commands (they all expand).
+  Warn-only, fails open; registered manually per machine (see CLAUDE.md).
 - `tests/` — fixtures and smoke tests for the transcript/session-status
   parsers (`ai-sessions.sh`'s Python helpers, the VS Code extension's
   session-status reader) — undocumented, version-dependent formats that can
@@ -43,7 +46,8 @@ A tour of what lives where. For install and usage, see the [README](../README.md
   this workflow (e.g. `ruflo.md`).
 - `docs/` — user and maintainer documentation (this file, per-skill
   [configuration](configuration.md), [platform support](platform-support.md),
-  [tab-setup details](tab-setup.md), fork maintenance runbooks).
+  [tab-setup details](tab-setup.md), [observed harness behavior](harness-behavior.md),
+  fork maintenance runbooks).
 - `.github/workflows/` — GitHub Actions. `lint.yml` checks skill and agent
   frontmatter, skill references, repo-init template blocks, catalog-table
   drift, ShellCheck, and the `tests/` parser smoke tests on every push/PR.
