@@ -1,11 +1,11 @@
 ---
 name: figure-review
-description: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support. Use this whenever the user shares or references a figure, plot, panel, or colorbar for a paper, report, or brief and wants it checked, reviewed, or made publication-ready — even if they just say "does this figure work?" or "review my plot." Emits a per-criterion report; never silently rewrites plotting code.'
-allowed-tools: Bash Read Write
+description: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support. Panel-aware — judges one panel of a composite against what its shared caption and sibling panels supply, and raises a likely-deliberate choice as `by-design?` instead of a defect. Use this whenever the user shares or references a figure, plot, panel, or colorbar for a paper, report, or brief and wants it checked, reviewed, or made publication-ready — even if they just say "does this figure work?" or "review my plot." Emits a per-criterion report and archives it to .ai/reviews/; never silently rewrites plotting code.'
+allowed-tools: Bash Read Write Glob Grep
 argument-hint: "[--style] [--no-archive]"
 catalog:
   order: 110
-  summary: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axis labels, caption completeness, and claim support; `--style` adds CC house style.'
+  summary: 'Audit a scientific figure for publication-readiness: colormaps, uncertainty, axes, caption, and claim support; panel-aware, and raises likely-deliberate choices as `by-design?`; `--style` adds CC house style.'
 ---
 
 ## Colorblind reference
@@ -28,7 +28,7 @@ Accept any subset of: figure image, plotting code, caption, surrounding text cla
 
 Determine each of the following from the inputs.
 
-**Standalone figure, or one panel of a composite?** A panel legitimately delegates its legend, symbol definitions, n, and data source to the composite caption and its sibling panels. Signals: a panel-style filename (`fig2C.pdf`, `Fig_3B.pdf`); a sibling file in the same directory differing by one letter; one notebook saving several panels. **Never flag a panel for context its composite supplies.**
+**Standalone figure, or one panel of a composite?** Look for siblings before deciding — list the directory, and if plotting code is an input, check whether one script saves several panels. Signals: a panel-style filename (`fig2C.pdf`, `Fig_3B.pdf`); a sibling differing by one letter. A panel delegates its **legend and symbol definitions** to the composite; do not flag those. It does **not** reliably delegate **n or data source** — a composite caption routinely covers several panels without mapping which is which — so keep checking them. When the composite is not itself an input, mark delegated items `cant-assess`; never pass them silently.
 
 **Draft, or published?** Published means post-peer-review: apparent defects are far more likely to be considered choices, journal requirements, or context carried by the caption. For a published figure, raise concerns as `by-design?` rather than `flag`.
 
