@@ -43,23 +43,34 @@ is the inference from them, not a documented contract.
 | 6 | Nothing warns before two sets of skill instructions land in one context. | observed | True by construction from row 4, and the honest version of a claim this file first wrote as "both bodies execute, ungated." That phrasing was category-confused: the harness does not *execute* skill bodies at all — it injects them as instructions, and whether they run is the model choosing to comply. So there is no harness-level gate to go looking for, and "a second skill that writes files" would not test the parser: it would test model compliance plus the ordinary tool-permission prompt, which applies as it always does. Cite this row for the pre-injection warning gap, and nothing for "auto-executes." |
 | 7 | A command whose name is a **repo skill** shadows the Claude Code built-in of the same name: a local `resume` skill made the built-in past-session picker unreachable as `/resume`. This is why the skill is named `pickup`. | observed + reported | Version not recorded (before 2.1.220). The shadowing was seen in-session; the companion fact that `claude --resume` still worked is terminal-level, which a session cannot see — that half is the tester's account. |
 
-**Not yet tested, in value order** (each is one submission):
+**Known unknowns — deliberately not being chased.** The prose prefix is still
+confounded with position (all four row 3 trials used `let's … now`); the token
+boundary in row 4b was only tested with plain words, not a bare `-` or a quote;
+and row 5 stays `reported`. Each is one submission to test, and none of them
+changes what anyone does — the actionable rule above survives either arm of all
+three. Chasing them was retired on 2026-08-04 as parser archaeology: n≤4 negatives
+about a closed-source parser that ships weekly, with no CI able to tell you when
+they break. Fix a row when it bites in real use; don't run probes for their own
+sake.
 
-- Row 3 with a **different prose prefix** — all four trials used `let's … now`, so the scaffold is still confounded with position. Submit e.g. `please run /pickup` or `can you /pickup for me`; expansion either way is the informative outcome.
-- A non-prose token between two commands (`-`, `"`, a list bullet) — row 4b used plain words; the boundary the parser actually uses is untested.
-- Row 5 (newline separator) by a route that doesn't depend on the tester's account — e.g. a `UserPromptSubmit` hook logging the raw payload, which *can* see the whitespace a session cannot.
-
-When designing a probe, prefer side-effect-free commands. `/worklog /overbaked`
+If a probe ever *is* warranted, prefer side-effect-free commands. `/worklog /overbaked`
 would have tested row 4b too, but `worklog` writes to Notion — a parser probe
 should not change the world.
 
 ## The one consequence that lives in CLAUDE.md
 
-Rows 3 and 6 combine into a single actionable rule — a **gated** skill named
-mid-sentence has no invocation path from that phrasing — and that rule is stated
-in `CLAUDE.md` under "A gated skill only expands at the head of a submission",
-not repeated here. It survives either arm of row 3's gating confound, which is
-why it is the only part promoted out of this register.
+Rows 3 and 9b combine into the one actionable rule — a skill named mid-sentence
+does not expand, but a **gated** one is still reachable by name through the
+`Skill` tool, so what you lose is argument capture, not access. That rule is
+stated in `CLAUDE.md` under "A gated skill only expands at the head of a
+submission", not repeated here.
+
+It is the only part promoted out of this register, and it survives every
+confound still open on row 3. **It also spent a while stated wrongly** — as
+"no invocation path from that phrasing," which row 9b falsified on 2026-08-04.
+Worth remembering when deciding what else to promote: the rule that got copied
+into the always-loaded file was the one claim here nobody re-tested, because it
+read as settled. Prefer promoting things that fail loudly.
 
 ## Settings and hooks
 
@@ -68,6 +79,7 @@ why it is the only part promoted out of this register.
 | 8 | Interactive `/model` and `/effort` write straight into `~/.claude/settings.json` as the new default. | observed | Motivates the `SessionStart` re-pin hook. Version unrecorded. |
 | 8b | There is no per-session opt-in for model or effort (only `fastModePerSessionOptIn`, covering fast mode alone). | inferred | A universal negative: this comes from enumerating the settings schema, not from observing an absence. A future release could add one without this row noticing. |
 | 9 | `disable-model-invocation: true` does **not** reclaim description token budget — the description stays in the model's selection context. | observed | CLI 2.1.181. Known open bug: anthropics/claude-code#31935, #41417. |
+| 9b | `disable-model-invocation: true` withholds a skill from the available-skills listing Claude selects from, but does **not** reject an explicit `Skill` call naming it. | observed | 2026-08-04, **CLI 2.1.221**. Found by accident while running the row 3 probe: `let's /pickup now` did not expand, and `Skill(pickup)` then loaded the body normally — no error. `pickup` is confirmed gated in its frontmatter, and all 11 gated skills in this repo were absent from that session's listing while all 9 ungated ones were present, so the withholding half is solid at n=11/9. **This corrects a claim `CLAUDE.md` carried until now:** that the tool "hard-rejects it (`cannot be used with Skill tool due to disable-model-invocation`)". That rejection was never observed here; it may have been true at an earlier version, or may have been inferred from the field's name and written down as fact. Either way the invocation path exists at 2.1.221, so gating is not a way to make a skill unreachable — it only stops Claude reaching for it *unprompted*. |
 | 10 | Agent frontmatter that fails to parse is dropped **silently** — the `.md` deploys and the type never registers. | observed | Classic cause: unquoted multi-line `description` containing `": "`. `lint_frontmatter()` exists for this. Version unrecorded. |
 | 10b | The failure only surfaces in a *fresh* session, because the agent-type list is snapshotted at session start. | inferred | No single session can observe cross-session snapshotting; this is the explanation that fits, not a thing that was watched. |
 | 11 | A ~1,536-char cap on skill `description`. | reported | CLI 2.1.181, unsourced in official docs. The lint enforces it; re-verify before relying on the exact number. CLAUDE.md defers to this row for the tier — keep them in agreement. |
