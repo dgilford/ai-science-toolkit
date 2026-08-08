@@ -67,7 +67,7 @@ disable-model-invocation: true             # user-invoked only; see below
 ---
 ```
 
-Shell commands in ` ```! ` blocks run before Claude sees the skill content — use for injecting live repo state (git status, log, diff).
+Shell commands in ` ```! ` blocks run before Claude sees the skill content — use for injecting live repo state (git status, log, diff). **These preambles run under PowerShell on Windows, not bash**, so keep them PowerShell-safe: avoid `2>/dev/null` (it resolves to `C:\dev\null` and *throws*), `VAR=…` assignments, `${x:+y}` expansion, and `head`/`basename`. Prefer bare `git …` with `&&`/`||` chaining, which behaves the same under both shells (see the companion-file bullet under Plugin distribution and `docs/platform-support.md`).
 
 ### Invocation control: user-invoked vs model-invokable
 
@@ -200,5 +200,7 @@ Zenodo only captures releases published *after* the webhook was enabled, and onl
 ## Commits
 
 Global GPG signing is disabled (`commit.gpgsign` is unset in `~/.gitconfig`), so commits are unsigned by default and can be made in-session without a passphrase prompt. The signing key (`user.signingkey`) is still configured — opt into a signed commit per-commit with `git commit -S`. To restore signing-by-default: `git config --global commit.gpgsign true` (note: pinentry's GUI times out in this environment, so signed commits would then need an external terminal with the key already unlocked).
+
+**A commit message cannot contain a literal control byte.** `git commit -m "…"` with a raw control character (e.g. a `0x1f` US byte, as the status line uses for its jq field separator) is rejected by the Bash tool's approval layer — *"command contains control characters that would be hidden in the approval dialog"* — and the failure repeats as long as the byte is in the message. Write the escape in words (e.g. "unicode escape") or use `git commit -F <file>` with the message composed via the Write tool.
 
 **`origin/HEAD` may be unset in a clone**, which breaks any skill whose preamble diffs against it — `/security-review` fails with *"ambiguous argument 'origin/HEAD...'"* rather than degrading. Fix once per clone: `git remote set-head origin --auto`. Also note those preambles use a three-dot commit range, so they see **committed** work only; to review an uncommitted working tree, diff it explicitly rather than assuming the skill picked it up.

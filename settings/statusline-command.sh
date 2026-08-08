@@ -46,11 +46,11 @@ fi
 #   1. The separator must NOT be tab. Tab is an IFS *whitespace* character, so
 #      bash collapses runs of it and an absent middle field silently shifts
 #      every later value left — an absent `effort` renders the 5h percentage as
-#      the effort level. US () is not IFS whitespace, so empty fields
+#      the effort level. US (\u001f) is not IFS whitespace, so empty fields
 #      survive. Write it as a jq \u escape, never as a literal control byte.
 #   2. Keep the jq program on ONE line. This file is checked out CRLF on
 #      Windows, and a multi-line jq program carries those CRs into the values.
-_fields=$(echo "$input" | "$JQ" -r '[.context_window.used_percentage // "", .model.display_name // "", .effort.level // "", .rate_limits.five_hour.used_percentage // ""] | join("")')
+_fields=$(echo "$input" | "$JQ" -r '[.context_window.used_percentage // "", .model.display_name // "", .effort.level // "", .rate_limits.five_hour.used_percentage // ""] | join("\u001f")')
 IFS=$'\x1f' read -r used_pct model effort five_hr <<< "$_fields"
 
 # --- Emoji cues per segment: 🪟 context · 🤖 model · 🪨 effort · ⏰ 5h ---
