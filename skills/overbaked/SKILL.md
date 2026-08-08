@@ -61,7 +61,7 @@ Rewrite: `tighter version`
 
 ## Archive
 
-Unless `--no-archive` was passed: after emitting the audit, write it verbatim to `.ai/reviews/<YYYY-MM-DD>-overbaked[-<target-slug>].md` under the repo root (`mkdir -p .ai/reviews`; suffix `-2`, `-3`… on filename collision). Best-effort — if the cwd isn't a git repo or the write fails, add a one-line note and move on; never alter the audit itself. If `.ai/` is not gitignored (`git check-ignore -q .ai` exits non-zero), warn and suggest adding `.ai/` to `.gitignore`.
+Unless `--no-archive` was passed: after emitting the audit, write it verbatim to `<repo-root>/.ai/reviews/<YYYY-MM-DD>-overbaked[-<target-slug>].md` (`mkdir -p "$(git rev-parse --show-toplevel)/.ai/reviews"`; suffix `-2`, `-3`… on filename collision). Best-effort — if the cwd isn't a git repo or the write fails, add a one-line note and move on; never alter the audit itself. Probe the ignore with the **file path at repo root**, not the bare directory: if `git check-ignore -q "$(git rev-parse --show-toplevel)/.ai/reviews/probe.md"` exits non-zero, warn and suggest adding `.ai/` to `.gitignore`. (`git check-ignore -q .ai` false-negatives for the directory-form `.ai/` pattern whenever the directory does not yet exist.)
 
 ---
 

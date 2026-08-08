@@ -17,7 +17,7 @@ Nothing here fires automatically; this is a navigation aid only.
 ## Session lifecycle
 
 ```
-Start of session   →  /resume
+Start of session   →  /pickup
                          ↓ (do work)
 End of session     →  /handoff           writes .ai/HANDOFF.md, then calls /evolve-claude-md
 Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.md only
@@ -30,7 +30,7 @@ Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.m
 | Skill | Command | Reach for it when… |
 |---|---|---|
 | repo-init | `/repo-init [--package]` | Starting a new repo (or retrofitting an old one): scaffolds the standard structure — research mode by default, `--package` for a distributable library. Idempotent |
-| resume | `/resume` | Starting a new session; reconstructs context from `.ai/HANDOFF.md` |
+| pickup | `/pickup` | Starting a new session; reconstructs context from `.ai/HANDOFF.md`. Named `pickup`, not `resume`, so it doesn't shadow Claude Code's built-in `/resume` session picker |
 | handoff | `/handoff` | Ending a session or switching agents; calls `evolve-claude-md` internally |
 | evolve-claude-md | `/evolve-claude-md` | Standalone CLAUDE.md update without a full handoff |
 | grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |

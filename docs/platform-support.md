@@ -96,8 +96,8 @@ skills**.
 | `create-alert` | 2 | `VAR=`, `${x:+y}`, `if/then/fi`, `2>/dev/null` |
 | `figure-review` | 2 | `VAR=`, `${x:+y}` |
 | `handoff` | 3 | `2>/dev/null`, `head -N` |
+| `pickup` | 2 | `2>/dev/null` |
 | `repo-init` | 2 | `VAR=`, `${x:+y}`, `2>/dev/null` |
-| `resume` | 2 | `2>/dev/null` |
 | `slack-message` | 1 | `2>/dev/null`, `head -N`, `basename` |
 | `unstale` | 1 | `2>/dev/null` |
 | `worklog` | 1 | `2>/dev/null` (verified separately, not in the harness total above) |
@@ -143,33 +143,29 @@ catches a failing command without it — it is actively fatal.
 `.gitattributes`**, and Git for Windows defaults to `core.autocrlf=true`. Every
 tracked shell script therefore checks out with CRLF:
 
-| File | CRLF lines |
-|---|---|
-| `scripts/sync.sh` | 507 |
-| `scripts/gen-docs.sh` | 169 |
-| `vscode-extension/install.sh` | 91 |
-| `scripts/ai-sessions.sh` | 85 |
-| `tests/smoke_test_parsers.sh` | 69 |
-| `settings/statusline-command.sh` | 61 |
-| `scripts/lint-shell.sh` | 57 |
-
-That is 100% of tracked `.sh` files.
+Every line of every tracked `.sh` file — `git ls-files '*.sh'` is the
+authoritative list, which is why one isn't reproduced here. A hand-copied
+enumeration is just another thing to keep in sync, and the per-file line counts
+that used to sit here went stale as the scripts grew.
 
 **What it does *not* break:** execution. Git Bash runs these scripts fine —
 `sync.sh push` completes, and the CRLF status line renders correctly.
 
 **What it does break:** the repo's own shell lint. On a Windows clone,
-`scripts/lint-shell.sh` reports **471 × SC1017 (literal carriage return)** and
-exits 1, plus cascading parse errors (SC1041–SC1047, SC1072, SC1073, SC1140) that
-are artefacts of the CR rather than real defects. A Windows contributor cannot
+`scripts/lint-shell.sh` reports one **SC1017 (literal carriage return)** per line
+of every tracked script — 471 of them when this was measured, and necessarily
+more as the scripts grow, so treat the number as an order of magnitude rather
+than a fact to check against — and exits 1, plus cascading parse errors
+(SC1041–SC1047, SC1072, SC1073, SC1140) that are artefacts of the CR rather than
+real defects. A Windows contributor cannot
 pass the project's own gate, and the genuine findings are buried.
 
 **Verified fix:** stripping CR from a scratch copy makes shellcheck exit 0 with the
 same ruleset. A `.gitattributes` containing `*.sh text eol=lf` would prevent the
 whole class.
 
-Note the deployed copies inherit this too — `~/.claude/skills/tab-setup/scripts/hook-startup.sh`
-carries 457 CRLF lines after a `sync.sh push`.
+Note the deployed copies inherit this too — after a `sync.sh push`,
+`~/.claude/skills/tab-setup/scripts/hook-startup.sh` is CRLF throughout.
 
 ## ⚠️ Works, with caveats
 

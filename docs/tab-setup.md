@@ -22,9 +22,9 @@ tab-setup`) deploys the skill and registers the boot hook in
 
 ## Context reminders at startup
 
-- `[resume]` — if `.ai/HANDOFF.md` exists in the project, surfaces the
+- `[pickup]` — if `.ai/HANDOFF.md` exists in the project, surfaces the
   objective and first next action so you know where you left off without
-  running `/resume`
+  running `/pickup`
 - `[env]` — reminds you to activate the project environment. Detection order:
   1. `pixi.toml` in project → `run: pixi shell`
   2. `environment.yml` in project → `activate: conda <name>`

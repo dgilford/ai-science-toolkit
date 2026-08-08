@@ -47,12 +47,54 @@ is_excluded() {
 }
 
 usage() {
-  echo "Usage: $0 [push [name...]|pull|lint]"
+  echo "Usage: $0 [push [name...]|pull|lint|orphans]"
   echo "  push           Deploy all skills to ~/.claude/skills/ and agents to ~/.claude/agents/"
   echo "  push <name>... Deploy only the named skills/agents, plus their hard dependencies"
   echo "  pull           Pull skills from ~/.claude/skills/ into repo"
   echo "  lint           Lint frontmatter, skill references, repo-init templates, claude-tab extension drift, and tracked shell scripts"
+  echo "  orphans        Report deployed skills/agents with no repo counterpart (read-only; deletes nothing)"
   exit 1
+}
+
+# `push` is an overlay (never deletes), so a skill or agent renamed or removed in
+# the repo keeps resolving from ~/.claude/, and `pull` re-adds it to the repo.
+# Read-only: it cannot distinguish "orphaned by a rename" from "installed from a
+# plugin bundle", so it reports and never deletes.
+#
+# Names are printed with `%q` deliberately. This function inspects a directory
+# that third-party bundles write to, so a name may contain spaces, newlines, or
+# ANSI escapes — raw `echo` would let one forge a section header or repaint the
+# report, defeating the audit. %q also makes each path safe to copy-paste.
+# Known blind spots: dot-prefixed deployed dirs (the `*/` glob skips them), and
+# files deleted from inside a still-tracked skill.
+report_orphans() {
+  local found=0 name
+  echo "Deployed skills with no skills/<name>/ in this repo:"
+  for skill_dir in "$SKILLS_DEST"/*/; do
+    [ -d "$skill_dir" ] || continue
+    name=$(basename "$skill_dir")
+    if [ ! -d "$SKILLS_SRC/$name" ]; then
+      printf '  ? %q\n' "$name"
+      found=$((found + 1))
+    fi
+  done
+  [ "$found" -eq 0 ] && echo "  (none)"
+  local agents_found=0
+  echo "Deployed agents with no agents/<name>.md in this repo:"
+  for agent_file in "$AGENTS_DEST"/*.md; do
+    [ -f "$agent_file" ] || continue
+    name=$(basename "$agent_file")
+    if [ ! -f "$AGENTS_SRC/$name" ]; then
+      printf '  ? %q\n' "$name"
+      agents_found=$((agents_found + 1))
+    fi
+  done
+  [ "$agents_found" -eq 0 ] && echo "  (none)"
+  echo
+  echo "Third-party skills are expected here. Renamed or removed repo skills are not —"
+  echo "delete those by hand before the next \`pull\` re-adds them to the repo:"
+  printf '  rm -rf %q/<name>\n' "$SKILLS_DEST"
+  echo "(Files deleted from inside a still-tracked skill won't show here.)"
 }
 
 # Co-deployed runtime dependencies: a launcher or orchestrator that invokes another
@@ -218,26 +260,56 @@ print(f"  ✓ frontmatter lint passed ({len(targets)} files)")
 EOF
 }
 
-# Verify every backticked `/slash-command` in a skill or agent body resolves to
-# a real skill in skills/ (or a known Claude Code built-in / delegated command).
+# Verify every backticked `/slash-command` resolves to a real skill in skills/
+# (or a known Claude Code built-in / delegated command).
 # Catches a launcher whose target was renamed or deleted — e.g. grill-me's body
 # is just "Run a `/grilling` session.", so if `grilling` vanished the launcher
 # would deploy fine and silently no-op. Frontmatter lint can't see this.
+#
+# Scope: skill bodies and their companion .md files (at any depth), agent files,
+# and the prose docs (CLAUDE.md, README.md, docs/**.md) — renames routinely land
+# in skills/ but not in the surrounding prose, and nothing checked the prose.
 lint_skill_refs() {
   python3 - "$SKILLS_SRC" "$AGENTS_SRC" <<'EOF'
 import glob, os, re, sys
-skills_dir, agents_dir = sys.argv[1], sys.argv[2]
+# normpath first: a trailing slash on the skills arg would otherwise make
+# dirname() return the skills dir itself, silently dropping the prose docs from
+# scope and mangling every relpath used for SCOPED_REFS matching.
+skills_dir, agents_dir = os.path.normpath(sys.argv[1]), os.path.normpath(sys.argv[2])
+repo_root = os.path.dirname(skills_dir)
 
 known = {os.path.basename(os.path.dirname(p))
          for p in glob.glob(os.path.join(skills_dir, "*", "SKILL.md"))}
 
 # Slash commands that are NOT skills in this repo and so are legitimate to
-# reference: Claude Code built-ins plus the external review commands ai-review
-# delegates to. Add to this set when a body starts citing a new built-in.
+# reference ANYWHERE: Claude Code built-ins plus the external review commands
+# ai-review delegates to. Add to this set when a body starts citing a new
+# built-in.
 BUILTINS = {
     "code-review", "security-review",
     "rename", "color", "clear", "compact", "model", "effort", "review",
-    "help", "cost", "fast", "memory",
+    "help", "cost", "fast", "memory", "plugin",
+}
+
+# Generic prose stand-ins, not commands — `/slash` and `/slash-command` appear
+# when the docs talk ABOUT the syntax rather than naming a command. Kept
+# separate from BUILTINS so that list stays an honest inventory of real
+# built-ins. For a new placeholder prefer the angle form (`/<name>`), which the
+# regex already ignores, over growing this set.
+PLACEHOLDERS = {"slash", "slash-command"}
+
+# (repo-relative path, command) pairs — a reference legitimate only in the ONE
+# file that has a reason to name it. Prefer this over BUILTINS: a repo-wide
+# entry silently disables detection everywhere else.
+#
+# /resume is the built-in past-session picker. The repo's own skill is named
+# `pickup` precisely so it doesn't shadow it, and these files cite `/resume` by
+# name to explain why.
+SCOPED_REFS = {
+    ("CLAUDE.md", "resume"),
+    ("docs/harness-behavior.md", "resume"),
+    ("skills/pickup/SKILL.md", "resume"),
+    ("skills/pathfinder/SKILL.md", "resume"),
 }
 
 # Optional args before the closing backtick — bracket form (`/repo-init [--package]`,
@@ -247,20 +319,37 @@ BUILTINS = {
 # rewording the prose over widening this regex.
 REF = re.compile(r"`/([a-z][a-z0-9-]+)(?: (?:\[[^`\]]*\]|--[^`]+))?`")
 targets = sorted(glob.glob(os.path.join(skills_dir, "*", "SKILL.md")))
+targets += sorted(glob.glob(os.path.join(skills_dir, "*", "**", "*.md"), recursive=True))
 targets += sorted(glob.glob(os.path.join(agents_dir, "*.md")))
+targets += [os.path.join(repo_root, "CLAUDE.md"), os.path.join(repo_root, "README.md")]
+targets += sorted(glob.glob(os.path.join(repo_root, "docs", "**", "*.md"), recursive=True))
+# The two skills globs overlap on SKILL.md; dedupe, keep a stable order, and
+# tolerate a missing CLAUDE.md/README.md (a consumer repo may not have both).
+targets = sorted({p for p in targets if os.path.isfile(p)})
 
 failures = []
 for path in targets:
-    fn = os.path.relpath(path, os.path.dirname(skills_dir))
-    for name in sorted(set(REF.findall(open(path, encoding="utf-8").read()))):
-        if name not in known and name not in BUILTINS:
-            failures.append(f"{fn}: references `/{name}`, neither a skill in skills/ nor a known built-in")
+    # Forward slashes always: SCOPED_REFS keys are written POSIX-style, but
+    # relpath emits "\" on Windows, so an unnormalized fn silently matches
+    # nothing there and every scoped exception fails the lint.
+    fn = os.path.relpath(path, repo_root).replace(os.sep, "/")
+    # encoding is explicit: this lint reads the widest set of files in the repo,
+    # and Windows' cp1252 default raises UnicodeDecodeError on the non-ASCII
+    # already present in these bodies.
+    with open(path, encoding="utf-8") as fh:
+        body = fh.read()
+    for name in sorted(set(REF.findall(body))):
+        if (name in known or name in BUILTINS or name in PLACEHOLDERS
+                or (fn, name) in SCOPED_REFS):
+            continue
+        failures.append(f"{fn}: references `/{name}`, neither a skill in skills/ nor a known built-in")
 
 if failures:
     print("  ✗ skill-reference lint failed:", file=sys.stderr)
     for f in failures:
         print(f"      {f}", file=sys.stderr)
-    print("    Fix: correct the reference, add the missing skill, or allowlist a new built-in in lint_skill_refs().", file=sys.stderr)
+    print("    Fix: correct the reference, add the missing skill, allowlist a new built-in in", file=sys.stderr)
+    print("    BUILTINS, or scope a one-file exception in SCOPED_REFS (prefer SCOPED_REFS).", file=sys.stderr)
     sys.exit(1)
 print(f"  ✓ skill-reference lint passed ({len(targets)} files)")
 EOF
@@ -518,6 +607,9 @@ case "$1" in
     lint_templates
     lint_vscode_extension
     lint_shell
+    ;;
+  orphans)
+    report_orphans
     ;;
   *)
     usage

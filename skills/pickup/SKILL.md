@@ -1,11 +1,11 @@
 ---
-name: resume
-description: Resume work from repo-local handoff state. Use when starting a new Claude Code session, switching agents, returning to a project, or asking an AI agent to reconstruct context from prior work.
+name: pickup
+description: Pick up work from repo-local handoff state. Use when starting a new Claude Code session, switching agents, returning to a project, or asking an AI agent to reconstruct context from prior work. Named `pickup` rather than `resume` to avoid shadowing Claude Code's built-in `/resume` conversation picker.
 allowed-tools: Bash Read
 disable-model-invocation: true
 catalog:
   order: 20
-  summary: 'Resume work from repo-local handoff state.'
+  summary: 'Pick up work from repo-local handoff state — the read side of the `handoff` pair.'
 ---
 
 Resume this project from the repo-local handoff state.
