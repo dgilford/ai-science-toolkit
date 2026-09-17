@@ -89,6 +89,20 @@ explicit error naming the field.
 | 11 | A ~1,536-char cap on skill `description`. | reported | CLI 2.1.181, unsourced in official docs. The lint enforces it; re-verify before relying on the exact number. CLAUDE.md defers to this row for the tier — keep them in agreement. |
 | 12 | `UserPromptSubmit` hooks do **not** run for messages the user submits *mid-turn* (the ones the harness surfaces inside a running turn alongside a tool result). | observed | Found incidentally, 2026-08-04, CLI 2.1.220. With a sentinel armed, 4 user messages reached the session and only 2 appended to it — the two that didn't were both mid-turn interjections, and the two that did were ordinary between-turn submissions (191s apart, with no entries in between). The sentinel ran **before** the hook script and was payload-independent, so this is not the script exiting early on an unfamiliar payload shape: the hook command never ran at all. Still a negative result at n=2, and it does not distinguish "the event never fires" from "the event fires but user hooks are skipped for queued input". **Consequence:** any guard built on this event has a hole — a mid-turn submission bypasses it entirely. |
 
+| 13 | The `statusLine` command receives a JSON payload on **stdin** whose `context_window` object carries `total_input_tokens`, `total_output_tokens`, `context_window_size`, `current_usage`, `used_percentage` and `remaining_percentage`. Siblings include `model.{id,display_name}`, `effort.level` and `rate_limits.{five_hour,seven_day}.{used_percentage,resets_at}`. | observed | 2026-09-17, **CLI 2.1.272**, captured live (see the note below the table). `context_window_size` was **1000000** — a 1M window, not the 200k the older `exceeds_200k_tokens` sibling implies, which is why a percentage-only status line stopped carrying signal. `effort` is present only when the session reports one; `settings/statusline-command.sh` treats every optional segment as droppable for this reason. |
+| 13b | `used_percentage` is **`null`, not absent**, before the first API response of a session — so a `jq '… // empty'` read lands on the missing-value branch rather than printing `0`. | inferred | 2026-09-17, **CLI 2.1.272**. The live payload was never seen in this state; the claim comes from reading the shipped helper in the binary, which returns `{used: null, remaining: null}` when `current_usage` is null. The consequence was reproduced only against a *synthetic* null payload. Treat as the explanation that fits, not a watched transition. |
+| 13c | `rate_limits.five_hour.used_percentage` arrives as a **float carrying FP noise** — observed `7.000000000000001`, not `7`. | observed | 2026-09-17, **CLI 2.1.272**, n=1. Consequence: round before formatting or comparing (`printf "%.0f"` already absorbs it); never test it with shell integer `-eq`. |
+
+**How to observe rows 13–13c:** capture the status line's real stdin rather than
+reasoning about the schema or grepping the binary. Insert `printf "%s" "$input" >
+/tmp/claude-statusline-input.json` immediately after `input=$(cat)` in the
+*deployed* `~/.claude/statusline-command.sh`, let one render fire, read the file,
+then restore from a `.bak`. Two cautions: the dump is **overwritten on every
+render**, so `cp` it before analyzing — two consecutive reads returned different
+models and percentages, which briefly read as a contradiction; and the binary is
+a compiled Mach-O whose embedded JS is reachable with `strings`, which answers
+*what the code does* but not *what this session actually receives*.
+
 ## When a row here turns out to be wrong
 
 Correct it in place and move the old text into the row's confounds column with
