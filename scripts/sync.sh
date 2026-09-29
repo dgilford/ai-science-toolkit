@@ -302,6 +302,7 @@ PLACEHOLDERS = {"slash", "slash-command"}
 # name to explain why.
 SCOPED_REFS = {
     ("CLAUDE.md", "resume"),
+    ("skills/recover-sessions/SKILL.md", "resume"),
     ("docs/harness-behavior.md", "resume"),
     ("skills/pickup/SKILL.md", "resume"),
     ("skills/pathfinder/SKILL.md", "resume"),

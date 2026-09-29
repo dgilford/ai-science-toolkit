@@ -17,6 +17,7 @@ The canonical "when to reach for each" catalog is `skills/pathfinder/SKILL.md` (
 | `handoff` | `/handoff` | Create or update a durable project handoff (`.ai/HANDOFF.md`) for the next AI agent/session. |
 | `worklog` | `/worklog` | Log a work entry to the Notion Work Journal + remote server cache + local `.ai/` mirror — the capture core invoked by `/handoff` and whenever you ask to log something. |
 | `pickup` | `/pickup` | Pick up work from repo-local handoff state — the read side of the `handoff` pair. |
+| `recover-sessions` | `/recover-sessions` | Find and resume closed Claude Code sessions from the on-disk transcript store — working directory, subject, and a ready-to-paste resume command. |
 | `evolve-claude-md` | `/evolve-claude-md` | Update CLAUDE.md — or the canonical AGENTS.md it redirects to — with durable knowledge from the current session. |
 | `grill-me` | `/grill-me` | Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core. By [Matt Pocock](https://github.com/mattpocock). |
 | `grilling` | `/grilling` | Grill the user relentlessly about a plan or design, one decision at a time, until shared understanding — the model-invokable core behind `/grill-me`. Adapted from [Matt Pocock](https://github.com/mattpocock). |

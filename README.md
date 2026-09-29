@@ -24,6 +24,7 @@ Skills are slash commands and mid-task capabilities for Claude Code. Type `/path
 | **overbaked** | `/overbaked` | Audit a document, plan, or code for over-engineering, verbosity, and scope creep. |
 | **pathfinder** | `/pathfinder` | Router: a navigable map of every skill and subagent and when to reach for each; resolves the reviewer-2-vs-panel review decision. |
 | **pickup** | `/pickup` | Pick up work from repo-local handoff state — the read side of the `handoff` pair. |
+| **recover-sessions** | `/recover-sessions` | Find and resume closed Claude Code sessions from the on-disk transcript store — working directory, subject, and a ready-to-paste resume command. |
 | **repo-init** | `/repo-init` | Scaffold a new repo (or retrofit an existing one) with a standard structure via a short intake grill: research mode by default, `--package` for a distributable library. Never overwrites; `--dry-run` previews. |
 | **reviewer-2** | `/reviewer-2` | Adopt a critical-reviewer stance to stress-test a claim, result, or manuscript section: baseline, counterfactual, alternatives, uncertainty consistency. |
 | **slack-message** | `/slack-message` | Draft an internal Slack message grounded in current project context and recent workflow. |
@@ -113,10 +114,13 @@ Run `ai-sessions` to list sessions. Claude's own recap (`away_summary`) is shown
 The handoff skills form a session lifecycle that keeps project state durable across sessions:
 
 ```
+/recover-sessions  # a session closed — find the conversation on disk and resume it
 /pickup            # start of session — loads handoff, reports state
 /handoff           # end of session — writes handoff, updates CLAUDE.md
 /evolve-claude-md  # anytime — promote new knowledge to CLAUDE.md
 ```
+
+`recover-sessions` reads Claude Code's own transcript store, so it works even in a project that has never used `.ai/` state.
 
 State lives in a repo-local `.ai/` directory — add it to `.gitignore` in any project where you use these skills.
 
