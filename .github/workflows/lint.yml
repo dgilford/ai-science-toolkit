@@ -44,6 +44,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run smoke tests against tests/fixtures/
         run: bash tests/smoke_test_parsers.sh
+      - name: briefly hook smoke test
+        run: bash tests/smoke_hook_briefly.sh
 
   spot-ai-rates:
     name: spot-ai measurement definitions

@@ -24,7 +24,7 @@ config, or claude.ai connectors for cloud-authenticated services like Notion).
 All four reviewer agents (`attribution-reviewer`, `stats-reviewer`,
 `meteo-reviewer`, `scicomm-reviewer`) and these skills:
 
-`ai-review`, `commit-batch`/`commit-batching`, `evolve-claude-md`,
+`ai-review`, `briefly`, `commit-batch`/`commit-batching`, `evolve-claude-md`,
 `figure-review`, `grill-me`/`grilling`, `overbaked`, `pathfinder`, `pickup`,
 `repo-init`, `reviewer-2`, `slack-message` (drafts from git context — no Slack
 connection needed), `spot-ai` (two optional layers: a machine-local voice profile at

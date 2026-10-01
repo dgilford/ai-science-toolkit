@@ -52,6 +52,7 @@ Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.m
 | `figure-review` | User shares or references a figure/plot and wants it checked for publication readiness |
 | `lit-review` | Searching or synthesizing scientific literature; citation checks from a review flow |
 | `overbaked` | Auditing any artifact for over-engineering, verbosity, or scope creep |
+| `briefly` | User wants a short answer — `/briefly` typed anywhere in a prompt (mid-prompt it doesn't expand; invoke it), or "brief"/"TL;DR" |
 | `reviewer-2` | Quick generalist stress-test of a claim, result, or section (any domain) |
 | `unstale` | Cleaning up dead imports, stale comments, resolved TODOs after a refactor |
 | `evolve-claude-md` | Promoting session knowledge to CLAUDE.md (called by `handoff`; also invokable standalone) |

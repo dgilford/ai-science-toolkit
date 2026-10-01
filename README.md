@@ -12,6 +12,7 @@ Skills are slash commands and mid-task capabilities for Claude Code. Type `/path
 | Skill | Command | Purpose |
 |---|---|---|
 | **ai-review** | `/ai-review` | Comprehensive senior-engineer repo review; orchestrates a parallel fan-out that delegates to code-review/security-review/unstale/overbaked/reviewer-2 and adds gap-hunting, grounded ideation, and prioritized synthesis. Report-only by default; `--fix` opts into HIGH-confidence unstale repairs. |
+| **briefly** | `/briefly` | Cap the length and detail of a reply — the answer only, sized to the question. Works mid-prompt. |
 | **commit-batch** | `/commit-batch` | Batch the working tree into logical, single-concern commits, then commit and push if asked. Thin launcher for the model-invokable `commit-batching` core. |
 | **commit-batching** | `/commit-batching` | Batch a dirty working tree into logical, single-concern commits (survey → group → stage by path → commit → push if asked) — the model-invokable core behind `/commit-batch`. |
 | **create-alert** | `/create-alert` | Author a scheduled Slack alert: grill a "tell me when X happens" ask into a testable trigger, dry-run it live, and — after you sign off on the synthesized spec — create a claude.ai cloud routine that messages Slack when it fires. |
