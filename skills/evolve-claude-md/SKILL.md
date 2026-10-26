@@ -40,11 +40,22 @@ The test: if removing this fact would cause a future developer to misunderstand 
 
 Do not add: session-specific state, task progress, anything already in CLAUDE.md, speculative findings, or things that belong in HANDOFF.md.
 
+## Routing ladder — before adding anything
+
+The canonical file is loaded into every session, so each line costs every future run. Prose is the **last** resort, not the first. For each candidate, ask in order:
+
+1. **Could a deterministic check enforce it?** A mechanical rule — a banned call, a value that must match another, a file-location constraint — belongs in a lint, a test, or CI, not in prose. Don't build the check unasked: note it as a proposed check in your summary and add at most a one-line pointer once it exists.
+2. **Is it reference material?** A procedure, a design history, a gotcha list — move it to `docs/<topic>.md` (or the existing doc it belongs in) and leave a one-line pointer.
+3. **Only then, is it a judgement call that earns prose?** Cross-file consistency, "why we chose X," a claim that fails loudly if wrong.
+
+If the target file is already large (roughly 150+ lines of substance), say so in the summary and suggest `/retro` for the cuts — this skill only adds.
+
 ## Steps
 
 1. Resolve the target file (table above) and read it in full.
 2. Scan the session for new knowledge: check git diff, recently modified files, and conversation context.
 3. Identify specific additions or corrections — be precise about what changed and why.
 4. If nothing meaningful warrants an update, say so explicitly and stop.
-5. Otherwise, make targeted edits to the target file. Do not rewrite sections that don't need changing.
-6. Briefly summarize what was added or corrected, where, and why.
+5. Run each candidate down the routing ladder; only rung 3 lands in the target file.
+6. Otherwise, make targeted edits to the target file. Do not rewrite sections that don't need changing.
+7. Briefly summarize what was added or corrected, where, and why — and list any candidates routed to a check or a doc instead.
