@@ -226,6 +226,8 @@ Manage routines at https://claude.ai/code/routines — IDs and creation notes in
 
 ## Commits
 
+**A tracked pre-commit hook (`.githooks/pre-commit`) runs `sync.sh lint` + `gen-docs.sh check`** — enable once per clone with `git config core.hooksPath .githooks`. Don't gate a commit on piped lint output (`lint | grep -c ✓ && git commit`): the pipeline's exit status is `grep`'s, so a failing lint still commits.
+
 Global GPG signing is disabled (`commit.gpgsign` is unset in `~/.gitconfig`), so commits are unsigned by default and can be made in-session without a passphrase prompt. The signing key (`user.signingkey`) is still configured — opt into a signed commit per-commit with `git commit -S`. To restore signing-by-default: `git config --global commit.gpgsign true` (note: pinentry's GUI times out in this environment, so signed commits would then need an external terminal with the key already unlocked).
 
 **`origin/HEAD` may be unset in a clone**, which breaks any skill whose preamble diffs against it — `/security-review` fails with *"ambiguous argument 'origin/HEAD...'"* rather than degrading. Fix once per clone: `git remote set-head origin --auto`. Also note those preambles use a three-dot commit range, so they see **committed** work only; to review an uncommitted working tree, diff it explicitly rather than assuming the skill picked it up.

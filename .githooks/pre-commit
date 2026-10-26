@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Pre-commit gate: the same lints CI runs (.github/workflows/lint.yml), so a
+# failure stops the commit instead of surfacing on the next full rerun.
+# Enable once per clone:  git config core.hooksPath .githooks
+#
+# Caveat: this lints the working tree, not the staged index — a partial
+# `git add` is checked against unstaged edits too. Bypass with --no-verify.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+bash scripts/sync.sh lint
+bash scripts/gen-docs.sh check
