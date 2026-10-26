@@ -46,6 +46,14 @@ is_excluded() {
   return 1
 }
 
+# Harness-managed dirs under ~/.claude/skills/ that are not repo skills:
+# `synced/` holds Claude Code's built-in anthropic-skills:* (account-specific
+# id in its path), so `pull` must never copy it into this public repo.
+is_harness_dir() {
+  case "$1" in synced) return 0 ;; esac
+  return 1
+}
+
 usage() {
   echo "Usage: $0 [push [name...]|pull|lint|orphans]"
   echo "  push           Deploy all skills to ~/.claude/skills/ and agents to ~/.claude/agents/"
@@ -73,6 +81,7 @@ report_orphans() {
   for skill_dir in "$SKILLS_DEST"/*/; do
     [ -d "$skill_dir" ] || continue
     name=$(basename "$skill_dir")
+    is_harness_dir "$name" && continue
     if [ ! -d "$SKILLS_SRC/$name" ]; then
       printf '  ? %q\n' "$name"
       found=$((found + 1))
@@ -592,6 +601,10 @@ case "$1" in
     echo "Pulling $SKILLS_DEST → skills/"
     for skill_dir in "$SKILLS_DEST"/*/; do
       name=$(basename "$skill_dir")
+      if is_harness_dir "$name"; then
+        echo "  ⤫ $name (harness-managed, skipped)"
+        continue
+      fi
       echo "  ← $name"
       mkdir -p "$SKILLS_SRC/$name"
       cp -r "$skill_dir/." "$SKILLS_SRC/$name/"
