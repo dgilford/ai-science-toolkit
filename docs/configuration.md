@@ -26,7 +26,8 @@ All four reviewer agents (`attribution-reviewer`, `stats-reviewer`,
 
 `ai-review`, `briefly`, `commit-batch`/`commit-batching`, `evolve-claude-md`,
 `figure-review`, `grill-me`/`grilling`, `overbaked`, `pathfinder`, `pickup`,
-`repo-init`, `reviewer-2`, `slack-message` (drafts from git context — no Slack
+`repo-init`, `retro` (reads the current session, or a transcript under
+`~/.claude/projects/` with `--session`), `reviewer-2`, `slack-message` (drafts from git context — no Slack
 connection needed), `spot-ai` (two optional layers: a machine-local voice profile at
 `~/.claude/spot-ai/voice-profile.md` — the author's measured writing statistics,
 produced with the skill's `scripts/measure_rates.py`, which re-tunes reference
@@ -44,8 +45,8 @@ until you configure it (below).
 
 ## Review-report provenance (no configuration)
 
-The six report-producing skills (`ai-review`, `figure-review`, `overbaked`,
-`reviewer-2`, `spot-ai`, `unstale`) prepend a YAML provenance header to each
+The seven report-producing skills (`ai-review`, `figure-review`, `overbaked`,
+`retro`, `reviewer-2`, `spot-ai`, `unstale`) prepend a YAML provenance header to each
 report they archive under `.ai/reviews/`, naming the toolkit version that
 produced it alongside the reviewed commit, CLI version, and date. This exists so
 a report re-read months later can be placed against a revision of the skill's

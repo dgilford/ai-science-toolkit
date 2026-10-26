@@ -12,4 +12,4 @@ catalog:
   summary: 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Thin launcher for the model-invokable `grilling` core.'
 ---
 
-Run a `/grilling` session.
+Call the Skill tool with "grilling" (the `/grilling` core).
