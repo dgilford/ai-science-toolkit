@@ -50,7 +50,7 @@ Periodically       →  /retro             the counterweight: propose checks, po
 
 | Skill | Reach for it when… |
 |---|---|
-| `grilling` | Stress-testing a plan one decision at a time — and *proactively* before a step that changes running state, grabs a shared resource (GPUs/ports/memory), or could invalidate an earlier decision. `/grill-me` is the explicit launcher |
+| `grilling` | Stress-testing a plan in rounds along the decision tree's frontier, facts looked up rather than asked — and *proactively* before a step that changes running state, grabs a shared resource (GPUs/ports/memory), or could invalidate an earlier decision. `/grill-me` is the explicit launcher |
 | `figure-review` | User shares or references a figure/plot and wants it checked for publication readiness |
 | `lit-review` | Searching or synthesizing scientific literature; citation checks from a review flow |
 | `overbaked` | Auditing any artifact for over-engineering, verbosity, or scope creep |
