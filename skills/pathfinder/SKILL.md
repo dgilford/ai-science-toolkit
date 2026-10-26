@@ -22,6 +22,7 @@ Start of session   →  /pickup
                          ↓ (do work)
 End of session     →  /handoff           writes .ai/HANDOFF.md, then calls /evolve-claude-md
 Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.md only
+Periodically       →  /retro             the counterweight: propose checks, pointers, and cuts so CLAUDE.md shrinks
 ```
 
 ---
@@ -35,6 +36,7 @@ Standalone update  →  /evolve-claude-md  promote session knowledge to CLAUDE.m
 | recover-sessions | `/recover-sessions` | A session closed or crashed and you want it back; finds the Claude conversation itself on disk. Distinct from `pickup`, which reconstructs project state from `.ai/HANDOFF.md` |
 | handoff | `/handoff` | Ending a session or switching agents; calls `evolve-claude-md` internally |
 | evolve-claude-md | `/evolve-claude-md` | Standalone CLAUDE.md update without a full handoff |
+| retro | `/retro [--session <id>] [--global]` | After a session where the agent struggled or repeated a mistake, or when CLAUDE.md has grown: proposes a check per mistake, a pointer per slow lookup, a cut per no-op instruction. Report-only — the opposite direction to `evolve-claude-md` |
 | grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
 | create-alert | `/create-alert [--spec-only]` | Getting pinged on Slack when something changes/happens: grills a "tell me when X" ask into a testable trigger, dry-runs it, and (on sign-off) creates a scheduled cloud routine. `--spec-only` stops at the spec |
