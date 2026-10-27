@@ -1,4 +1,5 @@
 ![ai-science-toolkit](assets/ai-science-toolkit_banner_071726_rounded.png)
+_Disclaimer: This image was generated using AI._
 
 # ai-science-toolkit
 
