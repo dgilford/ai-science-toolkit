@@ -80,8 +80,8 @@ session). Then assess from **transcript evidence only**, per role:
 Combine holistically — no fixed weights. **Weight roles by what the deliverable is:**
 for prose, ideation and drafting carry it; for code or analysis, method design and
 implementation; for research products, synthesis and whether it was verified.
-**Review alone keeps SOI low (typically 1–3)**: the deliverable stays the user's even
-when the critique is extensive — don't let review volume inflate the number.
+**Review pulls SOI lower** than producing the same work would: the deliverable stays
+the user's, so weigh how much the critique changed it, not how long the critique was.
 Unverified research/synthesis counts for more than synthesis the user checked.
 The amount of human intervention after the prompt separates 6–8 from 9, and any
 intervention at all separates 9 from 10.
