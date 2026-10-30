@@ -34,10 +34,9 @@ Show the estimate, ask, stop. One question, one turn.
 
 | Excuse | Why it doesn't hold |
 |---|---|
-| "My estimate is well-evidenced, just use it" | The user can see work you can't (drafts elsewhere, edits after pasting). Their number ships. |
+| "My estimate is well-evidenced, just use it" — or "the session shows Claude wrote it all, so 9–10" | The user can see work you can't: drafts elsewhere, edits after pasting, pasted text that is their own prior draft. Their number ships. |
 | "It's obviously 0 / obviously 10" | Still ask — a one-word reply costs nothing; a wrong public disclosure does. |
 | "The user is busy, I'll fill it in" | An unconfirmed rating is a fabricated record. Leave it unrated instead. |
-| "Session shows Claude wrote it all, so 9–10" | Text the user pasted in may be their own prior draft. Name the blind spot; let them correct it. |
 
 ## Scale (0–10)
 
