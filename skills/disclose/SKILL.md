@@ -81,7 +81,7 @@ Combine holistically — no fixed weights. Ideation and drafting usually dominat
 **Review alone keeps SOI low (typically 1–3)**: the deliverable stays the user's even
 when the critique is extensive — don't let review volume inflate the number.
 Unverified research/synthesis counts for more than synthesis the user checked.
-the amount of human intervention after the prompt separates 6–8 from 9, and any
+The amount of human intervention after the prompt separates 6–8 from 9, and any
 intervention at all separates 9 from 10.
 
 **Always state the blind spot:** you see only this session. Work drafted elsewhere,
