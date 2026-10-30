@@ -118,6 +118,7 @@ skill_deps() {
     handoff)      echo "worklog evolve-claude-md" ;;
     ai-review)    echo "unstale overbaked reviewer-2" ;;
     repo-init)    echo "grilling" ;;
+    slack-message) echo "disclose" ;;
   esac
 }
 

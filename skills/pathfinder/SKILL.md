@@ -57,6 +57,7 @@ Periodically       →  /retro             the counterweight: propose checks, po
 | `briefly` | User wants a short answer — `/briefly` typed anywhere in a prompt (mid-prompt it doesn't expand; invoke it), or "brief"/"TL;DR" |
 | `reviewer-2` | Quick generalist stress-test of a claim, result, or section (any domain) |
 | `unstale` | Cleaning up dead imports, stale comments, resolved TODOs after a refactor |
+| `disclose` | A deliverable is about to be shared (doc, Slack message, post, figure, artifact): estimates Claude's spectrum of involvement (0–10), has you confirm or revise it, and emits a content-disclosure line. `slack-message` calls it; `handoff` lists unrated shareables |
 | `evolve-claude-md` | Promoting session knowledge to CLAUDE.md (called by `handoff`; also invokable standalone) |
 
 ---
