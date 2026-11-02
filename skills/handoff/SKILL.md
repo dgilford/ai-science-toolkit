@@ -75,6 +75,13 @@ Preserve useful prior content. Remove stale or superseded details. Distinguish f
 
 Ask me at most one question, only if it would materially improve the handoff.
 
+## Unrated shareables
+
+If this session produced something meant to be shared (a doc, Slack message, post,
+figure, published artifact) with no matching entry in `.ai/disclosures.jsonl`, list
+it in one line in your reply and suggest running the `disclose` skill (`/disclose`). Don't run it
+from here — the rating is interactive and belongs to the artifact, not the session.
+
 ## Ship a worklog entry
 
 After `.ai/HANDOFF.md` is written, run the `worklog` skill to capture this session

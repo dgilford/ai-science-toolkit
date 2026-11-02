@@ -49,3 +49,6 @@ Present the draft with a title line followed by the message body inside a fenced
 ```
 <!-- Slack draft -->
 ```
+
+Then call the Skill tool with `disclose` (the `/disclose` core) on the draft, so the
+user can rate Claude's involvement before sending.
