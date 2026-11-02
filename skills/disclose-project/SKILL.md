@@ -18,6 +18,8 @@ contradictions.** Same 0–10 scale and seven roles as the `disclose` skill (`/d
 ```!
 root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "(not a git repo — interview only)"; exit 0; }
 echo "author: $(git config user.name 2>/dev/null || echo '(unset — ask)')"
+if git check-ignore -q "$root/.ai/disclosures.jsonl"; then echo "ledger: enabled"; else echo "ledger: disabled (.ai/ not gitignored)"; fi
+echo "HEAD: $(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 echo "commits: $(git rev-list --count HEAD 2>/dev/null) total, $(git log -i --grep='Co-Authored-By: Claude' --format=%H 2>/dev/null | wc -l | tr -d ' ') with a Claude co-author trailer"
 echo "trailer models:"; git log -i --grep='Co-Authored-By: Claude' --format=%B 2>/dev/null | grep -io 'Co-Authored-By: Claude[^<]*' | sort | uniq -c | sort -rn | head -5
 echo "files touched in Claude-trailer commits, by top-level dir:"
@@ -33,9 +35,8 @@ for r in rows[-15:]:
 PY
 ```
 
-**Read the trailers in both directions:** a trailer means Claude touched the commit, not
-that it wrote it; no trailer doesn't mean no AI (chat-pasted code, edits committed
-later). Treat counts as prompts for questions, never as shares.
+Counts are prompts for questions, never shares: a trailer means Claude touched a
+commit, not that it wrote it, and chat-pasted work leaves none.
 
 ## Anti-Rationalization (hard gate)
 
@@ -50,7 +51,7 @@ until every phase has an answer (a rating or "n/a").**
 
 ## Interview
 
-Phases, in order (skip none; the user may answer "n/a"):
+Phases, in order:
 
 | # | Phase | Roles to probe |
 |---|---|---|
@@ -98,15 +99,15 @@ and takes full responsibility for the content (overall spectrum of involvement: 
 Use the user's words for roles and verification; tighten, don't embellish. Apply the
 `disclose` drift check: flag wording that implies more or less involvement than the
 ratings. Then **offer** to insert into the manuscript file — default to the end, but ask
-where (journals often want it in methods or acknowledgments). Insert only on a yes.
+where. Insert only on a yes.
 
 ## Ledger
 
-Unless `--no-ledger`, or `.ai/` isn't gitignored, append one line to
+Unless `--no-ledger` or the evidence block says disabled, append one line to
 `<repo>/.ai/disclosures.jsonl` (`mkdir -p` `.ai/`; never edit `.gitignore`):
 
 ```json
-{"scope": "project", "date": "YYYY-MM-DD", "project": "<label>", "phases": [{"phase": "<name>", "roles": ["..."], "verification": "<...>", "soi": 3, "user_reply": "<verbatim>"}], "overall_soi": 3, "evidence": {"claude_trailer_commits": 0, "total_commits": 0, "ledger_entries": 0}, "statement": "<text>"}
+{"scope": "project", "date": "YYYY-MM-DD", "project": "<label>", "phases": [{"phase": "<name>", "roles": ["..."], "verification": "<...>", "soi": 3, "user_reply": "<verbatim>"}], "overall_soi": 3, "sha": "<short HEAD>", "statement": "<text>"}
 ```
 
 `user_reply` quotes each phase answer verbatim. Best-effort: a failed write is
