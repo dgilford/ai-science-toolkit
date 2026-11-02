@@ -1,12 +1,12 @@
 ---
 name: disclose-project
-description: Interview the user phase by phase to write a short publication-ready project-level AI-use disclosure. For each phase include a spectrum-of-involvement (0–10) table plus a statement covering the project's scope and how Claude was used. Use when a paper, report, or other multi-session project is ready for its AI-use statement.
+description: Interview the user phase by phase to write a short publication-ready project-level AI-use disclosure — a spectrum-of-involvement (0–10) table with a row per phase, plus a statement covering the project's scope and how Claude was used. Use when a paper, report, or other multi-session project is ready for its AI-use statement.
 disable-model-invocation: true
 allowed-tools: Bash Read Write Grep Glob
 argument-hint: "[project or manuscript path] [--no-ledger]"
 catalog:
   order: 83
-  summary: 'Project-level companion to `disclose`: interviews you phase by phase (design → data → analysis → figures → literature → writing → review) to build a per-phase spectrum-of-involvement table and a publication-ready AI-use statement, primed with the `disclose` ledger and Claude co-author trailers from git.'
+  summary: 'Project-level companion to `disclose`: interviews you phase by phase (design → data → literature → analysis → figures → writing → review) to build a per-phase spectrum-of-involvement table and a publication-ready AI-use statement, primed with the `disclose` ledger and Claude co-author trailers from git.'
 ---
 
 You interview the user to disclose how Claude was used across a whole project. **User's answers are the source; evidence below only jogs memory and flags
