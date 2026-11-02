@@ -1,16 +1,15 @@
 ---
 name: disclose-project
-description: Interview the user phase by phase to write a project-level AI-use disclosure for a publication — a per-phase spectrum-of-involvement (0–10) table plus a statement covering the project's scope and how Claude was used. Use when a paper, report, or other multi-session project is ready for its AI-use statement.
+description: Interview the user phase by phase to write a short publication-ready project-level AI-use disclosure. For each phase include a spectrum-of-involvement (0–10) table plus a statement covering the project's scope and how Claude was used. Use when a paper, report, or other multi-session project is ready for its AI-use statement.
 disable-model-invocation: true
 allowed-tools: Bash Read Write Grep Glob
 argument-hint: "[project or manuscript path] [--no-ledger]"
 catalog:
   order: 83
-  summary: 'Project-level companion to `disclose`: interviews you phase by phase (design → data → analysis → figures → literature → writing → review) to build a per-phase spectrum-of-involvement table and a publication AI-use statement, primed with the `disclose` ledger and Claude co-author trailers from git.'
+  summary: 'Project-level companion to `disclose`: interviews you phase by phase (design → data → analysis → figures → literature → writing → review) to build a per-phase spectrum-of-involvement table and a publication-ready AI-use statement, primed with the `disclose` ledger and Claude co-author trailers from git.'
 ---
 
-You interview the user to disclose how Claude was used across a whole project. **The
-user's answers are the source; the evidence below only jogs memory and flags
+You interview the user to disclose how Claude was used across a whole project. **User's answers are the source; evidence below only jogs memory and flags
 contradictions.** Same 0–10 scale and seven roles as the `disclose` skill (`/disclose`).
 
 ## Evidence
@@ -35,19 +34,19 @@ for r in rows[-15:]:
 PY
 ```
 
-Counts are prompts for questions, never shares: a trailer means Claude touched a
-commit, not that it wrote it, and chat-pasted work leaves none.
+Counts returned are used to prompt questions, never shares: a trailer means Claude touched a
+commit, not that it wrote it, and chat-pasted work leaves no trailer.
 
 ## Anti-Rationalization (hard gate)
 
-**Ask the phases one at a time, waiting for each answer. Write no table or statement
+**Ask each phase one at a time, waiting for each answer. Do not write a table or statement
 until every phase has an answer (a rating or "n/a").**
 
 | Excuse | Why it doesn't hold |
 |---|---|
 | "The evidence is strong enough to fill this phase in" | Trailers and the ledger miss chat work, other sessions, and verification. Only the user knows. |
-| "Seven turns is too many; batch them" | Batching invites a skim. One phase per turn; "n/a" makes empty phases cheap. |
-| "Overall SOI is just the average of the phases" | Phases differ in weight for the paper. Ask the user for the overall number. |
+| "Seven individual phases is too many; batch them" | Batching invites a skim. One phase per turn; "n/a" makes empty phases cheap. |
+| "Overall SOI is just the average of the phases" | Phases differ in weight for the paper. Ask the user for the final summary score. |
 
 ## Interview
 
@@ -57,13 +56,13 @@ Phases, in order:
 |---|---|---|
 | 1 | Conception & design | Ideation, research/synthesis |
 | 2 | Data acquisition & processing | Analysis/code, human intervention |
-| 3 | Analysis & derivation | Analysis/code, review |
-| 4 | Figures | Analysis/code, review |
-| 5 | Literature | Research/synthesis |
+| 3 | Literature | Research/synthesis |
+| 4 | Analysis & derivation | Analysis/code, review |
+| 5 | Figures | Analysis/code, review |
 | 6 | Writing | Drafting, editing |
 | 7 | Internal review | Review/critique |
 
-For each phase, show the evidence that bears on it (matching dirs, ledger entries),
+For each phase, show the evidence that speaks to it (matching dirs, ledger entries),
 then ask:
 
 ```
@@ -75,11 +74,11 @@ Evidence: <!-- relevant trailer counts / ledger entries, or "none in repo" -->
 3. Your SOI for this phase (0–10)?
 ```
 
-**Don't propose a number** — that anchors the rating. After the answer, flag a clear
+**Don't propose a score** — User input anchors the rating. After the answer, flag a clear
 conflict with the evidence in one line (e.g. 40 trailer commits under `analysis/` but
 rated 1) and accept the user's resolution.
 
-Last turn: show the filled table and ask for the **overall SOI** and the **model name(s)
+Last turn: show the filled table and ask for the **overall SOI** score and the **model name(s)
 and versions** to cite (suggest the trailer models above).
 
 ## Output
@@ -96,9 +95,9 @@ Claude (<!-- model(s), versions -->; Anthropic) was used for <!-- roles by phase
 and takes full responsibility for the content (overall spectrum of involvement: <!-- n -->).
 ```
 
-Use the user's words for roles and verification; tighten, don't embellish. Apply the
+Use the user's words for roles and verification; offer tightened wording, don't embellish. Apply the
 `disclose` drift check: flag wording that implies more or less involvement than the
-ratings. Then **offer** to insert into the manuscript file — default to the end, but ask
+ratings. Then **offer** to insert into the relevant manuscript file — default to the end, but ask
 where. Insert only on a yes.
 
 ## Ledger
@@ -115,8 +114,7 @@ mentioned, never blocks.
 
 ## Verification
 
-- [ ] Each of the 7 phases asked in its own turn, with an answer recorded before the next
-- [ ] No SOI proposed by you; conflicts with evidence flagged, user's resolution kept
-- [ ] Overall SOI and model names came from the user, not computed or assumed
+- [ ] Each of the 7 phases asked one at a time, with an answer recorded before the next
+- [ ] No SOI (overall or for individual phases) proposed or assumed by you; conflicts with evidence flagged, user's resolution kept
 - [ ] Table and statement use the user's words; drift check run
-- [ ] Insertion offered; ledger written with verbatim replies, or skipped and said so
+- [ ] Insertion offered; ledger written with verbatim replies, or skipped and explained
