@@ -26,7 +26,8 @@ All four reviewer agents (`attribution-reviewer`, `stats-reviewer`,
 
 `ai-review`, `briefly`, `commit-batch`/`commit-batching`, `disclose` (author name
 from `git config user.name`; logs to `.ai/disclosures.jsonl` only when `.ai/` is
-gitignored), `evolve-claude-md`,
+gitignored), `disclose-project` (same ledger; reads git
+co-author trailers), `evolve-claude-md`,
 `figure-review`, `grill-me`/`grilling`, `overbaked`, `pathfinder`, `pickup`,
 `repo-init`, `retro` (reads the current session, or a transcript under
 `~/.claude/projects/` with `--session`), `reviewer-2`, `slack-message` (drafts from git context — no Slack

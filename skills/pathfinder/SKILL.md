@@ -40,6 +40,7 @@ Periodically       →  /retro             the counterweight: propose checks, po
 | grill-me | `/grill-me` | Stress-testing a plan or design before implementing; thin launcher for the `grilling` core |
 | slack-message | `/slack-message` | Drafting an internal Slack update grounded in git context |
 | create-alert | `/create-alert [--spec-only]` | Getting pinged on Slack when something changes/happens: grills a "tell me when X" ask into a testable trigger, dry-runs it, and (on sign-off) creates a scheduled cloud routine. `--spec-only` stops at the spec |
+| disclose-project | `/disclose-project [path]` | A paper or other multi-session project needs its AI-use statement: interviews you phase by phase into a per-phase spectrum-of-involvement table plus a publication statement. Per-artifact disclosures are `disclose` |
 | tab-setup | `/tab-setup [all]` | Naming / coloring this Claude Code tab; `all` recolors every active session |
 | write-new-skill | `/write-new-skill` | Scaffolding a new skill from scratch |
 | spot-ai | `/spot-ai [path \| pasted text]` | Checking prose for **AI markers**: gray-list style tells (lane 1) and generation-mechanism substance tells like fabricated provenance or invented first-person testimony (lane 2). Flags only. Not a copy-editor — it reports AI markers, not writing advice |
