@@ -74,7 +74,7 @@ Evidence: <!-- relevant trailer counts / ledger entries, or "none in repo" -->
 3. Your SOI for this phase (0–10)?
 ```
 
-**Don't propose a score** — User input anchors the rating. After the answer, flag a clear
+**Don't propose a score** — a suggested number biases the user's rating. After the answer, flag a clear
 conflict with the evidence in one line (e.g. 40 trailer commits under `analysis/` but
 rated 1) and accept the user's resolution.
 
@@ -116,5 +116,6 @@ mentioned, never blocks.
 
 - [ ] Each of the 7 phases asked one at a time, with an answer recorded before the next
 - [ ] No SOI (overall or for individual phases) proposed or assumed by you; conflicts with evidence flagged, user's resolution kept
+- [ ] Model names and versions confirmed by the user, not copied from trailers unasked
 - [ ] Table and statement use the user's words; drift check run
 - [ ] Insertion offered; ledger written with verbatim replies, or skipped and explained
