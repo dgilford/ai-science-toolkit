@@ -5,7 +5,7 @@ allowed-tools: Bash Read Write Grep Glob
 argument-hint: "[path | \"last message\" | pasted text] [--no-ledger]"
 catalog:
   order: 82
-  summary: 'Estimate the AI spectrum of involvement (0–10, after MediaWise/Poynter) for a shareable deliverable, have the user confirm or revise it, and emit a content-disclosure line naming the model''s role. Logs to `.ai/disclosures.jsonl`.'
+  summary: 'Estimate the AI spectrum of involvement (0–10, after [MediaWise/Poynter](https://www.youtube.com/watch?v=vmZLaXgjPCw)) for a shareable deliverable, have the user confirm or revise it, and emit a content-disclosure line naming the model''s role. Logs to `.ai/disclosures.jsonl`.'
 ---
 
 You estimate how much Claude contributed to one deliverable, show the evidence, and
