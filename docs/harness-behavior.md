@@ -117,6 +117,17 @@ pass `--`. Output from `find .` is already safe.
 Also note **mtime is not last human activity**: any `--resume`, including an
 automated probe, updates it.
 
+## Plugins and MCP connectors
+
+Rows 17–19 come from a Linux session on **CLI 2.1.317**, 2026-11-02,
+while diagnosing the org-synced `claude-for-nonprofits` plugin.
+
+| # | Claim | Tier | Confounds / limits |
+|---|---|---|---|
+| 17 | Org-pushed (`auto_install`) plugins live under `~/.claude/plugins/synced/<org>_<user>/<plugin>[~gN]/` and appear in **neither** `installed_plugins.json` nor `enabledPlugins`. Each update lands as a new `~gN` generation dir; the old one is listed in `manifest.json` `staleDirs` and kept while any PID in its `.in_use/` is alive. | observed | n=1 plugin. The sweep timing was not watched; "kept while a PID is alive" is inferred from a live 5-day-old `claude -c` holding the only `.in_use` marker on the stale dir. |
+| 18 | `claude mcp list` reported the claude.ai Google Drive and Calendar connectors as **✔ Connected** while the running session exposed only their `authenticate` tools. Re-auth via the /mcp dialog fixed the session. | observed | n=1. `mcp list` spins up a fresh process, so it reports fresh-process state, not the running session's. **Check the in-session tool list, not `mcp list`.** |
+| 19 | A plugin MCP server whose URL matches a claude.ai connector is suppressed: it gets no log dir and is absent from `mcp list`, and the claude.ai connector serves instead. | inferred | Seen for google-drive, gmail, google-calendar and slack, each with a URL identical to a connected claude.ai connector. **Confound:** blackbaud and asana were absent the same way with no matching claude.ai connector, so URL match is not the whole mechanism. |
+
 ## When a row here turns out to be wrong
 
 Correct it in place and move the old text into the row's confounds column with
